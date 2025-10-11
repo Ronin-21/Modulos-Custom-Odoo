@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Form view -->
+    <record id="view_discount_rule_form" model="ir.ui.view">
+        <field name="name">discount.rule.form</field>
+        <field name="model">discount.rule</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Regla de Descuento">
+                <sheet>
+                    <group>
+                        <field name="min_liters"/>
+                        <field name="discount"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- List view -->
+    <record id="view_discount_rule_list" model="ir.ui.view">
+        <field name="name">discount.rule.list</field>
+        <field name="model">discount.rule</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list string="Reglas de Descuento" editable="bottom">
+                <field name="min_liters"/>
+                <field name="discount"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_discount_rule" model="ir.actions.act_window">
+        <field name="name">Reglas de Descuento</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">discount.rule</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu root: Descuentos -->
+    <menuitem id="menu_discount_root" 
+              name="Descuentos" 
+              parent="sale.sale_menu_root"
+              sequence="100"/>
+
+    <!-- Menu child: Reglas de Descuento -->
+    <menuitem id="menu_discount_rules" 
+              name="Reglas de Descuento" 
+              parent="menu_discount_root" 
+              action="action_discount_rule"
+              sequence="10"/>
+</odoo>

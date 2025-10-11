@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_payment_adjustment.AdjustmentIndicator">
+        <div class="payment-adjustment-indicator" t-if="adjustment_amount > 0">
+            <div class="adjustment-badge" t-att-class="adjustment_type">
+                <span class="adjustment-label">
+                    <t t-if="adjustment_type === 'discount'">
+                        DESCUENTO: <t t-esc="adjustment_percent.toFixed(2)"/>%
+                    </t>
+                    <t t-else="">
+                        RECARGO: <t t-esc="adjustment_percent.toFixed(2)"/>%
+                    </t>
+                </span>
+                <span class="adjustment-value">
+                    $<t t-esc="adjustment_amount.toFixed(2)"/>
+                </span>
+            </div>
+        </div>
+    </t>
+</templates>
