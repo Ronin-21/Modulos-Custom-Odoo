@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Heredar el template del reporte de pedido de venta -->
+    <template id="report_saleorder_document_inherit" inherit_id="sale.report_saleorder_document">
+        
+        <!-- Agregar total de litros después del total general -->
+        <xpath expr="//div[@id='total']" position="after">
+            <div class="clearfix" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-8"/>
+                    <div class="col-4">
+                        <table class="table table-sm">
+                            <tr class="border-black" style="border-bottom:1px solid #dddddd;">
+                                <td><strong>Total Litros:</strong></td>
+                                <td class="text-end">
+                                    <span t-field="doc.x_total_units"/>
+                                    <span> L</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+        
+    </template>
+</odoo>

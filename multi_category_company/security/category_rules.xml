@@ -1,0 +1,17 @@
+<odoo>
+    <!-- Regla para categorías POS por empresa -->
+    <record id="pos_category_company_rule" model="ir.rule">
+        <field name="name">POS Categorías por Empresa</field>
+        <field name="model_id" ref="point_of_sale.model_pos_category"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="global" eval="True"/>
+    </record>
+
+    <!-- Regla para categorías de Producto por empresa -->
+    <record id="product_category_company_rule" model="ir.rule">
+        <field name="name">Categorías de Producto por Empresa</field>
+        <field name="model_id" ref="product.model_product_category"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="global" eval="True"/>
+    </record>
+</odoo>

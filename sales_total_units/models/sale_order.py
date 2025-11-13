@@ -11,11 +11,11 @@ class SaleOrder(models.Model):
     )
 
     # Descuento global automático (%)
-    discount_global = fields.Float(
+    """ discount_global = fields.Float(
         string="Descuento Global (%)",
         compute="_compute_discount_global",
         store=True,
-    )
+    ) """
 
     @api.depends("order_line.product_uom_qty", "order_line.product_uom")
     def _compute_total_units(self):
@@ -31,7 +31,7 @@ class SaleOrder(models.Model):
                         litros_total += int(qty_in_litros)
             order.x_total_units = litros_total
 
-    @api.depends("x_total_units")
+    """ @api.depends("x_total_units")
     def _compute_discount_global(self):
         for order in self:
             litros = order.x_total_units
@@ -48,4 +48,4 @@ class SaleOrder(models.Model):
     def _apply_discount_global(self):
         for order in self:
             for line in order.order_line:
-                line.discount = order.discount_global
+                line.discount = order.discount_global """

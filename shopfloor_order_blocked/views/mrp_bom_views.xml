@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="mrp_bom_form_view_inherit_workorder_dep" model="ir.ui.view">
+        <field name="name">MRP BOM Form - Workorder Dependencies</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view" />
+        <field name="arch" type="xml">
+            <!-- Buscar el campo allow_operation_dependencies y agregar nuestro campo después -->
+            <field name="allow_operation_dependencies" position="after">
+                <field name="enforce_workorder_dependency" 
+                       invisible="not allow_operation_dependencies"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

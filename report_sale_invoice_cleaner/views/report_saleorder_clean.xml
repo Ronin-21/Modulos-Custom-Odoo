@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- SOLO PARA SALE.ORDER: header limpio -->
+    <template id="external_layout_wave_sale_clean" inherit_id="web.external_layout_wave">
+        <xpath expr="//div[@class='d-flex justify-content-between']" position="replace">
+            <div class="d-flex justify-content-between">
+                <t t-if="o and o._name == 'sale.order'">
+                    <!-- Header limpio para cotizaciones -->
+                    <div>
+                        <h2 style="margin:0; padding:0;">PM</h2>
+                    </div>
+                    <div class="w-50 text-end"></div>
+                </t>
+                <t t-else=""><t t-raw="0"/></t>
+            </div>
+        </xpath>
+
+        <!-- Dirección simplificada para sale.order -->
+        <xpath expr="//t[@t-call='web.address_layout']" position="replace">
+            <t t-if="o and o._name == 'sale.order'">
+                <div class="row mb-3">
+                    <div class="col-auto">
+                        <span t-field="o.partner_id"
+                              t-options="{'widget': 'contact', 'fields': ['name', 'address', 'phone'], 'no_marker': true}"/>
+                    </div>
+                </div>
+            </t>
+            <t t-else="">
+                <t t-call="web.address_layout"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Reporte de venta: cambiar título -->
+    <template id="report_saleorder_document_clean" inherit_id="sale.report_saleorder_document">
+        <xpath expr="//t[@t-set='layout_document_title']" position="replace">
+            <t t-set="layout_document_title">
+                <t t-if="doc">Presupuesto <t t-esc="doc.name"/></t>
+                <t t-else="">Presupuesto</t>
+            </t>
+        </xpath>
+    </template>
+
+</odoo>

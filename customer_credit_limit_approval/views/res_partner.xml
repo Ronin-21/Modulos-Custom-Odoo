@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_res_partner_form_inherit" model="ir.ui.view">
+        <field name="name">res.partner.form.credit.limit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <!-- agregamos una pestaña nueva dentro del notebook principal -->
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Cuenta corriente">
+                    <group>
+                        <group string="Estado de cuenta">
+                            <!-- estos son los que querías ver arriba -->
+                            <field name="credit" string="Total por cobrar Facturado"/>
+                            <field name="debit" string="Total por pagar Facturado"/>
+                        </group>
+                        <group string="Límite de crédito">
+                            <field name="credit_check" string="Crédito activo"/>
+                            <field name="credit_warning"
+                                   string="Monto de advertencia"
+                                   invisible="credit_check == False"/>
+                            <field name="credit_blocking"
+                                   string="Monto de bloqueo"
+                                   invisible="credit_check == False"/>
+                            <field name="amount_due"
+                                   string="Deuda Total"
+                                   readonly="1"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="res_company_inherit_form" model="ir.ui.view">
+        <field name="name">res.company.form.credit.limit</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vat']" position="after">
+                <field name="accountant_email"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

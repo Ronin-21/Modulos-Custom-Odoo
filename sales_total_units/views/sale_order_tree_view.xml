@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Agregar Total de Litros a la vista de lista de análisis de ventas -->
+    <record id="view_sale_report_tree_inherit_total_units" model="ir.ui.view">
+        <field name="name">sale.report.view.list.inherit.total_units</field>
+        <field name="model">sale.report</field>
+        <field name="inherit_id" ref="sale.sale_report_view_tree"/>
+        <field name="arch" type="xml">
+            <!-- Agregar después del campo price_total -->
+            <xpath expr="//field[@name='price_total']" position="after">
+                <field name="x_total_units" string="Total de Litros" optional="show" sum="Total de Litros"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

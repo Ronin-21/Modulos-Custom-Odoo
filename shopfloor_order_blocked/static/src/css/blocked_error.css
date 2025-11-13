@@ -1,0 +1,146 @@
+/* ========================================
+   Estilos para errores personalizados de Workorder
+   ======================================== */
+
+/* --- COMÚN PARA AMBOS DIÁLOGOS --- */
+.o_blocked_workorder_error,
+.o_workcenter_busy_error {
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.o_blocked_workorder_error p,
+.o_workcenter_busy_error p {
+  line-height: 1.6;
+}
+
+/* --- OPERACIÓN BLOQUEADA (DEPENDENCIAS) --- */
+
+.o_blocked_workorder_error .fa-lock {
+  animation: lockShake 0.5s ease-in-out;
+}
+
+@keyframes lockShake {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+}
+
+/* Animación para lista de operaciones bloqueantes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- CENTRO DE TRABAJO OCUPADO --- */
+
+.o_workcenter_busy_error .fa-industry {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+.o_workcenter_busy_error .fa-exclamation-triangle {
+  animation: blink 1s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* --- MEJORAS AL MODAL --- */
+
+/* Modal de dependencias bloqueadas */
+.modal-dialog:has(.o_blocked_workorder_error) .modal-content {
+  border: 3px solid #ff9800;
+  box-shadow: 0 5px 20px rgba(255, 152, 0, 0.3);
+}
+
+.modal-dialog:has(.o_blocked_workorder_error) .modal-header {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border-bottom: 2px solid #ffc107;
+}
+
+.modal-dialog:has(.o_blocked_workorder_error) .modal-title {
+  color: #856404;
+  font-weight: bold;
+}
+
+/* Modal de centro ocupado */
+.modal-dialog:has(.o_workcenter_busy_error) .modal-content {
+  border: 3px solid #f44336;
+  box-shadow: 0 5px 20px rgba(244, 67, 54, 0.3);
+}
+
+.modal-dialog:has(.o_workcenter_busy_error) .modal-header {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border-bottom: 2px solid #f44336;
+}
+
+.modal-dialog:has(.o_workcenter_busy_error) .modal-title {
+  color: #d32f2f;
+  font-weight: bold;
+}
+
+/* --- BOTONES --- */
+
+.modal-dialog:has(.o_blocked_workorder_error) .btn-primary,
+.modal-dialog:has(.o_workcenter_busy_error) .btn-primary {
+  transition: all 0.3s ease;
+}
+
+.modal-dialog:has(.o_blocked_workorder_error) .btn-primary:hover {
+  background-color: #ff9800;
+  border-color: #ff9800;
+  transform: scale(1.05);
+}
+
+.modal-dialog:has(.o_workcenter_busy_error) .btn-primary:hover {
+  background-color: #f44336;
+  border-color: #f44336;
+  transform: scale(1.05);
+}
+
+/* --- RESPONSIVE --- */
+
+@media (max-width: 768px) {
+  .o_blocked_workorder_error,
+  .o_workcenter_busy_error {
+    padding: 15px;
+  }
+
+  .o_blocked_workorder_error .fa-lock,
+  .o_workcenter_busy_error .fa-industry {
+    font-size: 3em !important;
+  }
+}
