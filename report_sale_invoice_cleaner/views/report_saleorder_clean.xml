@@ -4,17 +4,38 @@
     <!-- SOLO PARA SALE.ORDER: header limpio -->
     <template id="external_layout_wave_sale_clean" inherit_id="web.external_layout_wave">
         <xpath expr="//div[@class='d-flex justify-content-between']" position="replace">
-            <div class="d-flex justify-content-between">
-                <t t-if="(o and o._name == 'sale.order') or (o and o._name == 'account.move' and not o.journal_id.show_fiscal_data)">
-                    <!-- Header limpio: PM para cotizaciones y Factura X -->
-                    <div>
-                        <h2 style="margin:0; padding:0;">PM</h2>
-                    </div>
-                    <div class="w-50 text-end"></div>
-                </t>
-                <t t-else=""><t t-raw="0"/></t>
+    <div class="d-flex justify-content-between">
+        <t t-if="o and o._name == 'sale.order'">
+            <!-- Header para cotizaciones: logo + datos -->
+            <div>
+                <img t-if="company.logo" class="o_company_logo mb-2" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                <div t-if="company.report_header" t-field="company.report_header" class="o_company_tagline fw-bold">Company tagline</div>
             </div>
-        </xpath>
+            <div name="company_address" class="w-50 text-end">
+                <ul class="list-unstyled" name="company_address_list">
+                    <li t-if="company.is_company_details_empty">
+                        <span t-field="company.partner_id" t-options="{'widget': 'contact', 'fields': ['address', 'name'], 'no_marker': true}"/>
+                    </li>
+                    <li t-else="">
+                        <span t-field="company.company_details"/>
+                    </li>
+                    <li t-if="forced_vat">
+                        <t t-esc="company.country_id.vat_label or 'Tax ID'">Tax ID</t>:
+                        <span t-esc="forced_vat">US12345671</span>
+                    </li>
+                </ul>
+            </div>
+        </t>
+        <t t-elif="o and o._name == 'account.move' and not o.journal_id.show_fiscal_data">
+            <!-- Header para Factura X: solo PM -->
+            <div>
+                <h2 style="margin:0; padding:0;">PM</h2>
+            </div>
+            <div class="w-50 text-end"></div>
+        </t>
+        <t t-else=""><t t-raw="0"/></t>
+    </div>
+</xpath>
 
         <!-- Dirección simplificada para sale.order -->
         <xpath expr="//t[@t-call='web.address_layout']" position="replace">
