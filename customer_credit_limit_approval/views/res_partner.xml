@@ -12,8 +12,11 @@
                     <group>
                         <group string="Estado de cuenta">
                             <!-- estos son los que querías ver arriba -->
-                            <field name="credit" string="Total por cobrar Facturado"/>
-                            <field name="debit" string="Total por pagar Facturado"/>
+                            <field name="credit" string="Total por Cobrar Facturado"/>
+                            <field name="debit" string="Total por Pagar Facturado"/>
+                            <field name="amount_due"
+                                   string="Deuda Total"
+                                   readonly="1"/>
                         </group>
                         <group string="Límite de crédito">
                             <field name="credit_check" string="Crédito activo"/>
@@ -23,9 +26,6 @@
                             <field name="credit_blocking"
                                    string="Monto de bloqueo"
                                    invisible="credit_check == False"/>
-                            <field name="amount_due"
-                                   string="Deuda Total"
-                                   readonly="1"/>
                         </group>
                     </group>
                 </page>

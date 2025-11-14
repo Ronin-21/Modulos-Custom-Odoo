@@ -1,24 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- Template para FACTURAS: modificar header y ocultar datos fiscales -->
-    <template id="external_layout_wave_invoice_clean" inherit_id="web.external_layout_wave">
-        
-        <!-- Modificar header para Factura X: mostrar "PM" si no tiene datos fiscales -->
-        <xpath expr="//div[@class='d-flex justify-content-between']" position="replace">
-            <div class="d-flex justify-content-between">
-                <t t-if="o and o._name == 'account.move' and not o.journal_id.show_fiscal_data">
-                    <!-- Header limpio para Factura X -->
-                    <div>
-                        <h2 style="margin:0; padding:0;">PM</h2>
-                    </div>
-                    <div class="w-50 text-end"></div>
-                </t>
-                <t t-else=""><t t-raw="0"/></t>
-            </div>
-        </xpath>
-        
-    </template>
-
     <!-- Template para FACTURAS: ocultar datos fiscales SOLO si el diario lo indica -->
     <template id="report_invoice_document_clean" inherit_id="l10n_ar.report_invoice_document">
         
