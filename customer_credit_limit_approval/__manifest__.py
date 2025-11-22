@@ -19,13 +19,30 @@ Características:
     'category': 'Sales',
     'depends': [
         'sale_management',
+        'point_of_sale',
     ],
     'data': [
         'security/ir.model.access.csv',
+        'security/groups.xml',
+        'views/pos_config_views.xml',
         'views/res_partner.xml',
         'views/sale_order.xml',
         'wizard/credit_approval_wizard.xml',
     ],
+    'assets': {
+    # Bundle del POS “nuevo” (en algunas instancias 18 funciona perfecto)
+        'point_of_sale.assets': [
+            'customer_credit_limit_approval/static/src/js/pos_credit_limit.js',
+            'customer_credit_limit_approval/static/src/js/pos_hide_partner_balance.js',
+            'customer_credit_limit_approval/static/src/scss/pos_hide_partner_balance.scss',
+        ],
+        # Bundle del POS “viejo” que tu instancia sí usa
+        'point_of_sale._assets_pos': [
+            'customer_credit_limit_approval/static/src/js/pos_credit_limit.js',
+            'customer_credit_limit_approval/static/src/js/pos_hide_partner_balance.js',
+            'customer_credit_limit_approval/static/src/scss/pos_hide_partner_balance.scss',
+        ],
+    },
     'installable': True,
     'auto_install': False,
     'application': False,

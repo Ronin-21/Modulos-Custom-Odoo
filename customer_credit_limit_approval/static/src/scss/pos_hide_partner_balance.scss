@@ -1,0 +1,22 @@
+// Cuando el root del componente tiene .balance-hide, escondemos la 4ª columna
+.client-list.balance-hide {
+  // Cabeceras
+  .header > *:nth-child(4),
+  .header-line > *:nth-child(4) {
+    display: none !important;
+  }
+
+  // Filas
+  .row > *:nth-child(4),
+  .list-line > *:nth-child(4) {
+    display: none !important;
+  }
+
+  // Si esa vista usa grid, ajustamos a 3 columnas
+  .header,
+  .row,
+  .header-line,
+  .list-line {
+    grid-template-columns: 1fr 1fr 1fr !important;
+  }
+}

@@ -4,9 +4,10 @@
     'version': '18.0.1.0.0',
     'category': 'Inventory',
     'summary': 'Permite asignar productos a múltiples empresas específicas',
-    'depends': ['product', 'stock'],
+    'depends': ['product', "mrp"],
     'data': [
         'views/product_template_views.xml',
+        "views/mrp_bom_views.xml",
     ],
     'installable': True,
     'application': False,

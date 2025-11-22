@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- BoM form: mostrar company_ids y ocultar company_id -->
+    <record id="multi_company_form_mrp_bom" model="ir.ui.view">
+        <field name="name">multi.company.mrp.bom.form</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+        <field name="arch" type="xml">
+            <!-- Insertar el M2M al lado del company_id -->
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="company_ids"
+                       string="Empresas Permitidas"
+                       widget="many2many_tags"
+                       options="{'no_create': True}"/>
+            </xpath>
+            <!-- Ocultar el company_id nativo (opcional pero recomendado para evitar confusiones) -->
+            <xpath expr="//field[@name='company_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Regla: Mrp BoM visible si comparte alguna company con el usuario o si está vacía (global) -->
+    <record id="mrp_bom_comp_rule" model="ir.rule">
+        <field name="name">MRP BoM multi-company</field>
+        <field name="model_id" ref="mrp.model_mrp_bom"/>
+        <field name="domain_force">['|', ('company_ids','in', company_ids), ('company_ids','=', False)]</field>
+    </record>
+
+    <!-- Regla: BoM lines heredarán la visibilidad por la BoM -->
+    <record id="mrp_bom_line_comp_rule" model="ir.rule">
+        <field name="name">MRP BoM Line multi-company</field>
+        <field name="model_id" ref="mrp.model_mrp_bom_line"/>
+        <field name="domain_force">['|', ('bom_id.company_ids','in', company_ids), ('bom_id.company_ids','=', False)]</field>
+    </record>
+
+</odoo>

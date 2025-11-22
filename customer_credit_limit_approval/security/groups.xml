@@ -1,0 +1,9 @@
+<odoo>
+  <data noupdate="0">
+    <record id="group_pos_balance_admin" model="res.groups">
+      <field name="name">POS: Configurar visibilidad de saldos</field>
+      <!-- En v18 la categoría correcta es base.module_category_point_of_sale -->
+      <field name="category_id" ref="base.module_category_point_of_sale"/>
+    </record>
+  </data>
+</odoo>

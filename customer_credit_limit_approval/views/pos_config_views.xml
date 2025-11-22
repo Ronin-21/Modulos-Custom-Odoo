@@ -1,0 +1,21 @@
+<odoo>
+  <record id="view_pos_config_form_balance_gate" model="ir.ui.view">
+    <field name="name">pos.config.form.balance.gate</field>
+    <field name="model">pos.config</field>
+    <!-- xmlid correcto de la vista en v18 -->
+    <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+    <field name="arch" type="xml">
+      <!-- Inserta un bloque propio dentro del sheet (siempre existe) -->
+      <xpath expr="//sheet" position="inside">
+        <group string="Saldo de clientes (Crédito)">
+          <!-- Solo los del grupo pueden ver/cambiar este switch -->
+          <field name="show_partner_balance" groups="customer_credit_limit_approval.group_pos_balance_admin"/>
+          <label for="show_partner_balance" groups="customer_credit_limit_approval.group_pos_balance_admin"/>
+          <p class="text-muted" groups="customer_credit_limit_approval.group_pos_balance_admin">
+            Controla si el POS muestra la columna “Saldo” en el selector de clientes.
+          </p>
+        </group>
+      </xpath>
+    </field>
+  </record>
+</odoo>
