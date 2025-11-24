@@ -1,12 +1,13 @@
 <odoo>
-  <data noupdate="0">
-    <!-- Grupo para administrar visibilidad de saldos en POS config -->
+  <data noupdate="1">
+    <!-- Grupo: habilita/oculta el switch en pos.config -->
     <record id="group_pos_balance_admin" model="res.groups">
       <field name="name">POS: Configurar visibilidad de saldos</field>
       <field name="category_id" ref="base.module_category_point_of_sale"/>
+      <field name="comment">Permite ver y cambiar el check "Mostrar saldo de clientes en POS" en la configuración del PdV.</field>
     </record>
 
-    <!-- NUEVO: Grupo para usuarios que SIEMPRE ven el saldo -->
+    <!-- Grupo: los usuarios SIEMPRE ven la columna Saldo en el POS -->
     <record id="group_pos_can_view_balance" model="res.groups">
       <field name="name">POS: Ver saldo de clientes</field>
       <field name="category_id" ref="base.module_category_point_of_sale"/>

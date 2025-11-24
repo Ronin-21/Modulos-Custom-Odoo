@@ -10,10 +10,6 @@
         <group string="Saldo de clientes (Crédito)">
           <!-- Solo los del grupo pueden ver/cambiar este switch -->
           <field name="show_partner_balance" groups="customer_credit_limit_approval.group_pos_balance_admin"/>
-          <label for="show_partner_balance" groups="customer_credit_limit_approval.group_pos_balance_admin"/>
-          <p class="text-muted" groups="customer_credit_limit_approval.group_pos_balance_admin">
-            Controla si el POS muestra la columna “Saldo” en el selector de clientes.
-          </p>
         </group>
       </xpath>
     </field>

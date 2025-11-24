@@ -9,8 +9,10 @@ _logger = logging.getLogger(__name__)
 class PosOrder(models.Model):
     _inherit = 'pos.order'
 
-    amount_due = fields.Monetary(
-        related='partner_id.amount_due',
+    # (opcionales, sólo lectura para tenerlos en el modelo)
+    customer_receivable = fields.Monetary(
+        string="Total por cobrar",
+        related='partner_id.credit',
         currency_field='currency_id',
         readonly=True,
     )
@@ -24,7 +26,7 @@ class PosOrder(models.Model):
         store=False,
     )
 
-    # ---------- helpers ----------
+    # ----------------- helpers -----------------
     def _normalize_ui_order_dict(self, order):
         """Acepta dict plano o {'data': {...}} y devuelve el dict de datos."""
         return order.get('data') or order
@@ -57,6 +59,7 @@ class PosOrder(models.Model):
     def _has_account_payment(self, order_dict):
         """Verifica si la orden tiene pagos 'cuenta de cliente'."""
         for payment in order_dict.get('payment_ids', []):
+            # payment = (0/1/2, id, {vals})
             if len(payment) >= 3 and isinstance(payment[2], dict):
                 pm_id = self._extract_payment_method_id(payment[2])
                 if pm_id:
@@ -65,21 +68,20 @@ class PosOrder(models.Model):
                         return True
         return False
 
-    # ---------- computes ----------
-    @api.depends(
-        'amount_due',
-        'amount_total',
-        'partner_id.credit_check',
-        'partner_id.credit_blocking',
-    )
+    # ----------------- computes -----------------
+    @api.depends('amount_total', 'partner_id.credit', 'partner_id.credit_blocking')
     def _compute_credit_limit_exceeded(self):
         for order in self:
             exceeded = False
             partner = order.partner_id
             if partner and partner.credit_check:
-                total_with_order = (partner.amount_due or 0.0) + (order.amount_total or 0.0)
-                if order.currency_id and partner.company_id.currency_id and order.currency_id != partner.company_id.currency_id:
-                    total_with_order = (partner.amount_due or 0.0) + order.currency_id._convert(
+                # usamos receivable (credit) como “deuda actual”
+                total_with_order = (partner.credit or 0.0) + (order.amount_total or 0.0)
+
+                # conversión de moneda si hace falta
+                if (order.currency_id and partner.company_id.currency_id
+                        and order.currency_id != partner.company_id.currency_id):
+                    total_with_order = (partner.credit or 0.0) + order.currency_id._convert(
                         order.amount_total,
                         partner.company_id.currency_id,
                         order.company_id or partner.company_id or self.env.company,
@@ -88,63 +90,73 @@ class PosOrder(models.Model):
                 exceeded = total_with_order > (partner.credit_blocking or 0.0)
             order.is_credit_limit_exceeded = exceeded
 
-    def _validate_credit_limit(self):
-        """Valida si la orden excede el límite de crédito."""
-        self.ensure_one()
-        partner = self.partner_id
-        if not (partner and partner.credit_check):
-            return False
+    def _validate_credit_limit_numbers(self, partner, order_amount, order_currency, company):
+        """Devuelve (exceeded: bool, total_with_order: float, limit: float)."""
+        limit = partner.credit_blocking or 0.0
+        # deuda actual del cliente = receivable
+        current_due = partner.credit or 0.0
+        total_with_order = current_due + (order_amount or 0.0)
 
-        total_with_order = (partner.amount_due or 0.0) + (self.amount_total or 0.0)
-        if self.currency_id and partner.company_id.currency_id and self.currency_id != partner.company_id.currency_id:
-            total_with_order = (partner.amount_due or 0.0) + self.currency_id._convert(
-                self.amount_total,
+        if (order_currency and partner.company_id.currency_id
+                and order_currency != partner.company_id.currency_id):
+            total_with_order = current_due + order_currency._convert(
+                order_amount,
                 partner.company_id.currency_id,
-                self.company_id or partner.company_id or self.env.company,
+                company or partner.company_id or self.env.company,
                 fields.Date.context_today(self),
             )
-        return total_with_order > (partner.credit_blocking or 0.0)
+        return total_with_order > limit, total_with_order, limit
 
-    # ---------- main override ----------
+    # ----------------- main override -----------------
     @api.model
     def sync_from_ui(self, orders):
-        """Sincroniza órdenes desde el POS al backend con validación de crédito."""
-        for order in orders:
-            # Normalizar el dict de la orden
-            order = self._normalize_ui_order_dict(order)
+        """
+        Valida límite de crédito cuando se usa “Cuenta de cliente”.
+        """
+        for raw in orders:
+            order = self._normalize_ui_order_dict(raw)
 
-            # Validar solo si la orden está pagada Y usa método "Cuenta de cliente"
-            if order.get('state') == 'paid' and self._has_account_payment(order):
-                partner_id = order.get('partner_id')
-                partner = self.env['res.partner'].browse(partner_id) if partner_id else None
+            # Sólo órdenes que vienen en estado pagado
+            if order.get('state') != 'paid':
+                continue
 
-                # 1. Validar que el cliente tenga crédito habilitado
-                if not partner or not partner.credit_check:
-                    raise UserError(_(
-                        "El cliente no tiene habilitada la Cuenta Corriente.\n\n"
-                        "Active 'Activar control de crédito' en el contacto para poder usar este método de pago."
-                    ))
+            # ¿la orden tiene algún pago a cuenta corriente?
+            if not self._has_account_payment(order):
+                continue
 
-                # 2. Validar que no exceda el límite de crédito
-                total_with_order = (partner.amount_due or 0.0) + (order.get('amount_total', 0.0) or 0.0)
-                limit = partner.credit_blocking or 0.0
+            partner_id = order.get('partner_id')
+            if not partner_id:
+                # si no hay cliente no podemos aplicar crédito
+                continue
 
-                if total_with_order > limit:
-                    diff = round(total_with_order - limit, 2)
-                    raise UserError(_(
-                        "LÍMITE DE CRÉDITO EXCEDIDO\n\n"
-                        "Cliente: %(name)s\n"
-                        "Límite de crédito: %(limit).2f\n"
-                        "Monto adeudado: %(due).2f\n"
-                        "Total ticket: %(total).2f\n\n"
-                        "EXCESO: %(diff).2f\n\n"
-                        "Contacte con el gerente para autorizar."
-                    ) % {
-                        'name': partner.name,
-                        'limit': limit,
-                        'due': partner.amount_due or 0.0,
-                        'total': order.get('amount_total', 0.0) or 0.0,
-                        'diff': diff,
-                    })
+            partner = self.env['res.partner'].browse(partner_id)
+            if not partner.credit_check:
+                # el cliente no tiene habilitado el control de crédito
+                raise UserError(_("El cliente no tiene habilitada la Cuenta Corriente.\n\n"
+                                  "Active 'Crédito activo' en el contacto."))
+
+            exceeded, total_with_order, limit = self._validate_credit_limit_numbers(
+                partner=partner,
+                order_amount=order.get('amount_total', 0.0) or 0.0,
+                order_currency=self.env['res.currency'].browse(order.get('currency_id')) if order.get('currency_id') else None,
+                company=self.env.company,
+            )
+            if exceeded:
+                diff = round(total_with_order - limit, 2)
+                raise UserError(_(
+                    "LÍMITE DE CRÉDITO EXCEDIDO\n\n"
+                    "Cliente: %(name)s\n"
+                    "Límite de crédito: %(limit).2f\n"
+                    "Deuda actual: %(due).2f\n"
+                    "Total ticket: %(total).2f\n\n"
+                    "EXCESO: %(diff).2f\n\n"
+                    "Contacte con el gerente para autorizar."
+                ) % {
+                    'name': partner.name,
+                    'limit': limit,
+                    'due': partner.credit or 0.0,
+                    'total': order.get('amount_total', 0.0) or 0.0,
+                    'diff': diff,
+                })
 
         return super().sync_from_ui(orders)
