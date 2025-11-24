@@ -1,9 +1,16 @@
 <odoo>
   <data noupdate="0">
+    <!-- Grupo para administrar visibilidad de saldos en POS config -->
     <record id="group_pos_balance_admin" model="res.groups">
       <field name="name">POS: Configurar visibilidad de saldos</field>
-      <!-- En v18 la categoría correcta es base.module_category_point_of_sale -->
       <field name="category_id" ref="base.module_category_point_of_sale"/>
+    </record>
+
+    <!-- NUEVO: Grupo para usuarios que SIEMPRE ven el saldo -->
+    <record id="group_pos_can_view_balance" model="res.groups">
+      <field name="name">POS: Ver saldo de clientes</field>
+      <field name="category_id" ref="base.module_category_point_of_sale"/>
+      <field name="comment">Los usuarios en este grupo siempre ven la columna "Saldo" en el selector de clientes del POS, independientemente de la configuración del terminal.</field>
     </record>
   </data>
 </odoo>

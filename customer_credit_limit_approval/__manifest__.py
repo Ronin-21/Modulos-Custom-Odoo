@@ -13,6 +13,7 @@ Características:
 - Flujo de aprobación por gerencia (ventas / administración).
 - Registro en el chatter y actividades para los usuarios involucrados.
 - Control de permisos mediante reglas de acceso.
+- Visibilidad de saldo de clientes en POS por usuario.
 """,
     'author': "Abel Alejandro Acuña",
     'website': "",
@@ -30,16 +31,16 @@ Características:
         'wizard/credit_approval_wizard.xml',
     ],
     'assets': {
-    # Bundle del POS “nuevo” (en algunas instancias 18 funciona perfecto)
+    # Bundle del POS "nuevo" (en algunas instancias 18 funciona perfecto)
         'point_of_sale.assets': [
             'customer_credit_limit_approval/static/src/js/pos_credit_limit.js',
-            'customer_credit_limit_approval/static/src/js/pos_hide_partner_balance.js',
+            'customer_credit_limit_approval/static/src/js/pos_balance_visibility.js',
             'customer_credit_limit_approval/static/src/scss/pos_hide_partner_balance.scss',
         ],
-        # Bundle del POS “viejo” que tu instancia sí usa
+        # Bundle del POS "viejo" que tu instancia sí usa
         'point_of_sale._assets_pos': [
             'customer_credit_limit_approval/static/src/js/pos_credit_limit.js',
-            'customer_credit_limit_approval/static/src/js/pos_hide_partner_balance.js',
+            'customer_credit_limit_approval/static/src/js/pos_balance_visibility.js',
             'customer_credit_limit_approval/static/src/scss/pos_hide_partner_balance.scss',
         ],
     },

@@ -1,22 +1,19 @@
-// Cuando el root del componente tiene .balance-hide, escondemos la 4ª columna
-.client-list.balance-hide {
-  // Cabeceras
-  .header > *:nth-child(4),
-  .header-line > *:nth-child(4) {
-    display: none !important;
-  }
+/* ── Quitar columna de ACCIONES (kebab) del selector de clientes ───────────── */
 
-  // Filas
-  .row > *:nth-child(4),
-  .list-line > *:nth-child(4) {
-    display: none !important;
-  }
+/* Celda que contiene el botón del menú */
+html.pos-balance-hidden td.edit-partner-button-cell {
+  display: none !important;
+}
 
-  // Si esa vista usa grid, ajustamos a 3 columnas
-  .header,
-  .row,
-  .header-line,
-  .list-line {
-    grid-template-columns: 1fr 1fr 1fr !important;
-  }
+/* Por si el DOM trae el botón con otras clases */
+html.pos-balance-hidden .partner-line button.dropdown-toggle,
+html.pos-balance-hidden .partner-line .dropdown-menu {
+  display: none !important;
+}
+
+/* (ya lo tenías) Quitar encabezado y celdas de SALDO en la tabla */
+html.pos-balance-hidden .modal .table.table-hover thead tr > th:nth-child(4),
+html.pos-balance-hidden .modal .table.table-hover tbody tr > td:nth-child(4),
+html.pos-balance-hidden .partner-line .partner-line-balance {
+  display: none !important;
 }
