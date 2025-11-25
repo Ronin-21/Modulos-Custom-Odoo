@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- REPORTE LIMPIO PARA COMPONENTES DE PRODUCCIÓN -->
+    <template id="report_mrp_production_components_clean" inherit_id="mrp.report_mrp_production_components">
+        
+        <!-- Cambiar el título y hacerlo muy visible -->
+        <xpath expr="//h3" position="replace">
+            <h3 style="background-color: #FF6B00; color: white; padding: 15px; margin: 20px 0; border-radius: 5px; text-transform: uppercase; font-weight: bold;">
+                ✓ COMPONENTES Y MATERIALES (VISTA PERSONALIZADA)
+            </h3>
+        </xpath>
+        
+        <!-- Rediseñar la tabla -->
+        <xpath expr="//table[@class='table table-sm']" position="replace">
+            <table class="table table-sm table-striped" style="border: 2px solid #FF6B00;">
+                <div class="oe_structure"/>
+                <t t-set="has_product_barcode" t-value="any(m.product_id.barcode for m in o.move_raw_ids)"/>
+                <thead style="background-color: #FF6B00; color: white;">
+                    <tr>
+                        <th style="color: white; font-weight: bold;">Producto</th>
+                        <th t-if="o.state in ('progress', 'to_close','done')" t-attf-class="{{ 'text-end' if not has_product_barcode else '' }}" style="color: white; font-weight: bold;">Consumido</th>
+                        <th t-attf-class="{{ 'text-end' if not has_product_barcode else '' }}" style="color: white; font-weight: bold;">A Consumir</th>
+                        <th t-if="has_product_barcode" width="15%" class="text-center" style="color: white; font-weight: bold;">Código de Barras</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="o.move_raw_ids" t-as="raw_line" style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 12px; vertical-align: middle;">
+                            <span t-field="raw_line.product_id" style="font-weight: 500;">8 GB RAM</span>
+                        </td>
+                        <td t-attf-class="{{ 'text-end' if not has_product_barcode else '' }}" style="padding: 12px; vertical-align: middle;" t-if="o.state in ('progress', 'to_close','done')">
+                            <div style="background-color: #FFF3E0; padding: 8px; border-radius: 3px; font-weight: bold;">
+                                <span t-field="raw_line.quantity" style="color: #FF6B00;">2</span>
+                            </div>
+                        </td>
+                        <td t-attf-class="{{ 'text-end' if not has_product_barcode else '' }}" style="padding: 12px; vertical-align: middle;">
+                            <div style="background-color: #E8F5E9; padding: 8px; border-radius: 3px; font-weight: bold;">
+                                <span t-field="raw_line.product_uom_qty" style="color: #2E7D32;">25</span>
+                                <span t-field="raw_line.product_uom" groups="uom.group_uom" style="color: #666;"> Piezas</span>
+                            </div>
+                        </td>
+                        <td t-if="has_product_barcode" width="15%" class="text-center" style="padding: 12px; vertical-align: middle;">
+                            <t t-if="raw_line.product_id.barcode">
+                                <span t-field="raw_line.product_id.barcode" t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:100%;height:35px'}">12345678901</span>
+                            </t>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </xpath>
+        
+    </template>
+
+</odoo>

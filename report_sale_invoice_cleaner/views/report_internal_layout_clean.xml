@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- LAYOUT INTERNO PERSONALIZADO PARA MRP - SIN HEADER -->
+    <!-- Este layout es específico y solo se usa donde lo referenciamos explícitamente -->
+    <template id="internal_layout_mrp_clean" inherit_id="web.internal_layout">
+        
+        <!-- Ocultar el div.header completamente SIN dejar espacio -->
+        <xpath expr="//div[@class='header']" position="replace">
+            <!-- Header oculto para reportes MRP -->
+        </xpath>
+        
+        <!-- Limpiar márgenes de article -->
+        <xpath expr="//div[@class='article']" position="attributes">
+            <attribute name="style">margin: 0; padding: 0;</attribute>
+        </xpath>
+        
+    </template>
+
+</odoo>
