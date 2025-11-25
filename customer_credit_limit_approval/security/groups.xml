@@ -8,10 +8,10 @@
     </record>
 
     <!-- Grupo: los usuarios SIEMPRE ven la columna Saldo en el POS -->
-    <record id="group_pos_can_view_balance" model="res.groups">
+    <!-- <record id="group_pos_can_view_balance" model="res.groups">
       <field name="name">POS: Ver saldo de clientes</field>
       <field name="category_id" ref="base.module_category_point_of_sale"/>
       <field name="comment">Los usuarios en este grupo siempre ven la columna "Saldo" en el selector de clientes del POS, independientemente de la configuración del terminal.</field>
-    </record>
+    </record> -->
   </data>
 </odoo>

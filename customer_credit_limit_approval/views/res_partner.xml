@@ -10,21 +10,37 @@
             <xpath expr="//sheet/notebook" position="inside">
                 <page string="Cuenta corriente">
                     <group>
+                        <!-- ESTADO DE CUENTA -->
                         <group string="Estado de cuenta">
-                            <!-- estos son los que querías ver arriba -->
+                            <!-- Valores contables estándar -->
                             <field name="credit" string="Total por Cobrar Facturado"/>
                             <field name="debit" string="Total por Pagar Facturado"/>
+
+                            <!-- Desglose adicional -->
+                            <field name="amount_due_accounting"
+                                   string="Deuda facturada (contable)"
+                                   readonly="1"/>
+                            <field name="amount_due_sale"
+                                   string="Ventas confirmadas sin facturar"
+                                   readonly="1"/>
+                            <field name="amount_due_pos"
+                                   string="POS Cuenta Corriente pendiente"
+                                   readonly="1"/>
+
+                            <!-- Total general (suma de los anteriores) -->
                             <field name="amount_due"
                                    string="Deuda Total"
                                    readonly="1"/>
                         </group>
+
+                        <!-- LÍMITE DE CRÉDITO -->
                         <group string="Límite de crédito">
-                            <field name="credit_check" string="Crédito activo"/>
+                            <field name="credit_check" string="Crédito activo ?"/>
                             <field name="credit_warning"
-                                   string="Monto de advertencia"
+                                   string="Monto de advertencia ?"
                                    invisible="credit_check == False"/>
                             <field name="credit_blocking"
-                                   string="Monto de bloqueo"
+                                   string="Monto de bloqueo ?"
                                    invisible="credit_check == False"/>
                         </group>
                     </group>

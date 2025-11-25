@@ -69,49 +69,64 @@ class PosOrder(models.Model):
         return False
 
     # ----------------- computes -----------------
-    @api.depends('amount_total', 'partner_id.credit', 'partner_id.credit_blocking')
+    @api.depends('amount_total', 'partner_id.amount_due', 'partner_id.credit_blocking')
     def _compute_credit_limit_exceeded(self):
+        """
+        Marca la orden como excedida si, sumando el ticket,
+        la DEUDA TOTAL (amount_due) supera el límite de bloqueo.
+        """
         for order in self:
             exceeded = False
             partner = order.partner_id
             if partner and partner.credit_check:
-                # usamos receivable (credit) como “deuda actual”
-                total_with_order = (partner.credit or 0.0) + (order.amount_total or 0.0)
-
-                # conversión de moneda si hace falta
-                if (order.currency_id and partner.company_id.currency_id
-                        and order.currency_id != partner.company_id.currency_id):
-                    total_with_order = (partner.credit or 0.0) + order.currency_id._convert(
-                        order.amount_total,
-                        partner.company_id.currency_id,
-                        order.company_id or partner.company_id or self.env.company,
-                        fields.Date.context_today(self),
-                    )
-                exceeded = total_with_order > (partner.credit_blocking or 0.0)
+                exceeded, total_with_order, limit, current_due = order._validate_credit_limit_numbers(
+                    partner=partner,
+                    order_amount=order.amount_total or 0.0,
+                    order_currency=order.currency_id,
+                    company=order.company_id or self.env.company,
+                )
             order.is_credit_limit_exceeded = exceeded
 
     def _validate_credit_limit_numbers(self, partner, order_amount, order_currency, company):
-        """Devuelve (exceeded: bool, total_with_order: float, limit: float)."""
-        limit = partner.credit_blocking or 0.0
-        # deuda actual del cliente = receivable
-        current_due = partner.credit or 0.0
-        total_with_order = current_due + (order_amount or 0.0)
+        """
+        Usa la DEUDA TOTAL (partner.amount_due) como base:
 
-        if (order_currency and partner.company_id.currency_id
-                and order_currency != partner.company_id.currency_id):
-            total_with_order = current_due + order_currency._convert(
-                order_amount,
-                partner.company_id.currency_id,
+        - current_due: partner.amount_due (contable + ventas + POS CC)
+        - order_amount: total del ticket convertido a moneda de la compañía
+        - limit: partner.credit_blocking
+
+        Devuelve (exceeded: bool, total_with_order: float, limit: float, current_due: float).
+        """
+        limit = partner.credit_blocking or 0.0
+
+        # deuda actual del cliente = Deuda Total que calculamos en res.partner
+        current_due = partner.amount_due or 0.0
+
+        # convertimos el importe del ticket a la moneda de la compañía si hace falta
+        company_currency = partner.company_id.currency_id or company.currency_id
+        order_amount_company = order_amount or 0.0
+        if order_currency and company_currency and order_currency != company_currency:
+            order_amount_company = order_currency._convert(
+                order_amount or 0.0,
+                company_currency,
                 company or partner.company_id or self.env.company,
                 fields.Date.context_today(self),
             )
-        return total_with_order > limit, total_with_order, limit
+
+        total_with_order = current_due + order_amount_company
+        return total_with_order > limit, total_with_order, limit, current_due
 
     # ----------------- main override -----------------
     @api.model
     def sync_from_ui(self, orders):
         """
         Valida límite de crédito cuando se usa “Cuenta de cliente”.
+
+        IMPORTANTE:
+        - Sólo se aplica si la orden tiene un pago de tipo 'Cuenta de cliente'
+          (pay_later / receivable / flags de terceros).
+        - Usa partner.amount_due como deuda actual, para que coincida con la
+          pestaña "Cuenta corriente" (Deuda Total).
         """
         for raw in orders:
             order = self._normalize_ui_order_dict(raw)
@@ -135,7 +150,7 @@ class PosOrder(models.Model):
                 raise UserError(_("El cliente no tiene habilitada la Cuenta Corriente.\n\n"
                                   "Active 'Crédito activo' en el contacto."))
 
-            exceeded, total_with_order, limit = self._validate_credit_limit_numbers(
+            exceeded, total_with_order, limit, current_due = self._validate_credit_limit_numbers(
                 partner=partner,
                 order_amount=order.get('amount_total', 0.0) or 0.0,
                 order_currency=self.env['res.currency'].browse(order.get('currency_id')) if order.get('currency_id') else None,
@@ -147,14 +162,14 @@ class PosOrder(models.Model):
                     "LÍMITE DE CRÉDITO EXCEDIDO\n\n"
                     "Cliente: %(name)s\n"
                     "Límite de crédito: %(limit).2f\n"
-                    "Deuda actual: %(due).2f\n"
+                    "Deuda actual (Total): %(due).2f\n"
                     "Total ticket: %(total).2f\n\n"
                     "EXCESO: %(diff).2f\n\n"
                     "Contacte con el gerente para autorizar."
                 ) % {
                     'name': partner.name,
                     'limit': limit,
-                    'due': partner.credit or 0.0,
+                    'due': current_due,
                     'total': order.get('amount_total', 0.0) or 0.0,
                     'diff': diff,
                 })
