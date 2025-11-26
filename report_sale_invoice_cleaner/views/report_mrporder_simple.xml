@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- REPORTE SIMPLE PARA ÓRDENES DE MANUFACTURA MRP - SIN ESTILOS -->
+    <template id="report_mrporder_clean" inherit_id="mrp.report_mrporder">
+        
+        <!-- Cambiar el layout interno por el limpio (sin header) -->
+        <xpath expr="//t[@t-call='web.internal_layout']" position="attributes">
+            <attribute name="t-call">report_sale_invoice_cleaner.internal_layout_mrp_clean</attribute>
+        </xpath>
+        
+        <!-- Reemplazar primer div.row (header) -->
+        <xpath expr="//div[@class='row'][1]" position="replace">
+            <div class="row">
+                <div class="col-7">
+                    <h2><span t-field="o.name">MRP-001</span></h2>
+                </div>
+                <div class="col-5">
+                    <span class="text-end">
+                        <span t-field="o.name" t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:350px;height:60px'}">Package barcode</span>
+                    </span>
+                </div>
+            </div>
+        </xpath>
+        
+        <!-- Cambiar primer row mt32 mb32 (Responsable, Source, etc) -->
+        <xpath expr="//div[@class='row mt32 mb32'][1]" position="replace">
+            <div class="row mt32 mb32">
+                <div class="col-3" t-if="o.origin">
+                    <strong>Origen:</strong><br/>
+                    <span t-field="o.origin">Vendor ABC</span>
+                </div>
+                <div class="col-3" t-if="o.date_start or o.date_planned_start">
+                    <strong>Fecha Orden:</strong><br/>
+                    <span t-field="o.date_start" t-options="{'widget': 'date'}">2023-09-15</span>
+                    <span t-if="not o.date_start" t-field="o.date_planned_start" t-options="{'widget': 'date'}">2023-09-15</span>
+                </div>
+                <div class="col-3" t-if="o.user_id">
+                    <strong>Responsable:</strong><br/>
+                    <span t-field="o.user_id">John Doe</span>
+                </div>
+                <div class="col-3">
+                    <strong>Estado:</strong><br/>
+                    <span t-field="o.state">Draft</span>
+                </div>
+            </div>
+        </xpath>
+        
+        <!-- Cambiar segundo row mt32 mb32 (Producto, Cantidad) -->
+        <xpath expr="//div[@class='row mt32 mb32'][2]" position="replace">
+            <div class="row mt32 mb32">
+                <div class="col-3">
+                    <strong>Producto:</strong><br/>
+                    <span t-field="o.product_id">Laptop Model X</span>
+                </div>
+                <div class="col-3">
+                    <strong>Cantidad:</strong><br/>
+                    <span t-field="o.product_qty">100</span>
+                    <span t-field="o.product_uom_id.name" groups="uom.group_uom"> Units</span>
+                </div>
+                <div class="col-3" t-if="o.lot_producing_id">
+                    <strong>Lote:</strong><br/>
+                    <span t-field="o.lot_producing_id">LOT-001</span>
+                </div>
+                <div class="col-3" t-if="o.product_id.barcode">
+                    <strong>Código Barras:</strong><br/>
+                    <span t-field="o.product_id.barcode" t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:100%;height:35px'}">123456789</span>
+                </div>
+            </div>
+        </xpath>
+        
+    </template>
+
+</odoo>

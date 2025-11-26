@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_reception_invoice_wizard_form" model="ir.ui.view">
+        <field name="name">reception.invoice.wizard.form</field>
+        <field name="model">reception.invoice.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Vincular Recepción a Factura">
+                <group>
+                    <field name="invoice_id" readonly="1"/>
+                    <!-- AQUÍ va el domain que filtra por proveedor + recepciones -->
+                    <field name="picking_id"
+                           domain="[('partner_id', '=', partner_id),
+                                    ('picking_type_code', '=', 'incoming'),
+                                    ('state', '=', 'done'),
+                                    ('vendor_invoice_id', '=', False)]"/>
+                </group>
+                <footer>
+                    <button name="action_link" type="object" string="Vincular" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_reception_invoice_wizard" model="ir.actions.act_window">
+        <field name="name">Vincular Recepción a Factura</field>
+        <field name="res_model">reception.invoice.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

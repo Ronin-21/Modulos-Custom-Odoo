@@ -22,7 +22,9 @@ Compat AR (l10n_ar / l10n_latam_invoice_document).
         # MRP Reports Clean
         "views/report_internal_layout_clean.xml",
         "views/report_mrporder_clean.xml",
+        #"views/report_mrporder_simple.xml",
         "views/report_mrp_production_components_clean.xml",
+        #"views/report_mrp_production_components_simple.xml",
     ],
     "installable": True,
     "application": False,

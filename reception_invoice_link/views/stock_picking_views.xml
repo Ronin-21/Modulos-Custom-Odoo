@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Botón inteligente en la recepción para abrir la factura -->
+    <record id="view_picking_form_invoice_link" model="ir.ui.view">
+        <field name="name">stock.picking.form.invoice.link</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_open_vendor_invoice"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-pencil-square-o"
+                        invisible="not vendor_invoice_id">
+                    <field name="vendor_invoice_id"
+                           widget="statinfo"
+                           string="Factura proveedor"/>
+                </button>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
