@@ -5,7 +5,7 @@
     <template id="external_layout_wave_sale_clean" inherit_id="web.external_layout_wave">
         <xpath expr="//div[@class='d-flex justify-content-between']" position="replace">
     <div class="d-flex justify-content-between">
-        <t t-if="(o and o._name == 'sale.order') or (o and o._name == 'account.payment' and o.journal_id.show_fiscal_data)">
+        <t t-if="(o and o._name == 'sale.order') or (o and o._name == 'account.payment' and o.journal_id.show_fiscal_data) or (o and o._name == 'purchase.order')">
             <!-- Header para cotizaciones: logo + datos -->
             <div>
                 <img t-if="company.logo" class="o_company_logo mb-2" t-att-src="image_data_uri(company.logo)" alt="Logo"/>

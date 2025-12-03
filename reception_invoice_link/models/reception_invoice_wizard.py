@@ -28,7 +28,6 @@ class PickingReceptionWizard(models.TransientModel):
         string='Recepción',
         required=True,
         ondelete='cascade',
-        # el filtro real lo ponemos en la vista XML con domain="[...]"
     )
 
     @api.onchange('picking_id')
@@ -41,7 +40,10 @@ class PickingReceptionWizard(models.TransientModel):
                 )
 
     def action_link(self):
-        """Vincula la recepción a la factura."""
+        """Vincula la recepción a la factura y genera las líneas."""
         self.ensure_one()
+        # 1) Crear líneas de factura desde la recepción
+        self.invoice_id._create_lines_from_picking(self.picking_id)
+        # 2) Vincular la recepción a la factura
         self.picking_id.vendor_invoice_id = self.invoice_id.id
         return {'type': 'ir.actions.act_window_close'}

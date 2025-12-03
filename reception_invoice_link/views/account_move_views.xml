@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
 
-            <!-- Smart button 'Recepciones' -->
+            <!-- Smart button 'Recepciones' (solo facturas de proveedor) -->
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_open_receptions"
                         type="object"
@@ -16,6 +16,25 @@
                         invisible="move_type != 'in_invoice'">
                     <field name="picking_count" widget="statinfo" string="Recepciones"/>
                 </button>
+            </xpath>
+
+            <!-- Botones en el header -->
+            <xpath expr="//header" position="inside">
+
+                <!-- Agregar nueva recepción a la factura -->
+                <button name="action_link_reception"
+                        type="object"
+                        string="Agregar recepción"
+                        class="btn-primary"
+                        invisible="state != 'draft' or move_type != 'in_invoice'"/>
+
+                <!-- Quitar todas las recepciones y sus líneas -->
+                <button name="action_clear_receptions"
+                        type="object"
+                        string="Quitar recepciones"
+                        class="btn-secondary"
+                        invisible="picking_count == 0 or state != 'draft' or move_type != 'in_invoice'"/>
+
             </xpath>
 
         </field>
