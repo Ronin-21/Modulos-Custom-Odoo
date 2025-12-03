@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- CONFIGURACIÓN POR DEFECTO PARA EMPRESA PRINCIPAL -->
+        <record id="report_template_config_default" model="report.template.config">
+            <field name="company_id" ref="base.main_company"/>
+            <field name="logo_text">PM</field>
+            <field name="primary_color">#FF6B00</field>
+            <field name="secondary_color">#2C3E50</field>
+            <field name="header_bg_color">#ECF0F1</field>
+            <field name="accent_color">#E8F5E9</field>
+            <field name="enable_mrp_templates">True</field>
+            <field name="mrp_template">clean</field>
+            <field name="enable_sale_templates">True</field>
+            <field name="sale_template">clean</field>
+            <field name="enable_purchase_templates">True</field>
+            <field name="purchase_template">clean</field>
+            <field name="enable_payment_templates">True</field>
+            <field name="show_payment_checks">True</field>
+        </record>
+
+    </data>
+</odoo>

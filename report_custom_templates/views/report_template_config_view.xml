@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- VISTA DE FORMULARIO -->
+    <record id="report_template_config_form" model="ir.ui.view">
+        <field name="name">report.template.config.form</field>
+        <field name="model">report.template.config</field>
+        <field name="arch" type="xml">
+            <form string="Configuración de Plantillas de Reportes">
+                <!-- Usamos el guardar estándar de Odoo -->
+                <header/>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="company_id" readonly="1" class="oe_inline"/>
+                            <span> - Configuración de Plantillas</span>
+                        </h1>
+                    </div>
+
+                    <notebook>
+                        <!-- TAB: GENERAL -->
+                        <page string="General" name="general">
+                            <group>
+                                <group string="Datos Generales">
+                                    <field name="company_id" readonly="1"/>
+                                    <field name="active"/>
+                                    <field name="logo_text" placeholder="PM, EMPRESA, etc."/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- TAB: COLORES -->
+                        <page string="Colores" name="colors">
+                            <group>
+                                <group string="Esquema de Colores">
+                                    <field name="primary_color" widget="color"/>
+                                    <field name="secondary_color" widget="color"/>
+                                    <field name="header_bg_color" widget="color"/>
+                                    <field name="accent_color" widget="color"/>
+                                </group>
+                                <group string="Vista Previa">
+                                    <p class="o_form_label">
+                                        Usá los selectores de color de la izquierda para ver el color seleccionado.
+                                    </p>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- TAB: MRP -->
+                        <page string="MRP" name="mrp">
+                            <group>
+                                <group string="Órdenes de Manufactura">
+                                    <field name="enable_mrp_templates"/>
+                                    <field name="mrp_template"/>
+                                </group>
+                                <group string="Información">
+                                    <p class="o_form_label">Plantillas disponibles:</p>
+                                    <ul>
+                                        <li><strong>Limpia:</strong> Con estilos, colores y diseño personalizado</li>
+                                        <li><strong>Simple:</strong> Sin estilos, apariencia estándar de Odoo</li>
+                                        <li><strong>Estándar:</strong> Plantilla por defecto de Odoo (sin personalización)</li>
+                                    </ul>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- TAB: VENTAS -->
+                        <page string="Ventas" name="sales">
+                            <group>
+                                <group string="Órdenes de Venta">
+                                    <field name="enable_sale_templates"/>
+                                    <field name="sale_template"/>
+                                </group>
+                                <group string="Información">
+                                    <p class="o_form_label">Plantillas disponibles:</p>
+                                    <ul>
+                                        <li><strong>Limpia:</strong> Con estilos, colores y diseño personalizado</li>
+                                        <li><strong>Simple:</strong> Sin estilos, apariencia estándar de Odoo</li>
+                                        <li><strong>Estándar:</strong> Plantilla por defecto de Odoo (sin personalización)</li>
+                                    </ul>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- TAB: COMPRAS -->
+                        <page string="Compras" name="purchases">
+                            <group>
+                                <group string="Órdenes de Compra">
+                                    <field name="enable_purchase_templates"/>
+                                    <field name="purchase_template"/>
+                                </group>
+                                <group string="Información">
+                                    <p class="o_form_label">Plantillas disponibles:</p>
+                                    <ul>
+                                        <li><strong>Limpia:</strong> Con estilos, colores y diseño personalizado</li>
+                                        <li><strong>Simple:</strong> Sin estilos, apariencia estándar de Odoo</li>
+                                        <li><strong>Estándar:</strong> Plantilla por defecto de Odoo (sin personalización)</li>
+                                    </ul>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- TAB: PAGOS -->
+                        <page string="Pagos" name="payments">
+                            <group>
+                                <group string="Recibos de Pago">
+                                    <field name="enable_payment_templates"/>
+                                    <field name="show_payment_checks"/>
+                                </group>
+                                <group string="Información">
+                                    <p class="o_form_label">Opciones disponibles:</p>
+                                    <ul>
+                                        <li><strong>Mostrar cheques:</strong> Incluir tabla detallada de cheques utilizados</li>
+                                        <li>Los recibos mostrarán información de pagos y facturas asociadas</li>
+                                    </ul>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- VISTA DE LISTA (ahora tipo list, no tree) -->
+    <record id="report_template_config_tree" model="ir.ui.view">
+        <field name="name">report.template.config.list</field>
+        <field name="model">report.template.config</field>
+        <field name="arch" type="xml">
+            <list string="Configuraciones de Plantillas">
+                <field name="company_id"/>
+                <field name="logo_text"/>
+                <field name="mrp_template"/>
+                <field name="sale_template"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ACCIÓN (view_mode con list,form) -->
+    <record id="action_report_template_config" model="ir.actions.act_window">
+        <field name="name">Configuración de Plantillas</field>
+        <field name="res_model">report.template.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea la primera configuración de plantillas para tu empresa
+            </p>
+        </field>
+    </record>
+
+    <!-- MENÚ -->
+    <menuitem
+        id="menu_report_template_config"
+        parent="base.menu_administration"
+        action="action_report_template_config"
+        sequence="100"
+        name="Plantillas de Reportes"
+        groups="base.group_system"/>
+
+</odoo>

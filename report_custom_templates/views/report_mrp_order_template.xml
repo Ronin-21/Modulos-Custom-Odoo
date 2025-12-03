@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- PLANTILLA DINÁMICA PARA ÓRDENES DE MANUFACTURA MRP -->
+    <template id="report_mrporder_template" inherit_id="mrp.report_mrporder">
+        <xpath expr="//div[@class='row'][1]" position="replace">
+            <t t-set="config" t-value="env['report.template.config'].get_config(company.id)"/>
+            
+            <!-- BANNER SUPERIOR -->
+            <div t-attf-style="background-color: #{ config.secondary_color or '#2C3E50' }; color: white; padding: 20px; margin-bottom: 20px; margin-top: 0; border-radius: 5px; text-align: center;">
+                <h1 style="margin: 0; font-size: 28px; font-weight: bold;">ORDEN DE MANUFACTURA</h1>
+                <p style="margin: 5px 0 0 0; font-size: 12px;">Reporte Personalizado - Sistema <t t-esc="config.logo_text or 'PM'"/></p>
+            </div>
+            
+            <!-- HEADER -->
+            <div class="row" t-attf-style="margin-bottom: 20px; padding: 15px; background-color: #{ config.header_bg_color or '#ECF0F1' }; border-left: 5px solid #{ config.primary_color or '#FF6B00' };">
+                <div class="col-7">
+                    <h2 style="margin: 0;" t-attf-style="color: #{ config.secondary_color or '#2C3E50' };"><span t-field="o.name">MRP-001</span></h2>
+                    <p style="margin: 5px 0 0 0; font-size: 12px; color: #7F8C8D;">Identificación de la Orden</p>
+                </div>
+                <div class="col-5">
+                    <div style="text-align: right; padding: 10px; background-color: white; border-radius: 5px;">
+                        <span t-field="o.name" t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:350px;height:60px'}">Package barcode</span>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+        
+        <!-- DATOS GENERALES -->
+        <xpath expr="//div[@class='row mt32 mb32'][1]" position="replace">
+            <t t-set="config" t-value="env['report.template.config'].get_config(company.id)"/>
+            <div class="row mt32 mb32" style="background-color: #F8F9FA; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                <div class="col-3" t-if="o.date_start or o.date_planned_start">
+                    <strong t-attf-style="color: #{ config.primary_color or '#FF6B00' };">Fecha Orden:</strong><br/>
+                    <span t-field="o.date_start" t-options="{'widget': 'date'}" style="font-size: 14px;">2023-09-15</span>
+                    <span t-if="not o.date_start" t-field="o.date_planned_start" t-options="{'widget': 'date'}" style="font-size: 14px;">2023-09-15</span>
+                </div>
+                <div class="col-3" t-if="o.origin">
+                    <strong t-attf-style="color: #{ config.primary_color or '#FF6B00' };">Origen:</strong><br/>
+                    <span t-field="o.origin" style="font-size: 14px;">Vendor ABC</span>
+                </div>
+                <div class="col-3" t-if="o.user_id">
+                    <strong t-attf-style="color: #{ config.primary_color or '#FF6B00' };">Responsable:</strong><br/>
+                    <span t-field="o.user_id" style="font-size: 14px;">John Doe</span>
+                </div>
+                <div class="col-3">
+                    <strong t-attf-style="color: #{ config.primary_color or '#FF6B00' };">Estado:</strong><br/>
+                    <span t-field="o.state" style="font-size: 14px; text-transform: uppercase; font-weight: bold;" t-attf-style="color: #{ config.secondary_color or '#2C3E50' };">Draft</span>
+                </div>
+            </div>
+        </xpath>
+        
+        <!-- PRODUCTO -->
+        <xpath expr="//div[@class='row mt32 mb32'][2]" position="replace">
+            <t t-set="config" t-value="env['report.template.config'].get_config(company.id)"/>
+            <div class="row mt32 mb32" t-attf-style="background-color: #FFF3E0; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 2px solid #{ config.primary_color or '#FF6B00' };">
+                <div class="col-3">
+                    <strong t-attf-style="color: #{ config.primary_color or '#FF6B00' };">Producto:</strong><br/>
+                    <span t-field="o.product_id" style="font-size: 14px; font-weight: bold;">Laptop Model X</span>
+                </div>
+                <div class="col-3">
+                    <strong t-attf-style="color: #{ config.primary_color or '#FF6B00' };">Cantidad:</strong><br/>
+                    <span t-field="o.product_qty" style="font-size: 16px; font-weight: bold;" t-attf-style="color: #{ config.secondary_color or '#2C3E50' };">100</span>
+                    <span t-field="o.product_uom_id.name" groups="uom.group_uom" style="font-size: 14px;"> Units</span>
+                </div>
+                <div class="col-3" t-if="o.lot_producing_id">
+                    <strong t-attf-style="color: #{ config.primary_color or '#FF6B00' };">Lote:</strong><br/>
+                    <span t-field="o.lot_producing_id" style="font-size: 14px; font-weight: bold;">LOT-001</span>
+                </div>
+                <div class="col-3" t-if="o.product_id.barcode">
+                    <strong t-attf-style="color: #{ config.primary_color or '#FF6B00' };">Código Barras:</strong><br/>
+                    <span t-field="o.product_id.barcode" t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:100%;height:35px'}" style="font-size: 12px;">123456789</span>
+                </div>
+            </div>
+        </xpath>
+        
+        <!-- TÍTULO OPERACIONES -->
+        <xpath expr="//h3" position="replace">
+            <t t-set="config" t-value="env['report.template.config'].get_config(company.id)"/>
+            <h3 t-attf-style="background-color: #{ config.primary_color or '#FF6B00' }; color: white; padding: 15px; margin: 30px 0 20px 0; border-radius: 5px; text-transform: uppercase; font-weight: bold;">
+                <t t-if="o.state == 'done'">✓ Operaciones Completadas</t>
+                <t t-elif="o.is_planned">📋 Operaciones Planificadas</t>
+                <t t-else="">⚙️ Operaciones</t>
+            </h3>
+        </xpath>
+        
+    </template>
+
+</odoo>

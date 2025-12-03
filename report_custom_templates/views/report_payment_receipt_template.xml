@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- PLANTILLA DINÁMICA PARA RECIBOS DE PAGO CON CHEQUES -->
+    <template id="report_payment_receipt_document_template" inherit_id="account.report_payment_receipt_document">
+        
+        <!-- Agregar tabla de cheques al final -->
+        <xpath expr="//table[@name='invoices']" position="after">
+            <t t-set="config" t-value="env['report.template.config'].get_config(company.id)"/>
+            
+            <!-- TABLA DE CHEQUES - Solo si está habilitado -->
+            <t t-if="config.show_payment_checks and (o.l10n_latam_move_check_ids or o.l10n_latam_new_check_ids or o.move_id.line_ids)">
+                <t t-set="cheques" t-value="o.l10n_latam_move_check_ids or o.l10n_latam_new_check_ids or o.move_id.line_ids.mapped('l10n_latam_check_ids')"/>
+                <t t-if="cheques">
+                    <div class="mt-5 mb-4">
+                        <h4 t-attf-style="color: #{ config.primary_color or '#FF6B00' };"><strong>Cheques Utilizados</strong></h4>
+                        <table class="table table-bordered table-sm" t-attf-style="border: 2px solid #{ config.primary_color or '#FF6B00' };">
+                            <thead t-attf-style="background-color: #{ config.header_bg_color or '#f8f9fa' };">
+                                <tr>
+                                    <th class="text-center"><strong>Número de Cheque</strong></th>
+                                    <th class="text-center"><strong>Banco</strong></th>
+                                    <th class="text-center"><strong>Fecha de Pago</strong></th>
+                                    <th class="text-end"><strong>Importe</strong></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="cheques" t-as="check">
+                                    <tr>
+                                        <td class="text-center">
+                                            <span t-field="check.name">CHQ-001</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-field="check.bank_id.name" t-if="check.bank_id">BANCO XX</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-field="check.payment_date" t-options="{'widget': 'date'}" t-if="check.payment_date">2025-01-01</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-field="check.amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" t-if="check.amount">$ 1.000,00</span>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </xpath>
+        
+    </template>
+
+</odoo>
