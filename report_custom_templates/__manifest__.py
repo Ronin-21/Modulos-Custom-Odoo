@@ -19,6 +19,8 @@ Sistema centralizado para gestionar plantillas de reportes PDF:
         "sale",
         "purchase",
         "account",
+        "l10n_ar",
+        "l10n_latam_invoice_document",
         "mrp",
     ],
     "data": [
@@ -28,8 +30,10 @@ Sistema centralizado para gestionar plantillas de reportes PDF:
     # Configuración
     "views/report_template_config_view.xml",
     "views/report_template_settings_view.xml",
+    "views/account_journal_view.xml",
     
     # Templates de reportes
+    "views/report_sale_order_document.xml",
     "views/report_sale_order_template.xml",
     "views/report_mrp_order_template.xml",
     "views/report_mrp_components_template.xml",

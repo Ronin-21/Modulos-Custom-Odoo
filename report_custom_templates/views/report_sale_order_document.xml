@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ACCIÓN DEL REPORTE -->
+    <record id="action_report_saleorder_custom" model="ir.actions.report">
+        <field name="name">Presupuesto (Personalizado)</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <!-- IMPORTANTE: este es el template EXTERIOR -->
+        <field name="report_name">report_custom_templates.report_saleorder_custom_document</field>
+        <field name="report_file">report_custom_templates.report_saleorder_custom_document</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <!-- TEMPLATE EXTERIOR: CREA <html> + <main> -->
+    <template id="report_saleorder_custom_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="report_custom_templates.report_saleorder_custom_document_body"
+                   t-lang="doc.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
+
+    <!-- CUERPO DEL DOCUMENTO: USA external_layout + page -->
+    <template id="report_saleorder_custom_document_body">
+        <t t-set="config" t-value="env['report.template.config'].get_config(doc.company_id.id)"/>
+
+        <t t-call="web.external_layout">
+            <div class="page">
+
+                <!-- CABECERA DEL PRESUPUESTO -->
+                <div class="row mb-3">
+                    <div class="col-8">
+                        <!-- Nombre del cliente -->
+                        <div t-if="doc.partner_id">
+                            <h2 t-attf-style="margin: 0 0 4px 0; color: #{config.secondary_color or '#333'};">
+                                <span t-field="doc.partner_id"/>
+                            </h2>
+                        </div>
+
+                        <!-- Título del documento -->
+                        <h3 t-attf-style="margin: 0; color: #{config.primary_color or '#6f42c1'};">
+                            Presupuesto <span t-field="doc.name"/>
+                        </h3>
+                    </div>
+
+                    <div class="col-4 text-right">
+                        <div>
+                            <strong>Fecha:</strong>
+                            <span t-field="doc.date_order" t-options="{'widget': 'date'}"/>
+                        </div>
+                        <div>
+                            <strong>Vendedor:</strong>
+                            <span t-field="doc.user_id"/>
+                        </div>
+                    </div>
+                </div>
+
+                <hr t-attf-style="border-top: 3px solid #{config.primary_color or '#6f42c1'}; margin: 8px 0 16px 0;"/>
+
+                <!-- TABLA DE LÍNEAS -->
+                <table class="table table-sm o_main_table">
+                    <thead>
+                        <tr>
+                            <th>Descripción</th>
+                            <th class="text-right">Cantidad</th>
+                            <th class="text-right">Precio unitario</th>
+                            <th class="text-right">Impuestos</th>
+                            <th class="text-right">Importe</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="doc.order_line" t-as="line">
+                            <tr>
+                                <td>
+                                    <strong><span t-field="line.product_id.name"/></strong><br/>
+                                    <span t-field="line.name" style="font-size: 0.9em; color: #666;"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-field="line.product_uom_qty"/>
+                                    <span t-field="line.product_uom"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-field="line.price_unit"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-esc="', '.join(map(lambda x: x.name, line.tax_id))"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-field="line.price_subtotal"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <!-- TOTALES -->
+                <div class="row mt-4">
+                    <div class="col-7"></div>
+                    <div class="col-5">
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Subtotal</strong></td>
+                                <td class="text-right">
+                                    <span t-field="doc.amount_untaxed"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Impuestos</strong></td>
+                                <td class="text-right">
+                                    <span t-field="doc.amount_tax"/>
+                                </td>
+                            </tr>
+                            <tr style="border-top: 2px solid #333;">
+                                <td><strong>Total</strong></td>
+                                <td class="text-right">
+                                    <strong><span t-field="doc.amount_total"/></strong>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>
