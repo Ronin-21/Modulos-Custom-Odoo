@@ -1,56 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- VISTA DE CONFIGURACIÓN EN SETTINGS -->
+    <!-- VISTA EN AJUSTES GENERALES -->
     <record id="res_config_settings_view_report_templates" model="ir.ui.view">
         <field name="name">res.config.settings.report.templates</field>
         <field name="model">res.config.settings</field>
-
-        <!-- Vista base estándar de Ajustes -->
         <field name="inherit_id" ref="base.res_config_settings_view_form"/>
-
         <field name="arch" type="xml">
-            <!-- Patrón Odoo 17/18: insertar un <app> dentro del <form> -->
             <xpath expr="//form" position="inside">
                 <app string="Plantillas de Reportes"
                      data-string="Plantillas de Reportes"
-                     icon="fa-file-pdf-o"
-                     name="report_templates_settings">
-
-                    <!-- CONFIGURACIÓN GENERAL -->
-                    <block title="Configuración General" name="general_settings">
-                        <setting>
-                            <field name="report_logo_text" placeholder="PM, EMPRESA, etc."/>
-                            <div class="text-muted">
-                                Texto que aparece como logo en los reportes.
-                            </div>
-                        </setting>
-                    </block>
+                     name="report_templates_app">
 
                     <!-- COLORES -->
-                    <block title="Colores" name="color_settings">
+                    <block title="Colores y estilo" name="colors_block">
+                        <setting>
+                            <field name="report_logo_text"/>
+                            <div class="text-muted">
+                                Texto corto para usar como logo en la cabecera de los reportes.
+                            </div>
+                        </setting>
                         <setting>
                             <field name="report_primary_color" widget="color"/>
                             <div class="text-muted">
-                                Color principal para headers y elementos destacados.
+                                Color primario para encabezados.
                             </div>
                         </setting>
                         <setting>
                             <field name="report_secondary_color" widget="color"/>
                             <div class="text-muted">
-                                Color para títulos y fondos secundarios.
+                                Color secundario para títulos.
                             </div>
                         </setting>
                         <setting>
                             <field name="report_header_bg_color" widget="color"/>
                             <div class="text-muted">
-                                Color de fondo para headers de información.
+                                Color de fondo de cuadros de información.
                             </div>
                         </setting>
                         <setting>
                             <field name="report_accent_color" widget="color"/>
                             <div class="text-muted">
-                                Color de acento para elementos secundarios.
+                                Color de acento para pequeños detalles.
                             </div>
                         </setting>
                     </block>
@@ -66,23 +57,23 @@
                         <setting>
                             <field name="report_mrp_template"/>
                             <div class="text-muted">
-                                Selecciona el diseño para reportes de manufactura.
+                                Selecciona el diseño para las órdenes de manufactura.
                             </div>
                         </setting>
                     </block>
 
                     <!-- VENTAS -->
-                    <block title="Órdenes de Venta" name="sale_settings">
+                    <block title="Órdenes de Venta / Cotizaciones" name="sale_settings">
                         <setting>
                             <field name="report_enable_sale"/>
                             <div class="text-muted">
-                                Activar plantillas personalizadas para ventas.
+                                Activar cabecera personalizada para cotizaciones y pedidos.
                             </div>
                         </setting>
-                            <setting>
-                            <field name="report_sale_template"/>
+                        <setting>
+                            <field name="report_sale_logo_mode"/>
                             <div class="text-muted">
-                                Selecciona el diseño para reportes de ventas.
+                                Elegí si el encabezado usa el logo de imagen de la empresa o el texto configurado.
                             </div>
                         </setting>
                     </block>
@@ -98,7 +89,7 @@
                         <setting>
                             <field name="report_purchase_template"/>
                             <div class="text-muted">
-                                Selecciona el diseño para reportes de compras.
+                                Selecciona el diseño para las órdenes de compra.
                             </div>
                         </setting>
                     </block>
@@ -114,7 +105,7 @@
                         <setting>
                             <field name="report_show_payment_checks"/>
                             <div class="text-muted">
-                                Mostrar tabla detallada de cheques en recibos.
+                                Mostrar tabla detallada de cheques en los recibos.
                             </div>
                         </setting>
                     </block>

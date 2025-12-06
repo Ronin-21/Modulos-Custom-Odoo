@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Template para FACTURAS: ocultar datos fiscales SOLO si el diario lo indica -->
+    <template id="report_invoice_document_clean" inherit_id="l10n_ar.report_invoice_document">
+        
+        <!-- Ocultar el bloque de informaciones SOLO si no es fiscal -->
+        <div id="informations" position="attributes">
+            <attribute name="t-if">o.journal_id.show_fiscal_data</attribute>
+        </div>
+        
+        <!-- Ocultar QR SOLO si no es fiscal -->
+        <div id="qrcode" position="attributes">
+            <attribute name="t-if">o.journal_id.show_fiscal_data</attribute>
+        </div>
+        
+        <!-- Ocultar comentarios SOLO si no es fiscal -->
+        <div name="comment" position="attributes">
+            <attribute name="t-if">o.journal_id.show_fiscal_data</attribute>
+        </div>
+        
+    </template>
+
+</odoo>
