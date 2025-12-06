@@ -30,10 +30,10 @@ Sistema centralizado para gestionar plantillas de reportes PDF:
     # Configuración
     "views/report_template_config_view.xml",
     "views/report_template_settings_view.xml",
+        
+    # Templates específicos
     "views/report_invoice_template.xml",
     "views/account_journal_view.xml",
-    
-    # Templates de reportes
     "views/report_sale_order_template.xml",
     "views/report_mrp_order_template.xml",
     "views/report_mrp_components_template.xml",

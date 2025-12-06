@@ -1,23 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- Template para FACTURAS: ocultar datos fiscales SOLO si el diario lo indica -->
+
+    <!-- PERSONALIZACIÓN PARA FACTURAS -->
     <template id="report_invoice_document_clean" inherit_id="l10n_ar.report_invoice_document">
         
-        <!-- Ocultar el bloque de informaciones SOLO si no es fiscal -->
-        <div id="informations" position="attributes">
-            <attribute name="t-if">o.journal_id.show_fiscal_data</attribute>
-        </div>
+        <!-- ============================================ -->
+        <!-- 1. OCULTAR DATOS FISCALES si no es fiscal   -->
+        <!-- ============================================ -->
         
-        <!-- Ocultar QR SOLO si no es fiscal -->
-        <div id="qrcode" position="attributes">
+        <xpath expr="//div[@id='informations']" position="attributes">
             <attribute name="t-if">o.journal_id.show_fiscal_data</attribute>
-        </div>
+        </xpath>
         
-        <!-- Ocultar comentarios SOLO si no es fiscal -->
-        <div name="comment" position="attributes">
+        <xpath expr="//div[@id='qrcode']" position="attributes">
             <attribute name="t-if">o.journal_id.show_fiscal_data</attribute>
-        </div>
+        </xpath>
         
+        <xpath expr="//div[@name='comment']" position="attributes">
+            <attribute name="t-if">o.journal_id.show_fiscal_data</attribute>
+        </xpath>
+
+        <!-- ============================================ -->
+        <!-- 2. AGREGAR TÍTULO PARA TODAS LAS FACTURAS   -->
+        <!-- ============================================ -->
+        
+        <xpath expr="//div[@id='informations']" position="before">
+            <t t-set="config" t-value="env['report.template.config'].get_config(o.company_id.id)"/>
+            
+            <!-- TÍTULO PARA FACTURAS CON DATOS FISCALES -->
+            <t t-if="o.journal_id.show_fiscal_data">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 style="margin: 0 0 10px 0; color: #0066CC; font-size: 28px; font-weight: bold;">
+                            Factura <span t-field="o.name"/>
+                        </h2>
+                    </div>
+                </div>
+            </t>
+            
+            <!-- TÍTULO PARA FACTURAS SIN DATOS FISCALES (Factura X) -->
+            <t t-if="not o.journal_id.show_fiscal_data">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 style="margin: 0 0 10px 0;" t-attf-style="color: #{config.primary_color or '#FF6B55'}; font-size: 28px; font-weight: bold;">
+                            Factura <span t-field="o.name"/>
+                        </h2>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+
     </template>
 
 </odoo>

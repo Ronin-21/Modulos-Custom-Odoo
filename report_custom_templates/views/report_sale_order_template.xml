@@ -1,36 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- SOLO PARA SALE.ORDER / COMPRAS / PAGOS / FACTURAS X -->
+    <!-- PERSONALIZACIÓN DEL HEADER PARA DISTINTOS DOCUMENTOS -->
     <template id="external_layout_wave_sale_clean" inherit_id="web.external_layout_wave">
 
-        <!-- Reemplazamos solo el header principal -->
+        <!-- Reemplazamos el header principal -->
         <xpath expr="//div[@class='d-flex justify-content-between']" position="replace">
+            
+            <!-- Cargamos la config al inicio -->
+            <t t-set="config" t-value="env['report.template.config'].get_config(company.id)"/>
+            
             <div class="d-flex justify-content-between">
 
-                <!-- 1) Cotizaciones, Purchase Order y Payments CON datos fiscales -->
-                <t t-if="(o and o._name == 'sale.order') or (o and o._name == 'account.payment' and o.journal_id.show_fiscal_data) or (o and o._name == 'purchase.order')">
-
-                    <!-- Configuración de nuestro módulo -->
-                    <t t-set="config" t-value="env['report.template.config'].get_config(company.id)"/>
-
-                    <!-- Header: logo imagen o texto + tagline -->
+                <!-- CASO 1: PRESUPUESTOS (sale.order) -->
+                <t t-if="o and o._name == 'sale.order'">
                     <div>
-                        <!-- Logo por TEXTO si está configurado -->
-                        <t t-if="config and config.sale_logo_mode == 'text'">
-                            <h2 style="margin:0; padding:0;">
-                                <t t-esc="(config and config.logo_text) or company.name"/>
+                        <!-- Modo TEXTO -->
+                        <t t-if="config and config.enable_sale_templates and config.sale_logo_mode == 'text'">
+                            <h2 style="margin:0; padding:0;" t-attf-style="color: #{config.primary_color or '#FF6B55'}; font-size: 42px; font-weight: bold;">
+                                <t t-esc="config.logo_text or company.name"/>
                             </h2>
                         </t>
-                        <!-- Si no, logo imagen o nombre de la empresa -->
+                        <!-- Modo IMAGEN -->
                         <t t-else="">
-                            <img t-if="company.logo" class="o_company_logo mb-2"
-                                 t-att-src="image_data_uri(company.logo)" alt="Logo"/>
-                            <t t-else="">
-                                <h2 style="margin:0; padding:0;">
-                                    <t t-esc="company.name"/>
-                                </h2>
-                            </t>
+                            <img t-if="company.logo" 
+                                 class="o_company_logo mb-2"
+                                 t-att-src="image_data_uri(company.logo)" 
+                                 alt="Logo"/>
+                            <h2 t-else="" style="margin:0; padding:0;">
+                                <t t-esc="company.name"/>
+                            </h2>
                         </t>
 
                         <div t-if="company.report_header"
@@ -40,14 +39,12 @@
                         </div>
                     </div>
 
-                    <!-- Bloque derecho: datos de empresa (igual que wave original) -->
+                    <!-- Datos de empresa (derecha) -->
                     <div name="company_address" class="w-50 text-end">
                         <ul class="list-unstyled" name="company_address_list">
                             <li t-if="company.is_company_details_empty">
                                 <span t-field="company.partner_id"
-                                      t-options="{'widget': 'contact',
-                                                  'fields': ['address', 'name'],
-                                                  'no_marker': true}"/>
+                                      t-options="{'widget': 'contact', 'fields': ['address', 'name'], 'no_marker': true}"/>
                             </li>
                             <li t-else="">
                                 <span t-field="company.company_details"/>
@@ -60,46 +57,131 @@
                     </div>
                 </t>
 
-                <!-- 2) FACTURA X: account.move SIN datos fiscales -->
+                <!-- CASO 2: FACTURAS SIN DATOS FISCALES -->
                 <t t-elif="o and o._name == 'account.move' and not o.journal_id.show_fiscal_data">
-                    <t t-set="config" t-value="env['report.template.config'].get_config(company.id)"/>
                     <div>
-                        <h2 style="margin:0; padding:0;">
-                            <t t-esc="(config and config.logo_text) or company.name or 'PM'"/>
+                        <h2 style="margin:0; padding:0;" t-attf-style="color: #{config.primary_color or '#FF6B55'}; font-size: 42px; font-weight: bold;">
+                            <t t-esc="config.logo_text or company.name or 'AI'"/>
                         </h2>
                     </div>
-                    <div class="w-50 text-end"></div>
+                    <!-- VACÍO: no mostrar dirección -->
+                    <div name="company_address" class="w-50 text-end">
+                    </div>
                 </t>
 
-                <!-- 3) PAYMENT X: account.payment SIN datos fiscales -->
+                <!-- CASO 3: PAGOS CON DATOS FISCALES -->
+                <t t-elif="o and o._name == 'account.payment' and o.journal_id.show_fiscal_data">
+                    <div>
+                        <img t-if="company.logo" 
+                             class="o_company_logo mb-2"
+                             t-att-src="image_data_uri(company.logo)" 
+                             alt="Logo"/>
+                        <div t-if="company.report_header"
+                             t-field="company.report_header"
+                             class="o_company_tagline fw-bold">
+                            Company tagline
+                        </div>
+                    </div>
+                    <div name="company_address" class="w-50 text-end">
+                        <ul class="list-unstyled" name="company_address_list">
+                            <li t-if="company.is_company_details_empty">
+                                <span t-field="company.partner_id"
+                                      t-options="{'widget': 'contact', 'fields': ['address', 'name'], 'no_marker': true}"/>
+                            </li>
+                            <li t-else="">
+                                <span t-field="company.company_details"/>
+                            </li>
+                            <li t-if="forced_vat">
+                                <t t-esc="company.country_id.vat_label or 'Tax ID'">Tax ID</t>:
+                                <span t-esc="forced_vat">US12345671</span>
+                            </li>
+                        </ul>
+                    </div>
+                </t>
+
+                <!-- CASO 4: PAGOS SIN DATOS FISCALES -->
                 <t t-elif="o and o._name == 'account.payment' and not o.journal_id.show_fiscal_data">
-                    <t t-set="config" t-value="env['report.template.config'].get_config(company.id)"/>
                     <div>
-                        <h2 style="margin:0; padding:0;">
-                            <t t-esc="(config and config.logo_text) or company.name or 'PM'"/>
+                        <h2 style="margin:0; padding:0;" t-attf-style="color: #{config.primary_color or '#FF6B55'}; font-size: 42px; font-weight: bold;">
+                            <t t-esc="config.logo_text or company.name or 'AI'"/>
                         </h2>
                     </div>
-                    <div class="w-50 text-end"></div>
+                    <!-- VACÍO: no mostrar dirección -->
+                    <div name="company_address" class="w-50 text-end">
+                    </div>
                 </t>
 
-                <!-- 4) TODO LO DEMÁS (incluida FACTURA FISCAL):
-                        devolvemos el contenido original del header wave -->
+                <!-- CASO 5: PURCHASE ORDERS -->
+                <t t-elif="o and o._name == 'purchase.order'">
+                    <div>
+                        <img t-if="company.logo" 
+                             class="o_company_logo mb-2"
+                             t-att-src="image_data_uri(company.logo)" 
+                             alt="Logo"/>
+                        <div t-if="company.report_header"
+                             t-field="company.report_header"
+                             class="o_company_tagline fw-bold">
+                            Company tagline
+                        </div>
+                    </div>
+                    <div name="company_address" class="w-50 text-end">
+                        <ul class="list-unstyled" name="company_address_list">
+                            <li t-if="company.is_company_details_empty">
+                                <span t-field="company.partner_id"
+                                      t-options="{'widget': 'contact', 'fields': ['address', 'name'], 'no_marker': true}"/>
+                            </li>
+                            <li t-else="">
+                                <span t-field="company.company_details"/>
+                            </li>
+                            <li t-if="forced_vat">
+                                <t t-esc="company.country_id.vat_label or 'Tax ID'">Tax ID</t>:
+                                <span t-esc="forced_vat">US12345671</span>
+                            </li>
+                        </ul>
+                    </div>
+                </t>
+
+                <!-- CASO DEFAULT: FACTURAS FISCALES Y OTROS -->
                 <t t-else="">
-                    <t t-raw="0"/>
+                    <!-- HEADER ORIGINAL DE ODOO (para facturas fiscales) -->
+                    <div>
+                        <img t-if="company.logo" 
+                             class="o_company_logo mb-2"
+                             t-att-src="image_data_uri(company.logo)" 
+                             alt="Logo"/>
+                        <div t-if="company.report_header"
+                             t-field="company.report_header"
+                             class="o_company_tagline fw-bold">
+                            Company tagline
+                        </div>
+                    </div>
+                    <div name="company_address" class="w-50 text-end">
+                        <ul class="list-unstyled" name="company_address_list">
+                            <li t-if="company.is_company_details_empty">
+                                <span t-field="company.partner_id"
+                                      t-options="{'widget': 'contact', 'fields': ['address', 'name'], 'no_marker': true}"/>
+                            </li>
+                            <li t-else="">
+                                <span t-field="company.company_details"/>
+                            </li>
+                            <li t-if="forced_vat">
+                                <t t-esc="company.country_id.vat_label or 'Tax ID'">Tax ID</t>:
+                                <span t-esc="forced_vat">US12345671</span>
+                            </li>
+                        </ul>
+                    </div>
                 </t>
 
             </div>
         </xpath>
 
-        <!-- Dirección simplificada solo para sale.order -->
+        <!-- Dirección simplificada para presupuestos -->
         <xpath expr="//t[@t-call='web.address_layout']" position="replace">
             <t t-if="o and o._name == 'sale.order'">
                 <div class="row mb-3">
                     <div class="col-auto">
                         <span t-field="o.partner_id"
-                              t-options="{'widget': 'contact',
-                                          'fields': ['name', 'address', 'phone'],
-                                          'no_marker': true}"/>
+                              t-options="{'widget': 'contact', 'fields': ['name', 'address', 'phone'], 'no_marker': true}"/>
                     </div>
                 </div>
             </t>
@@ -110,7 +192,7 @@
 
     </template>
 
-    <!-- Cambiar título de la cotización -->
+    <!-- Cambiar título de presupuestos -->
     <template id="report_saleorder_document_clean" inherit_id="sale.report_saleorder_document">
         <xpath expr="//t[@t-set='layout_document_title']" position="replace">
             <t t-set="layout_document_title">

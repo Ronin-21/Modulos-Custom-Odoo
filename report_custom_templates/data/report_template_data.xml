@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="0">
+    <data noupdate="1">  <!-- ✅ CAMBIAR A 1 -->
 
         <!-- Configuración por defecto para la empresa principal -->
         <record id="report_template_config_default" model="report.template.config">
