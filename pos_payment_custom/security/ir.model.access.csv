@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_pos_pay_adj_opt_manager,pos.payment.method.adjustment.option manager,model_pos_payment_method_adjustment_option,point_of_sale.group_pos_manager,1,1,1,1
+access_pos_pay_adj_opt_admin,pos.payment.method.adjustment.option admin,model_pos_payment_method_adjustment_option,base.group_system,1,1,1,1

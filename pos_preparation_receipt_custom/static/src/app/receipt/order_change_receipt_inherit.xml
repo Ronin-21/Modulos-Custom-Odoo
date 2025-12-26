@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!--
+        Este template se usa para las impresoras de preparación (cocina/barra):
+        - POS -> Configuración -> Impresoras de preparación
+        - Imprime cambios (New / Note / Cancelled / Cancel / Message)
+
+        Template original: point_of_sale.OrderChangeReceipt
+    -->
+    <t t-inherit="point_of_sale.OrderChangeReceipt" t-inherit-mode="extension">
+
+        <!-- Marca el receipt root para estilos (margen/padding inferior) -->
+        <xpath expr="//div[contains(@class, 'pos-receipt')]" position="attributes">
+            <attribute name="class" add=" o_prep_receipt_root"/>
+        </xpath>
+
+
+        <!-- Header -->
+        <xpath expr="//div[contains(@class, 'receipt-header')]" position="replace">
+            <div class="receipt-header text-center o_prep_receipt_header">
+                <div class="pos-receipt-title o_prep_receipt_title">
+                    <t t-if="changes.printer_name"><span><t t-esc="changes.printer_name"/></span></t>
+                </div>
+
+                <div class="o_prep_receipt_subtitle">
+                    <t t-if="changes.diningModeUpdate">
+                        <t t-if="changes.takeaway">SALÓN → PARA LLEVAR</t>
+                        <t t-else="">PARA LLEVAR → SALÓN</t>
+                    </t>
+                    <t t-else="">
+                        <t t-if="changes.takeaway">PARA LLEVAR</t>
+                        <t t-if="changes.floor_name"><span><t t-esc="changes.floor_name"/></span></t>
+                    </t>
+                </div>
+
+                <div class="o-employee-name o_prep_receipt_meta">
+                    <span><t t-esc="changes.config_name"/> · <t t-esc="changes.time"/></span>
+                    <!-- <t t-if="changes.printer_name"> · <span>Impresora: <t t-esc="changes.printer_name"/></span></t> -->
+                    <!-- <t t-if="changes.floor_name"> · <span>Salón: <t t-esc="changes.floor_name"/></span></t> -->
+                    <br/>
+                    <t t-set="mozo" t-value="changes.waiter_name or changes.employee_name"/>
+                    <span>Mozo: <t t-esc="mozo"/></span>
+                </div>
+
+                <div class="my-3 o_prep_receipt_ref">
+                    <t t-if="changes.table_name">
+                        Mesa: <strong><t t-esc="changes.table_name"/></strong>
+                    </t>
+                    <t t-if="changes.tracking_number">
+                        <span class="mx-2">·</span>
+                        N°: <strong><t t-esc="changes.tracking_number"/></strong>
+                    </t>
+                    <t t-elif="changes.order_uid_short">
+                        <span class="mx-2">·</span>
+                        Orden: <strong><t t-esc="changes.order_uid_short"/></strong>
+                    </t>
+                </div>
+            </div>
+        </xpath>
+
+        <!-- Baja tamaño base + agrega interlineado y separación entre ítems -->
+        <xpath expr="//div[@t-foreach='changedlines' and contains(@style,'font-size')]" position="attributes">
+            <attribute name="style">font-size: 100%; line-height: 1.5;</attribute>
+        </xpath>
+
+        <!-- Agrega un “espaciador” al final para margen inferior real -->
+        <xpath expr="//div[contains(@class,'pos-receipt')][1]" position="inside">
+            <div class="o_prep_receipt_bottom_spacer"/>
+        </xpath>
+
+        <!-- Título operacional (New / Note / Cancelled / Cancel / Message) -->
+        <xpath expr="//div[@t-esc='operational_title']" position="replace">
+            <div class="pos-receipt-title text-center o_prep_receipt_operation">
+                <t t-if="operational_title == 'New'">NUEVO</t>
+                <t t-elif="operational_title == 'Note'">NOTA</t>
+                <t t-elif="operational_title == 'Cancelled'">ANULADO</t>
+                <t t-elif="operational_title == 'Cancel'">ANULACIÓN TOTAL</t>
+                <t t-elif="operational_title == 'Message'">MENSAJE</t>
+                <t t-else=""><t t-esc="operational_title"/></t>
+            </div>
+        </xpath>
+
+        <!-- Etiquetas "Table / By" no existen ya, pero mantenemos el body como está.
+             Si querés tocar líneas, acá es donde conviene hacerlo (se imprimen `changedlines`). -->
+    </t>
+
+</templates>

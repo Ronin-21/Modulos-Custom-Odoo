@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_pos_config_form_branding" model="ir.ui.view">
+        <field name="name">pos.config.form.branding</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Insertamos una sección nueva dentro del sheet del PdV -->
+            <xpath expr="//form/sheet" position="inside">
+
+                <group string="PERSONALIZACIÓN DEL POS" name="branding_container">
+                    <!-- Fila principal: 4 columnas -->
+                    <!-- <group name="branding_group" col="4"> -->
+
+                        <!-- Columna 1: activar/desactivar -->
+                        <group string="Activar Personalización">
+                            <field name="use_custom_branding"/>
+                        </group>
+
+                        <!-- Columna 2: colores -->
+                        <group string="Colores del POS"
+                               modifiers="{'invisible': [['use_custom_branding', '=', False]]}">
+                            <field name="primary_color" widget="color"/>
+                            <field name="secondary_color" widget="color"/>
+                            <field name="accent_color" widget="color"/>
+                        </group>
+
+                        <!-- Columna 3: logo y texto -->
+                        <group string="Logo y Branding"
+                               modifiers="{'invisible': [['use_custom_branding', '=', False]]}">
+                            <field name="custom_logo" widget="image" class="oe_avatar"/>
+                            <field name="custom_logo_filename" invisible="1"/>
+                            <field name="branding_text" placeholder="Ej: ALDERETE, Sucursal Centro"/>
+                        </group>
+
+                        <!-- Columna 4: fondo -->
+                        <group string="Fondo Personalizado"
+                               modifiers="{'invisible': [['use_custom_branding', '=', False]]}">
+                            <field name="custom_background" widget="image"/>
+                            <field name="custom_background_filename" invisible="1"/>
+                        </group>
+                    <!-- </group> -->
+
+                </group>
+                <!-- Fila de nota -->
+                <group name="branding_note"
+                       modifiers="{'invisible': [['use_custom_branding', '=', False]]}">
+                    <div class="alert alert-info" role="alert">
+                        <strong>Nota:</strong>
+                        Los cambios se aplicarán la próxima vez que se abra una sesión de POS.
+                        Para ver los cambios inmediatamente, cierre y vuelva a abrir el POS.
+                    </div>
+                </group>
+
+            </xpath>
+        </field>
+    </record>
+</odoo>

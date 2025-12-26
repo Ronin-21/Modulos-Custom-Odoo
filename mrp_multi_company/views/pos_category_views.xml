@@ -1,0 +1,83 @@
+<odoo>
+    <!-- Formulario de Categoría POS: agregar campo Empresa -->
+    <record id="view_pos_category_form_inherit_company" model="ir.ui.view">
+        <field name="name">pos.category.form.inherit.company</field>
+        <field name="model">pos.category</field>
+        <field name="inherit_id" ref="point_of_sale.product_pos_category_form_view"/>
+        <field name="arch" type="xml">
+            <field name="parent_id" position="after">
+                <field name="company_id" 
+                       options="{'no_create': True}"
+                       string="Empresa"/>
+                <field name="allowed_company_ids"
+                       widget="many2many_tags"
+                       options="{'no_create': True}"
+                       string="Empresas / Sucursales relacionadas"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Lista de Categorías POS: columnas Empresa y Empresas relacionadas -->
+    <record id="view_pos_category_tree_inherit_companies" model="ir.ui.view">
+        <field name="name">pos.category.tree.inherit.companies</field>
+        <field name="model">pos.category</field>
+        <field name="inherit_id" ref="point_of_sale.product_pos_category_tree_view"/>
+        <field name="arch" type="xml">
+            <!-- Insertamos las columnas después del primer campo -->
+            <xpath expr="//field[@name='display_name']" position="after">
+                <field name="company_id"
+                    optional="show"
+                    string="Empresa"/>
+                <field name="allowed_company_ids"
+                    widget="many2many_tags"
+                    optional="show"
+                    string="Empresas / Sucursales relacionadas"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda de Categorías POS: filtro por empresa -->
+    <record id="view_pos_category_search_company" model="ir.ui.view">
+        <field name="name">pos.category.search.company</field>
+        <field name="model">pos.category</field>
+        <field name="arch" type="xml">
+            <search string="Categorías POS">
+                <field name="name"/>
+                <field name="parent_id"/>
+                <field name="company_id"/>
+                <field name="allowed_company_ids"/>
+                <separator/>
+                <filter name="with_company" 
+                        string="Con empresa asignada"
+                        domain="[('company_id', '!=', False)]"/>
+                <filter name="without_company" 
+                        string="Sin empresa (globales)"
+                        domain="[('company_id', '=', False)]"/>
+                <filter name="with_allowed_companies"
+                        string="Globales con relacionadas"
+                        domain="[('company_id', '=', False), ('allowed_company_ids', '!=', False)]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_company" 
+                            string="Empresa" 
+                            context="{'group_by': 'company_id'}"/>
+                    <filter name="group_parent" 
+                            string="Categoría Padre" 
+                            context="{'group_by': 'parent_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para abrir categorías POS con la búsqueda personalizada -->
+    <record id="product_pos_category_action_company" model="ir.actions.act_window">
+        <field name="name">Categorías de PdV</field>
+        <field name="res_model">pos.category</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_pos_category_search_company"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crear una nueva categoría de PdV
+            </p>
+        </field>
+    </record>
+</odoo>

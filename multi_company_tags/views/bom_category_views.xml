@@ -1,0 +1,47 @@
+<odoo>
+    <!-- Formulario de BoM: agregar campo de Empresas / Sucursales relacionadas -->
+    <record id="view_mrp_bom_form_multi_company" model="ir.ui.view">
+        <field name="name">mrp.bom.form.multi.company.simple</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+        <field name="arch" type="xml">
+            <field name="company_id" position="after">
+                <field name="allowed_company_ids"
+                       widget="many2many_tags"
+                       string="Empresas / Sucursales relacionadas"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- LISTA de BoM: columna con Empresas / Sucursales relacionadas -->
+    <record id="view_mrp_bom_tree_multi_company" model="ir.ui.view">
+        <field name="name">mrp.bom.tree.multi.company</field>
+        <field name="model">mrp.bom</field>
+        <!-- Vista árbol estándar de BoM -->
+        <field name="inherit_id" ref="mrp.mrp_bom_tree_view"/>
+        <field name="arch" type="xml">
+            <!-- Insertamos la columna después del código de BoM -->
+            <field name="code" position="after">
+                <field name="allowed_company_ids"
+                       widget="many2many_tags"
+                       optional="show"
+                       string="Empresas / Sucursales relacionadas"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda de BoM: filtro "Solo relacionadas" -->
+    <record id="view_mrp_bom_search_multi_company" model="ir.ui.view">
+        <field name="name">mrp.bom.search.multi.company</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.view_mrp_bom_filter"/>
+        <field name="arch" type="xml">
+            <!-- Añadimos el filtro después del filtro por producto -->
+            <xpath expr="//filter[@name='product']" position="after">
+                <filter name="related_companies"
+                        string="Solo relacionadas"
+                        domain="[('allowed_company_ids', '!=', False)]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,17 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <record id="pos_payment_method_form_cash_adjustment" model="ir.ui.view">
-        <field name="name">pos.payment.method.form.cash.adjustment</field>
+    <record id="pos_payment_method_form_adjustment" model="ir.ui.view">
+        <field name="name">pos.payment.method.form.adjustment</field>
         <field name="model">pos.payment.method</field>
         <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//group" position="inside">
-                <group string="Descuentos y Recargos" col="2">
+
+            <xpath expr="//group[@name='Payment methods']" position="after">
+                <group string="Descuentos y Recargos" name="payment_adjustments" col="2"
+                       groups="point_of_sale.group_pos_user">
                     <field name="apply_adjustment"/>
                     <field name="adjustment_type" invisible="not apply_adjustment"/>
-                    <field name="adjustment_value" invisible="not apply_adjustment"/>
+                    <field name="adjustment_value" string="Porcentaje (%)" invisible="not apply_adjustment"/>
+
+                    <field name="adjustment_product_id"
+                           invisible="not apply_adjustment or adjustment_type != 'surcharge'"/>
+
+                    <field name="adjustment_option_ids"
+                           invisible="not apply_adjustment or adjustment_type != 'surcharge'">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="name"/>
+                            <field name="percent"/>
+                            <field name="active"/>
+                        </list>
+                    </field>
                 </group>
             </xpath>
+
         </field>
     </record>
 </odoo>

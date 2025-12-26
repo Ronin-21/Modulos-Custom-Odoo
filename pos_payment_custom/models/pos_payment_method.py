@@ -1,81 +1,88 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
+
 class PosPaymentMethod(models.Model):
-    _inherit = 'pos.payment.method'
+    _inherit = "pos.payment.method"
 
     apply_adjustment = fields.Boolean(
         string="Aplicar descuento/recargo",
-        help="Permite aplicar un descuento o recargo para el método de pago."
+        help="Permite aplicar un ajuste al usar este método de pago.",
     )
+
     adjustment_type = fields.Selection(
         [
-            ('discount', 'Descuento'),
-            ('surcharge', 'Recargo')
+            ("discount", "Descuento"),
+            ("surcharge", "Recargo"),
         ],
         string="Tipo de ajuste",
-        default='discount'
+        default="discount",
     )
+
     adjustment_value = fields.Float(
-        string="Valor de ajuste (%)",
-        help="Porcentaje de descuento o recargo aplicado sobre el total.",
-        default=0.0
+        string="Porcentaje (%)",
+        help="Porcentaje (0-100). Para recargos con opciones, este valor puede usarse como default si no hay opciones.",
+        default=0.0,
     )
 
-    @api.constrains('adjustment_value')
-    def _check_adjustment_values(self):
-        for record in self:
-            if record.adjustment_value < 0:
-                raise ValidationError("El valor del ajuste no puede ser negativo.")
-            if record.adjustment_value > 100:
-                raise ValidationError("El valor del ajuste no puede ser mayor a 100%.")
+    adjustment_product_id = fields.Many2one(
+        "product.product",
+        string="Producto de recargo",
+        help="Producto (idealmente Servicio) que se agregará como línea cuando el método tenga Recargo.",
+        domain=[("available_in_pos", "=", True)],
+    )
 
-    def calculate_adjustment(self, amount):
-        """
-        Calcula el descuento o recargo a aplicar
-        
-        Args:
-            amount (float): Monto sobre el cual calcular el ajuste
-            
-        Returns:
-            dict: {
-                'adjustment_amount': float,
-                'final_amount': float,
-                'adjustment_type': str,
-                'adjustment_percent': float
-            }
-        """
-        self.ensure_one()
-        
-        result = {
-            'adjustment_amount': 0.0,
-            'final_amount': amount,
-            'adjustment_type': self.adjustment_type,
-            'adjustment_percent': 0.0
-        }
-        
-        # No aplicar si está desactivado
-        if not self.apply_adjustment or self.adjustment_value == 0.0:
-            return result
-        
-        # Calcular el ajuste
-        adjustment_amount = amount * (self.adjustment_value / 100)
-        
-        result['adjustment_percent'] = self.adjustment_value
-        result['adjustment_amount'] = adjustment_amount
-        
-        if self.adjustment_type == 'discount':
-            result['final_amount'] = amount - adjustment_amount
-        else:  # surcharge
-            result['final_amount'] = amount + adjustment_amount
-        
-        return result
+    adjustment_option_ids = fields.One2many(
+        "pos.payment.method.adjustment.option",
+        "payment_method_id",
+        string="Opciones de recargo",
+        help="Opciones de recargo (ej: Visa 3 cuotas 15%).",
+    )
 
-    def apply_adjustment_to_order(self, order, amount):
-        """
-        Aplica el ajuste a una orden del POS
-        Útil cuando necesites integrar directamente con órdenes
-        """
-        self.ensure_one()
-        adjustment_info = self.calculate_adjustment(amount)
-        return adjustment_info
+    # Esto viaja al POS sin tener que cargar otro modelo:
+    adjustment_options = fields.Json(
+        string="Opciones (POS)",
+        compute="_compute_adjustment_options",
+        readonly=True,
+    )
+
+    @api.depends("adjustment_option_ids", "adjustment_option_ids.name", "adjustment_option_ids.percent",
+                 "adjustment_option_ids.active", "adjustment_option_ids.sequence")
+    def _compute_adjustment_options(self):
+        for m in self:
+            opts = m.adjustment_option_ids.filtered(lambda o: o.active).sorted("sequence")
+            m.adjustment_options = [
+                {"id": o.id, "name": o.name, "percent": o.percent}
+                for o in opts
+            ]
+
+    @api.constrains("apply_adjustment", "adjustment_type", "adjustment_value", "adjustment_product_id")
+    def _check_adjustment(self):
+        for m in self:
+            if not m.apply_adjustment:
+                continue
+
+            if m.adjustment_value < 0 or m.adjustment_value > 100:
+                raise ValidationError("El porcentaje debe estar entre 0 y 100.")
+
+            # Si es recargo, debe haber producto de recargo
+            if m.adjustment_type == "surcharge" and not m.adjustment_product_id:
+                raise ValidationError("Si el método tiene Recargo, debe seleccionar un Producto de recargo.")
+
+    def _load_pos_data_fields(self, config_id):
+        fields_list = []
+        parent = super(PosPaymentMethod, self)
+        if hasattr(parent, "_load_pos_data_fields"):
+            fields_list = parent._load_pos_data_fields(config_id)
+
+        extra = [
+            "apply_adjustment",
+            "adjustment_type",
+            "adjustment_value",
+            "adjustment_product_id",
+            "adjustment_options",
+        ]
+        for f in extra:
+            if f not in fields_list:
+                fields_list.append(f)
+        return fields_list

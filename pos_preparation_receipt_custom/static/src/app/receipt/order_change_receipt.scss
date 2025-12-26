@@ -1,0 +1,30 @@
+.o_prep_receipt_header .o_prep_receipt_title {
+  font-size: 140%;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.o_prep_receipt_header .o_prep_receipt_subtitle {
+  font-size: 90%;
+  margin-top: 2px;
+  margin-bottom: 6px;
+}
+.o_prep_receipt_header .o_prep_receipt_meta {
+  font-size: 80%;
+}
+.o_prep_receipt_header .o_prep_receipt_ref {
+  font-size: 120%;
+}
+.o_prep_receipt_operation {
+  margin-top: 8px;
+}
+
+/* Más margen abajo para que no quede pegado al corte */
+.o_prep_receipt_root {
+  margin-bottom: 10mm;
+}
+
+.o_prep_receipt_bottom_spacer {
+  display: block;
+  height: 10mm;
+  min-height: 50px;
+}

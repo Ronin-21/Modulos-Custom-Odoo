@@ -201,5 +201,85 @@
             </t>
         </xpath>
     </template>
-
+    <!-- ============================================ -->
+    <!-- INYECTAR COLORES PERSONALIZADOS CON CSS     -->
+    <!-- ============================================ -->
+    
+    <template id="report_saleorder_custom_colors" inherit_id="sale.report_saleorder_document" priority="100">
+        
+        <!-- Inyectar CSS antes del contenido -->
+        <xpath expr="//t[@t-call='web.external_layout']" position="before">
+            <t t-set="config" t-value="env['report.template.config'].get_config(doc.company_id.id)"/>
+            
+            <style type="text/css">
+                /* ================================================ */
+                /* COLORES PERSONALIZADOS PARA PRESUPUESTOS        */
+                /* ================================================ */
+                
+                /* Headers de tablas */
+                .o_main_table thead,
+                .o_main_table thead th,
+                table.table thead,
+                table.table thead th {
+                    background-color: <t t-esc="config.primary_color or '#FF6B55'"/> !important;
+                    color: white !important;
+                    border-color: <t t-esc="config.primary_color or '#FF6B55'"/> !important;
+                }
+                
+                /* Bordes de tablas */
+                .o_main_table,
+                table.table {
+                    border: 2px solid <t t-esc="config.primary_color or '#FF6B55'"/> !important;
+                    border-radius: 5px !important;
+                }
+                
+                /* Títulos H2 */
+                .page h2,
+                h2[name='document_title'] {
+                    color: <t t-esc="config.primary_color or '#FF6B55'"/> !important;
+                }
+                
+                /* Fila de Total */
+                tr#total,
+                .o_total,
+                table tbody tr:last-child {
+                    background-color: <t t-esc="config.accent_color or '#E8F5E9'"/> !important;
+                    border-top: 3px solid <t t-esc="config.primary_color or '#FF6B55'"/> !important;
+                    font-weight: bold !important;
+                }
+                
+                /* Fila de Subtotal */
+                tr#subtotal,
+                .o_subtotal {
+                    background-color: <t t-esc="config.header_bg_color or '#ECF0F1'"/> !important;
+                }
+                
+                /* Enlaces */
+                .page a {
+                    color: <t t-esc="config.primary_color or '#FF6B55'"/> !important;
+                }
+                
+                /* Texto destacado */
+                .text-primary,
+                strong {
+                    color: <t t-esc="config.primary_color or '#FF6B55'"/> !important;
+                }
+                
+                /* Separadores */
+                hr {
+                    border-color: <t t-esc="config.primary_color or '#FF6B55'"/> !important;
+                    border-width: 2px !important;
+                }
+                
+                /* Información adicional */
+                div[name='information_block'] {
+                    border-left: 4px solid <t t-esc="config.primary_color or '#FF6B55'"/> !important;
+                    background-color: <t t-esc="config.header_bg_color or '#ECF0F1'"/> !important;
+                    padding: 15px !important;
+                    border-radius: 5px !important;
+                }
+            </style>
+        </xpath>
+        
+    </template>
 </odoo>

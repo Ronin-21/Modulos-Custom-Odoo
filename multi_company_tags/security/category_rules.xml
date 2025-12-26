@@ -1,0 +1,59 @@
+<odoo>
+    <!--
+        Regla adicional para mrp.bom:
+
+        Muestra las BoM cuando:
+        - company_id está en las empresas del usuario  (BoM propias)
+          O
+        - allowed_company_ids contiene alguna de las empresas del usuario
+          (BoM compartidas / globales asignadas)
+
+        Esta regla se AND-ea con la regla estándar de Odoo:
+        ['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]
+
+        Resultado:
+        - BoM de empresa A -> visibles para usuarios con empresa A.
+        - BoM global (company_id False) -> solo visibles si
+          allowed_company_ids incluye la empresa del usuario.
+    -->
+    <record id="mrp_bom_global_multi_company_restriction" model="ir.rule">
+        <field name="name">BoM multi-empresa por empresas permitidas</field>
+        <field name="model_id" ref="mrp.model_mrp_bom"/>
+        <field name="domain_force">
+            ['|',
+                ('company_id', 'in', company_ids),
+                ('allowed_company_ids', 'in', company_ids)
+            ]
+        </field>
+        <field name="global" eval="True"/>
+    </record>
+
+    <!-- Lo mismo para las líneas de BoM -->
+    <record id="mrp_bom_line_global_multi_company_restriction" model="ir.rule">
+        <field name="name">Líneas BoM multi-empresa por empresas permitidas</field>
+        <field name="model_id" ref="mrp.model_mrp_bom_line"/>
+        <field name="domain_force">
+            ['|',
+                ('bom_id.company_id', 'in', company_ids),
+                ('bom_id.allowed_company_ids', 'in', company_ids)
+            ]
+        </field>
+        <field name="global" eval="True"/>
+    </record>
+
+    <!-- Regla para categorías POS por empresa -->
+    <record id="pos_category_company_rule" model="ir.rule">
+        <field name="name">POS Categorías por Empresa</field>
+        <field name="model_id" ref="point_of_sale.model_pos_category"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="global" eval="True"/>
+    </record>
+
+    <!-- Regla para categorías de Producto por empresa -->
+    <record id="product_category_company_rule" model="ir.rule">
+        <field name="name">Categorías de Producto por Empresa</field>
+        <field name="model_id" ref="product.model_product_category"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="global" eval="True"/>
+    </record>
+</odoo>

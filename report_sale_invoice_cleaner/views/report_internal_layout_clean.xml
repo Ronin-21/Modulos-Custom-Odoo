@@ -1,20 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- LAYOUT INTERNO PERSONALIZADO PARA MRP - SIN HEADER -->
-    <!-- Este layout es específico y solo se usa donde lo referenciamos explícitamente -->
-    <template id="internal_layout_mrp_clean" inherit_id="web.internal_layout">
-        
-        <!-- Ocultar el div.header completamente SIN dejar espacio -->
-        <xpath expr="//div[@class='header']" position="replace">
-            <!-- Header oculto para reportes MRP -->
-        </xpath>
-        
-        <!-- Limpiar márgenes de article -->
-        <xpath expr="//div[@class='article']" position="attributes">
-            <attribute name="style">margin: 0; padding: 0;</attribute>
-        </xpath>
-        
-    </template>
+    <!--
+        Layout interno SOLO para MRP.
+        Importante:
+        - No hereda de web.internal_layout (inherit_id = False).
+        - Registramos un template QWeb con nombre:
+          "report_sale_invoice_cleaner.internal_layout_mrp_clean"
+        - Los reportes MRP lo usan con:
+          t-call="report_sale_invoice_cleaner.internal_layout_mrp_clean"
+    -->
+    <record id="internal_layout_mrp_clean" model="ir.ui.view">
+        <field name="name">report_sale_invoice_cleaner.internal_layout_mrp_clean</field>
+        <field name="type">qweb</field>
+        <!-- MUY IMPORTANTE: sin padre, no afecta a otros layouts -->
+        <field name="inherit_id" eval="False"/>
+        <field name="arch" type="xml">
+            <t t-name="report_sale_invoice_cleaner.internal_layout_mrp_clean">
+                <!-- Usamos el layout interno estándar de Odoo -->
+                <t t-call="web.internal_layout">
+                    <!-- Aquí entra el contenido del reporte MRP -->
+                    <t t-raw="0"/>
+                </t>
+            </t>
+        </field>
+    </record>
 
 </odoo>

@@ -1,0 +1,68 @@
+<odoo>
+    <!-- Formulario de Categoría de Producto: agregar campo Empresa -->
+    <record id="view_product_category_form_inherit_company" model="ir.ui.view">
+        <field name="name">product.category.form.inherit.company</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='first']" position="inside">
+                <field name="company_id" 
+                       options="{'no_create': True}"
+                       string="Empresa"/>
+                <field name="allowed_company_ids"
+                       widget="many2many_tags"
+                       options="{'no_create': True}"
+                       string="Empresas / Sucursales relacionadas"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Lista de Categorías de Producto: columna Empresa -->
+    <record id="view_product_category_list_inherit_company" model="ir.ui.view">
+        <field name="name">product.category.list.inherit.company</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_list_view"/>
+        <field name="arch" type="xml">
+            <!-- Insertamos la columna después del primer campo -->
+            <xpath expr="//field[1]" position="after">
+                <field name="company_id" 
+                       optional="show"
+                       string="Empresa"/>
+                <field name="allowed_company_ids"
+                       widget="many2many_tags"
+                       optional="show"
+                       string="Empresas / Sucursales relacionadas"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda de Categorías de Producto: filtro por empresa -->
+    <record id="view_product_category_search_company" model="ir.ui.view">
+        <field name="name">product.category.search.company</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_search_view"/>
+        <field name="arch" type="xml">
+            <!-- Agregar filtros al final de la búsqueda existente -->
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter name="with_company" 
+                        string="Con empresa asignada"
+                        domain="[('company_id', '!=', False)]"/>
+                <filter name="without_company" 
+                        string="Sin empresa (globales)"
+                        domain="[('company_id', '=', False)]"/>
+                <filter name="with_allowed_companies"
+                        string="Globales con relacionadas"
+                        domain="[('company_id', '=', False), ('allowed_company_ids', '!=', False)]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_company" 
+                            string="Empresa" 
+                            context="{'group_by': 'company_id'}"/>
+                    <filter name="group_parent" 
+                            string="Categoría Padre" 
+                            context="{'group_by': 'parent_id'}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

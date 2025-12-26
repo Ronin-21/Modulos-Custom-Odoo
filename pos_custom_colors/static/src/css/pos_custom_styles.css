@@ -1,0 +1,337 @@
+/* ========================================
+   ESTILOS PARA DESCUENTOS Y RECARGOS
+   ======================================== */
+
+.payment-adjustment-indicator {
+  margin: 15px 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  border-left: 4px solid #007bff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.adjustment-badge {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.adjustment-badge .label {
+  font-weight: 600;
+  color: #343a40;
+}
+
+.adjustment-badge .value {
+  font-weight: 700;
+}
+
+.payment-adjustment-indicator.discount {
+  border-left-color: #28a745;
+  background-color: #e6f4ea;
+}
+
+.payment-adjustment-indicator.surcharge {
+  background-color: #fff3cd;
+  border-left: 4px solid var(--pos-secondary-color);
+}
+
+/* ========================================
+   LOGO / HEADER
+   ======================================== */
+
+/* Ocultar logo de la esquina del header (ya está en el centro/fondo) */
+/* .pos .pos-topheader .pos-branding img,
+.pos .pos-topheader img.pos-logo,
+.pos .pos-topheader .pos-logo {
+  display: none !important;
+} */
+
+.pos .pos-branding-text {
+  color: #ffffff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================
+   FONDO Y LAYOUT GENERAL
+   ======================================== */
+
+/* Fondo general del POS con colores primario/secundario y fondo opcional */
+.pos {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%),
+    var(--pos-background-image);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Fondo de la pantalla de productos (refuerza la imagen de fondo) */
+.pos .product-screen {
+  background: var(--pos-background-image);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Header del POS: usa primario/secundario */
+.pos .pos-topheader {
+  background-color: color-mix(
+    in srgb,
+    var(--pos-primary-color) 90%,
+    transparent
+  );
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================
+   PRODUCTOS (GRID)
+   ======================================== */
+
+.pos .product-screen .product-list-container {
+  padding: 10px;
+}
+
+/* Tarjeta de producto */
+.pos .product {
+  background: linear-gradient(
+    90deg,
+    var(--pos-primary-color),
+    var(--pos-secondary-color)
+  );
+  border-bottom: 7px solid transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.pos .product-content {
+  border-radius: none;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+}
+
+/* .pos .product {
+  border-radius: 10px;
+  border: 2px solid var(--pos-accent-color);
+  overflow: hidden;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+} */
+
+/* Imagen del producto: altura fija + object-fit: cover */
+/* .pos .product .product-img {
+  height: 90px;
+  max-height: 90px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} */
+
+.pos .product .product-img {
+  height: 65%;
+}
+.pos .product .product-img img {
+  width: 100%;
+  object-fit: cover;
+}
+
+/* Hover del producto: usa color de ACENTO */
+.pos .product:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 124, 0, 0.3);
+  border-bottom-color: var(--pos-accent-color);
+}
+
+.pos .product .product-name {
+  width: 100%;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Etiqueta de precio dentro de la tarjeta */
+/* .pos .product-price-tag {
+  background-color: var(--pos-primary-color);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 6px;
+} */
+
+/* ========================================
+   BOTONES DE CATEGORÍA
+   ======================================== */
+
+.pos .category-button {
+  border-radius: 999px;
+  border: none;
+  padding: 8px 14px;
+  /* background: linear-gradient(
+    135deg,
+    transparent 0%,
+    var(--pos-accent-color) 100%
+  );
+  color: #ffffff !important; */
+  justify-content: center;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+/* Hover de categorías: usa ACENTO */
+.pos .category-button:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--pos-primary-color) 30%,
+    transparent
+  ) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Activa: también usa ACENTO para marcar la categoría elegida */
+.pos .category-button.opacity-50 {
+  display: none !important;
+}
+
+/* ========================================
+   PANTALLA DE PAGO
+   ======================================== */
+
+/* .pos .payment-screen .paymentlines-container {
+  background: #ffffffee;
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pos .paymentline {
+  border-radius: 8px;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+} */
+
+
+/* Seleccionada: resalta con primario/secundario */
+/* .pos .paymentline.selected {
+  background-color: #fff3cd;
+  border: 2px solid var(--pos-secondary-color);
+} */
+
+/* ========================================
+   TECLADO NUMÉRICO
+   ======================================== */
+
+.pos .numpad {
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  margin: 8px 0 8px 0 !important;
+}
+
+.pos .numpad-button {
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  background-color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+/* Hover numpad: usa ACENTO + secundario */
+.pos .numpad-button:hover {
+  transform: scale(1.05);
+  background: linear-gradient(
+    135deg,
+    var(--pos-secondary-color) 0%,
+    var(--pos-accent-color) 100%
+  );
+  color: #ffffff;
+}
+
+/* Botón "Pago" / Validar */
+.pos .pay-order-button,
+.pos .validation-button {
+  background-color: color-mix(
+    in srgb,
+    var(--pos-primary-color) 90%,
+    transparent
+  );
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 18px;
+  padding: 10px 18px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.pos .pay-order-button:hover {
+  background: linear-gradient(
+    135deg,
+    var(--pos-secondary-color) 0%,
+    var(--pos-accent-color) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 152, 0, 0.5);
+}
+
+/* ========================================
+   CARRITO / ORDER LINES
+   ======================================== */
+
+.pos .orderlines {
+  background-color: #ffffffee;
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.pos .orderline {
+  border-radius: 6px;
+  border-left: 4px solid transparent;
+  padding: 5px 8px;
+  margin-bottom: 4px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+/* Hover del ítem: leve highlight con primario */
+.pos .orderline:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--pos-primary-color) 10%,
+    transparent
+  );
+  border-left-color: var(--pos-primary-color);
+}
+
+/* Ítem seleccionado: usa secundario */
+.pos .orderline.selected {
+  background-color: color-mix(
+    in srgb,
+    var(--pos-secondary-color) 10%,
+    transparent
+  );
+  border-left: 4px solid var(--pos-secondary-color);
+}
+
+/* Total del carrito */
+.pos .total {
+  background: linear-gradient(
+    150deg,
+    transparent 0%,
+    var(--pos-primary-color) 100%
+  );
+  color: white;
+  font-weight: bold;
+  font-size: 24px;
+  padding: 15px;
+  border-radius: 8px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}

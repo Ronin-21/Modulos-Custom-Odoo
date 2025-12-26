@@ -1,0 +1,25 @@
+<odoo>
+    <!-- Agregar campo empresa al formulario de categorías de Producto -->
+    <record id="view_product_category_form_inherit_company" model="ir.ui.view">
+        <field name="name">product.category.form.inherit.company</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='first']" position="inside">
+                <field name="company_id" options="{'no_create': True}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Agregar columna empresa en la vista de árbol -->
+    <record id="view_product_category_list_inherit_company" model="ir.ui.view">
+        <field name="name">product.category.tree.inherit.company</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_list_view"/>
+        <field name="arch" type="xml">
+            <tree position="inside">
+                <field name="company_id" optional="show"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

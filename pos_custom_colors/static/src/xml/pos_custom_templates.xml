@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!-- Reemplaza el logo central de Odoo por el logo personalizado del PdV -->
+    <t t-name="pos_custom_colors.NavbarBranding"
+       t-inherit="point_of_sale.Navbar"
+       t-inherit-mode="extension"
+       owl="1">
+
+       <!-- 1) Cambiamos las clases del contenedor principal:
+               sacamos bg-white y border-bottom -->
+        <xpath expr="//div[hasclass('pos-topheader')]" position="attributes">
+            <attribute name="class">
+                pos-topheader navbar-height d-flex align-items-center justify-content-between p-2 m-0
+            </attribute>
+        </xpath>
+
+        <!-- 2) Reemplazamos el centro del navbar por nuestro logo / texto -->
+        <xpath expr="//div[hasclass('pos-centerheader')]" position="replace">
+            <div class="pos-centerheader d-flex justify-content-center overflow-hidden h-100">
+                <!-- Si hay logo personalizado, lo mostramos en el centro -->
+                <t t-if="pos.config.custom_logo">
+                    <img class="pos-logo object-fit-cover align-self-center my-2 h-100"
+                         t-attf-src="/pos/branding/logo/{{ pos.config.id }}"
+                         alt="Logo"/>
+                </t>
+
+                <!-- Si NO hay logo, mostramos el texto configurado -->
+                <t t-if="!pos.config.custom_logo and pos.config.branding_text">
+                    <span class="pos-branding-text fw-bold fs-4">
+                        <t t-esc="pos.config.branding_text"/>
+                    </span>
+                </t>
+            </div>
+        </xpath>
+    </t>
+
+</templates>
