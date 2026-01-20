@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
@@ -19,55 +20,87 @@ class PosPaymentMethod(models.Model):
         default="discount",
     )
 
-    adjustment_value = fields.Float(
-        string="Porcentaje (%)",
-        help="Porcentaje (0-100). Para recargos con opciones, este valor puede usarse como default si no hay opciones.",
-        default=0.0,
-    )
-
     adjustment_product_id = fields.Many2one(
         "product.product",
         string="Producto de recargo",
-        help="Producto (idealmente Servicio) que se agregará como línea cuando el método tenga Recargo.",
+        help="Producto que se agregará como línea cuando el método tenga Recargo.",
         domain=[("available_in_pos", "=", True)],
     )
 
-    adjustment_option_ids = fields.One2many(
-        "pos.payment.method.adjustment.option",
+    # ✅ Campos para configuración POR TARJETA
+    card_ids = fields.One2many(
+        "pos.payment.method.card",
         "payment_method_id",
-        string="Opciones de recargo",
-        help="Opciones de recargo (ej: Visa 3 cuotas 15%).",
+        string="Tarjetas",
+        help="Diferentes tarjetas con sus propias opciones de cuotas."
     )
 
-    # Esto viaja al POS sin tener que cargar otro modelo:
-    adjustment_options = fields.Json(
-        string="Opciones (POS)",
-        compute="_compute_adjustment_options",
+    # ✅ Campo para enviar tarjetas al POS
+    cards_config = fields.Json(
+        string="Configuración de Tarjetas (POS)",
+        compute="_compute_cards_config",
         readonly=True,
     )
 
-    @api.depends("adjustment_option_ids", "adjustment_option_ids.name", "adjustment_option_ids.percent",
-                 "adjustment_option_ids.active", "adjustment_option_ids.sequence")
-    def _compute_adjustment_options(self):
+    @api.depends(
+        "card_ids",
+        "card_ids.name",
+        "card_ids.active",
+        "card_ids.sequence",
+        "card_ids.adjustment_options",
+        "card_ids.requires_coupon",
+    )
+    def _compute_cards_config(self):
         for m in self:
-            opts = m.adjustment_option_ids.filtered(lambda o: o.active).sorted("sequence")
-            m.adjustment_options = [
-                {"id": o.id, "name": o.name, "percent": o.percent}
-                for o in opts
+            cards = m.card_ids.filtered(lambda c: c.active).sorted("sequence")
+            m.cards_config = [
+                {
+                    "id": c.id,
+                    "name": c.name,
+                    "requires_coupon": c.requires_coupon,
+                    "options": c.adjustment_options,
+                }
+                for c in cards
             ]
 
-    @api.constrains("apply_adjustment", "adjustment_type", "adjustment_value", "adjustment_product_id")
+    @api.constrains(
+        "apply_adjustment",
+        "adjustment_type",
+        "adjustment_product_id",
+        "card_ids"
+    )
     def _check_adjustment(self):
         for m in self:
             if not m.apply_adjustment:
                 continue
 
-            if m.adjustment_value < 0 or m.adjustment_value > 100:
-                raise ValidationError("El porcentaje debe estar entre 0 y 100.")
+            # Validaciones para RECARGO
+            if m.adjustment_type == "surcharge":
+                # Debe tener producto de recargo
+                if not m.adjustment_product_id:
+                    raise ValidationError(
+                        "Si el método tiene Recargo, debe seleccionar un Producto de recargo."
+                    )
 
-            # Si es recargo, debe haber producto de recargo
-            if m.adjustment_type == "surcharge" and not m.adjustment_product_id:
-                raise ValidationError("Si el método tiene Recargo, debe seleccionar un Producto de recargo.")
+                # Validar que el producto esté disponible en POS
+                if not m.adjustment_product_id.available_in_pos:
+                    raise ValidationError(
+                        f"El producto '{m.adjustment_product_id.name}' debe estar "
+                        "marcado como 'Disponible en el POS'."
+                    )
+
+                # Debe tener al menos una tarjeta
+                if not m.card_ids:
+                    raise ValidationError(
+                        "Debe crear al menos una tarjeta con sus opciones de cuotas."
+                    )
+
+                # Cada tarjeta debe tener al menos una opción
+                for card in m.card_ids:
+                    if not card.adjustment_option_ids:
+                        raise ValidationError(
+                            f"La tarjeta '{card.name}' debe tener al menos una opción de cuotas."
+                        )
 
     def _load_pos_data_fields(self, config_id):
         fields_list = []
@@ -78,9 +111,8 @@ class PosPaymentMethod(models.Model):
         extra = [
             "apply_adjustment",
             "adjustment_type",
-            "adjustment_value",
             "adjustment_product_id",
-            "adjustment_options",
+            "cards_config",
         ]
         for f in extra:
             if f not in fields_list:

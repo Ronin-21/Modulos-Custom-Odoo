@@ -1,42 +1,200 @@
+// ========================================
+// POS Payment Custom - Estilos principales
+// ========================================
+
+// Variables
+$pos-accent-color: var(--pos-accent-color, #007bff);
+$border-radius-base: 12px;
+$border-radius-small: 8px;
+$transition-speed: 0.2s;
+
+// ========================================
+// Tarjeta de descuento/recargo
+// ========================================
 .o_pos_cash_discount_card {
   margin: 6px 0 10px 0;
-  padding: 10px 12px;
-  border-radius: 12px;
+  padding: 12px 14px;
+  border-radius: $border-radius-base;
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: rgba(0, 0, 0, 0.03);
-  border-left: 5px solid var(--pos-accent-color);
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  border-left: 5px solid $pos-accent-color;
+  transition: all $transition-speed ease;
 }
 
 .o_pos_cash_discount_card--hidden {
   display: none !important;
 }
 
+// Variantes según tipo
+.o_pos_cash_discount_card--surcharge {
+  border-left-color: #dc3545;
+  background: rgba(220, 53, 69, 0.04);
+}
+
+.o_pos_cash_discount_card--discount {
+  border-left-color: #28a745;
+  background: rgba(40, 167, 69, 0.04);
+}
+
+// Contenedor principal
+.o_pos_cash_discount_card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// Header (título + monto)
+.o_pos_cash_discount_card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+// Elementos internos
+.o_pos_cash_discount_card__left {
+  flex: 1;
+}
+
 .o_pos_cash_discount_card__title {
   font-weight: 800;
   font-size: 13px;
   line-height: 1.1;
+  color: rgba(0, 0, 0, 0.85);
 }
+
 .o_pos_cash_discount_card__meta {
   margin-top: 3px;
   font-size: 12px;
   opacity: 0.75;
 }
 
-.o_pos_cash_discount_card__options {
-  margin-top: 8px;
+// ✅ NUEVO: Contenedor de selectores
+.o_pos_cash_discount_card__selectors {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.08);
 }
+
+.o_pos_cash_discount_card__selector_group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.o_pos_cash_discount_card__label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
 .o_pos_cash_discount_card__select {
   width: 100%;
   border-radius: 10px;
-  padding: 8px 10px;
+  padding: 9px 12px;
   border: 1px solid rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.9);
   outline: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all $transition-speed ease;
+
+  &:hover {
+    border-color: rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 1);
+  }
+
+  &:focus {
+    border-color: $pos-accent-color;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+    background: rgba(255, 255, 255, 1);
+  }
+}
+
+// ✅ NUEVO: Detalle de cuotas
+.o_pos_cash_discount_card__installment_detail {
+  padding: 8px 12px;
+  background: rgba(0, 123, 255, 0.08);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #007bff;
+  text-align: center;
+
+  i {
+    margin-right: 6px;
+  }
+}
+
+// ✅ NUEVO: Sección de cupón
+.o_pos_cash_discount_card__coupon_section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.08);
+}
+
+.o_pos_cash_discount_card__coupon_label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(0, 0, 0, 0.6);
+
+  i {
+    margin-right: 4px;
+    color: #007bff;
+  }
+}
+
+.o_pos_cash_discount_card__coupon_input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: "Courier New", monospace;
+  letter-spacing: 2px;
+  background: #ffffff;
+  text-align: center;
+  transition: all $transition-speed ease;
+
+  &::placeholder {
+    color: rgba(0, 0, 0, 0.3);
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 1px;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $pos-accent-color;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.12);
+  }
+
+  // Estado de error
+  &.o_pos_coupon_input--error {
+    border-color: #dc3545;
+    background: rgba(220, 53, 69, 0.05);
+    animation: shake 0.3s ease;
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+    }
+  }
+
+  // Estado válido
+  &:valid:not(:placeholder-shown) {
+    border-color: #28a745;
+    background: rgba(40, 167, 69, 0.04);
+  }
 }
 
 .o_pos_cash_discount_card__right {
@@ -50,6 +208,16 @@
   font-weight: 900;
   font-size: 14px;
   line-height: 1;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+// Color del monto según tipo
+.o_pos_cash_discount_card--surcharge .o_pos_cash_discount_card__amount {
+  color: #dc3545;
+}
+
+.o_pos_cash_discount_card--discount .o_pos_cash_discount_card__amount {
+  color: #28a745;
 }
 
 .o_pos_cash_discount_card__pill {
@@ -59,11 +227,187 @@
   font-size: 12px;
   background: rgba(0, 0, 0, 0.06);
   border: 1px solid rgba(0, 0, 0, 0.08);
+  white-space: nowrap;
 }
 
+// ========================================
+// Método de pago seleccionado
+// ========================================
 .o_pos_paymentmethod_selected {
-  outline: 2px solid var(--pos-accent-color) !important;
+  outline: 2px solid $pos-accent-color !important;
   outline-offset: -2px;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.03) !important;
+  background: rgba(0, 123, 255, 0.05) !important;
+}
+
+// ========================================
+// Contenedor de inputs de cupón
+// ========================================
+.o_pos_coupon_inputs_summary {
+  margin-top: 12px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: $border-radius-base;
+  border: 2px dashed rgba(0, 0, 0, 0.12);
+}
+
+// ========================================
+// Fila de cupón individual
+// ========================================
+.o_pos_coupon_row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.o_pos_coupon_label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+// ========================================
+// Input de cupón (desde pos_payment_coupon.js)
+// ========================================
+.o_pos_coupon_input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-radius: $border-radius-small;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: "Courier New", monospace;
+  letter-spacing: 1px;
+  background: #ffffff;
+  transition: all $transition-speed ease;
+
+  &::placeholder {
+    color: rgba(0, 0, 0, 0.35);
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $pos-accent-color;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.12);
+  }
+
+  // Estado de error
+  &:invalid,
+  &.o_pos_coupon_input--error {
+    border-color: #dc3545;
+    background: rgba(220, 53, 69, 0.05);
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+    }
+  }
+
+  // Estado válido
+  &:valid:not(:placeholder-shown),
+  &.o_pos_coupon_input--valid {
+    border-color: #28a745;
+    background: rgba(40, 167, 69, 0.04);
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.12);
+    }
+  }
+}
+
+// ========================================
+// Input wrapper (desde XML, deprecado)
+// ========================================
+.o_pos_coupon_input_wrapper {
+  margin: 12px 0;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: $border-radius-small;
+  border: 2px dashed rgba(0, 0, 0, 0.15);
+}
+
+// ========================================
+// Línea de pago con cupón faltante
+// ========================================
+.paymentline.o_pos_missing_coupon {
+  border: 2px solid #dc3545 !important;
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+// ========================================
+// Ticket Screen - Columna de cupón
+// ========================================
+.o_pos_coupon_header {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.o_pos_coupon_cell {
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+
+  &:empty::before {
+    content: "-";
+    opacity: 0.3;
+  }
+}
+
+// ========================================
+// Dropdown de búsqueda
+// ========================================
+.o_pos_coupon_search_item {
+  padding: 8px 16px;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.7);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: background $transition-speed ease;
+
+  &:hover {
+    background: rgba(0, 123, 255, 0.08);
+  }
+}
+
+// ========================================
+// Responsive
+// ========================================
+@media (max-width: 768px) {
+  .o_pos_cash_discount_card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .o_pos_cash_discount_card__right {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  .o_pos_cash_discount_card__select {
+    max-width: 100%;
+  }
 }

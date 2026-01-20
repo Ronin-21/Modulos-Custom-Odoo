@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ============================================
+         EXTENDER ANÁLISIS DE ÓRDENES EXISTENTE
+         (FIX Odoo 18: no anclar en payment_method_id porque no existe en la search view base)
+         ============================================ -->
+
+    <!-- Extender vista de búsqueda -->
+    <record id="view_report_pos_order_search_extended" model="ir.ui.view">
+        <field name="name">report.pos.order.search.extended</field>
+        <field name="model">report.pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_report_pos_order_search"/>
+        <field name="arch" type="xml">
+
+            <!-- ✅ Agregar campos de búsqueda (sin depender de un field que no existe en la vista base) -->
+            <xpath expr="//search" position="inside">
+                <field name="card_name" string="Tarjeta"/>
+                <field name="installment_plan_name" string="Plan"/>
+                <field name="coupon_numbers" string="Nº Cupón"/>
+            </xpath>
+
+            <!-- ✅ Agregar filtros (sin depender de filtros existentes como 'invoiced') -->
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter string="Con Cupón" name="filter_has_coupon"
+                        domain="[('has_coupon', '=', True)]"/>
+                <filter string="Sin Cupón" name="filter_no_coupon"
+                        domain="[('has_coupon', '=', False)]"/>
+            </xpath>
+
+            <!-- ✅ Agregar opciones de agrupación:
+                 - si existe un <group> de “Group By”, inserta ahí
+                 - si no existe, las inserta igual dentro de <search> (no rompe la vista) -->
+            <xpath expr="(//search/group[.//filter[contains(@context, 'group_by')]][1] | //search)[1]" position="inside">
+                <filter string="Tarjeta" name="group_card"
+                        context="{'group_by': 'card_name'}"/>
+                <filter string="Plan de Cuotas" name="group_plan"
+                        context="{'group_by': 'installment_plan_name'}"/>
+                <filter string="Nº de Cuotas" name="group_installments"
+                        context="{'group_by': 'installments'}"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Extender vista pivot -->
+    <record id="view_report_pos_order_pivot_extended" model="ir.ui.view">
+        <field name="name">report.pos.order.pivot.extended</field>
+        <field name="model">report.pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_report_pos_order_pivot"/>
+        <field name="arch" type="xml">
+            <!-- ✅ Agregar campos disponibles para arrastrar (sin anclar en payment_method_id) -->
+            <xpath expr="//pivot" position="inside">
+                <field name="card_name" type="row"/>
+                <field name="installment_plan_name" type="row"/>
+                <field name="installments" type="row"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Extender vista gráfico -->
+    <record id="view_report_pos_order_graph_extended" model="ir.ui.view">
+        <field name="name">report.pos.order.graph.extended</field>
+        <field name="model">report.pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_report_pos_order_graph"/>
+        <field name="arch" type="xml">
+            <!-- ✅ Agregar campos al gráfico (sin anclar en payment_method_id) -->
+            <xpath expr="//graph" position="inside">
+                <field name="card_name"/>
+                <field name="installment_plan_name"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============================================
+         ACCIONES RÁPIDAS (Accesos directos)
+         ============================================ -->
+
+    <!-- Acción: Ver solo ventas con tarjeta -->
+    <record id="action_pos_order_report_by_card" model="ir.actions.act_window">
+        <field name="name">Análisis por Tarjeta</field>
+        <field name="res_model">report.pos.order</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="domain">[('card_name', '!=', False)]</field>
+        <field name="context">{
+            'search_default_filter_has_coupon': 1,
+            'search_default_group_card': 1,
+            'pivot_measures': ['price_total'],
+            'pivot_row_groupby': ['card_name', 'installment_plan_name']
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay ventas con tarjeta
+            </p>
+            <p>
+                Análisis de ventas agrupadas por tipo de tarjeta y plan de cuotas.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú: Análisis por Tarjeta (acceso rápido) -->
+    <menuitem id="menu_pos_order_report_by_card"
+              name="Por Tarjeta"
+              parent="point_of_sale.menu_point_rep"
+              action="action_pos_order_report_by_card"
+              sequence="6"
+              groups="point_of_sale.group_pos_user"/>
+
+</odoo>

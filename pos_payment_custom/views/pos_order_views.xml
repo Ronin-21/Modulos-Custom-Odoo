@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- =========================
+         POS.ORDER - FORM
+         - Campos de ajuste
+         - Campo cupón (resumen)
+         - Botón de recálculo
+         ========================= -->
+    <record id="pos_order_form_adjustment" model="ir.ui.view">
+        <field name="name">pos.order.form.adjustment</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <!-- Botón de recálculo en header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_recalculate_coupons"
+                        string="Recalcular Cupones"
+                        type="object"
+                        class="btn-secondary"
+                        invisible="state != 'paid'"/>
+            </xpath>
+            
+            <!-- Campos de ajuste y cupón -->
+            <xpath expr="//field[@name='amount_total']" position="after">
+                <field name="adjustment_type" readonly="1"/>
+                <field name="adjustment_percent" readonly="1"
+                       invisible="adjustment_type == 'none'"/>
+                <field name="adjustment_amount" readonly="1"
+                       invisible="adjustment_type == 'none'"/>
+                <field name="coupon_numbers" readonly="1" placeholder="Ej: 123-1234"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- =========================
+         POS.ORDER - FORM PAYMENTS
+         - Muestra tarjeta, plan y cupón
+         ========================= -->
+    <record id="pos_order_form_payments_coupon" model="ir.ui.view">
+        <field name="name">pos.order.form.payments.coupon</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='payment_ids']//*[self::tree or self::list]" position="inside">
+                <field name="card_name" string="Tarjeta" optional="show"/>
+                <field name="installment_plan_name" string="Plan" optional="show"/>
+                <field name="coupon_number" string="Nº Cupón" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- =========================
+         POS.ORDER - TREE (Vista principal de lista)
+         ========================= -->
+    <record id="pos_order_tree_adjustment" model="ir.ui.view">
+        <field name="name">pos.order.tree.adjustment</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+        <field name="arch" type="xml">
+            <!-- Agregar después del cliente si existe -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="coupon_numbers" string="Nº Cupón" optional="show"/>
+            </xpath>
+            
+            <!-- Agregar después del total -->
+            <xpath expr="//field[@name='amount_total']" position="after">
+                <field name="adjustment_type" string="Tipo Ajuste" optional="hide"/>
+                <field name="adjustment_amount" string="Monto Ajuste" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- =========================
+         POS.PAYMENT - FORM
+         - Campos detallados de tarjeta
+         ========================= -->
+    <record id="pos_payment_form_coupon" model="ir.ui.view">
+        <field name="name">pos.payment.form.coupon</field>
+        <field name="model">pos.payment</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount']" position="after">
+                <field name="coupon_number" placeholder="Ej: 123-1234"/>
+                <field name="card_name" placeholder="Ej: Visa, Mastercard"/>
+                <field name="installments"/>
+                <field name="installment_percent"/>
+                <field name="installment_plan_name"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- =========================
+         POS.PAYMENT - TREE
+         ========================= -->
+    <record id="pos_payment_tree_coupon" model="ir.ui.view">
+        <field name="name">pos.payment.tree.coupon</field>
+        <field name="model">pos.payment</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_payment_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount']" position="after">
+                <field name="card_name" string="Tarjeta" optional="show"/>
+                <field name="installment_plan_name" string="Plan" optional="show"/>
+                <field name="coupon_number" string="Nº Cupón" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

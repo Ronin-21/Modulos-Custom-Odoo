@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ============================================
+         FORMATO DE PAPEL 80MM (PRIMERO)
+         ============================================ -->
+    <record id="paperformat_80mm" model="report.paperformat">
+        <field name="name">80mm Thermal</field>
+        <field name="default" eval="False"/>
+        <field name="format">custom</field>
+        <field name="page_height">297</field>
+        <field name="page_width">80</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">0</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">5</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- ============================================
+         TEMPLATE A4 (ORIGINAL) - Para impresión normal
+         + AGREGA "Totales por diario" (Fiscal / No fiscal)
+         + MUESTRA TODOS los métodos (con y sin tarjetas)
+         ============================================ -->
+    <template id="pos_payment_custom_report_saledetails_cards"
+              inherit_id="point_of_sale.report_saledetails">
+
+        <xpath expr="//t[@t-call='point_of_sale.pos_session_sales_details']" position="after">
+
+            <t t-set="card_sessions" t-value="pos_payment_custom_card_sessions or []"/>
+
+            <t t-if="card_sessions">
+                <div class="page">
+                    <h2 style="margin: 0 0 10px 0;">Detalle de métodos de pago</h2>
+
+                    <t t-foreach="card_sessions" t-as="cs">
+                        <t t-set="currency" t-value="env['res.currency'].browse(cs.get('currency_id'))"/>
+                        <t t-set="js" t-value="cs.get('journal_split')"/>
+
+                        <t t-if="len(card_sessions) &gt; 1">
+                            <h3 style="margin: 12px 0 6px 0;">
+                                <span t-out="cs.get('session_name')"/>
+                            </h3>
+                        </t>
+
+                        <!-- Totales por diario (Fiscal vs No fiscal) -->
+                        <t t-if="js">
+                            <h3 style="margin: 12px 0 6px 0;">Totales por diario</h3>
+
+                            <table class="table table-sm o_main_table" style="width:100%; font-size:12px; margin-bottom:10px;">
+                                <thead>
+                                    <tr>
+                                        <th>Diario</th>
+                                        <th style="text-align:center;">Órdenes</th>
+                                        <th style="text-align:right;">Neto</th>
+                                        <th style="text-align:right;">IVA</th>
+                                        <th style="text-align:right;">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span t-out="js.get('non_fiscal').get('journal_name')"/></td>
+                                        <td style="text-align:center;"><span t-out="js.get('non_fiscal').get('count') or 0"/></td>
+                                        <td style="text-align:right;">
+                                            <span t-out="js.get('non_fiscal').get('amount_untaxed') or 0.0"
+                                                  t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                        </td>
+                                        <td style="text-align:right;">
+                                            <span t-out="js.get('non_fiscal').get('amount_tax') or 0.0"
+                                                  t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                        </td>
+                                        <td style="text-align:right;">
+                                            <span t-out="js.get('non_fiscal').get('amount_total') or 0.0"
+                                                  t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td><span t-out="js.get('fiscal').get('journal_name')"/></td>
+                                        <td style="text-align:center;"><span t-out="js.get('fiscal').get('count') or 0"/></td>
+                                        <td style="text-align:right;">
+                                            <span t-out="js.get('fiscal').get('amount_untaxed') or 0.0"
+                                                  t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                        </td>
+                                        <td style="text-align:right;">
+                                            <span t-out="js.get('fiscal').get('amount_tax') or 0.0"
+                                                  t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                        </td>
+                                        <td style="text-align:right;">
+                                            <span t-out="js.get('fiscal').get('amount_total') or 0.0"
+                                                  t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- Total general de todos los métodos -->
+                        <div style="margin: 0 0 8px 0; font-size: 12px;">
+                            <strong>Total pagos:</strong>
+                            <span t-out="cs.get('total_trans') or 0"/> transacciones —
+                            <span t-out="cs.get('total_amount') or 0.0"
+                                  t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                        </div>
+
+                        <!-- Por cada método de pago -->
+                        <t t-foreach="cs.get('groups') or []" t-as="g">
+                            <div style="margin: 10px 0 4px 0; font-weight: 700;">
+                                <span t-out="g.get('payment_method_name')"/>
+                                <span> — </span>
+                                <span t-out="g.get('total_trans') or 0"/> trans. —
+                                <span t-out="g.get('total_amount') or 0.0"
+                                    t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                            </div>
+
+                            <!-- ✅ Mostrar tabla si tiene tarjetas O pagos sin tarjeta -->
+                            <t t-if="(g.get('has_card_details') and g.get('lines')) or g.get('non_card_lines')">
+                                <table class="table table-sm o_main_table" style="width:100%; font-size:12px; margin-bottom: 10px;">
+                                    <thead>
+                                        <tr>
+                                            <th>Tarjeta / Tipo</th>
+                                            <th>Plan</th>
+                                            <th style="text-align:center;">Cuotas</th>
+                                            <th style="text-align:center;">Recargo %</th>
+                                            <th style="text-align:center;">Trans.</th>
+                                            <th style="text-align:right;">Total</th>
+                                            <th>Cupones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- ✅ Líneas CON tarjeta -->
+                                        <t t-foreach="g.get('lines') or []" t-as="l">
+                                            <tr>
+                                                <td><span t-out="l.get('card_name') or '-'"/></td>
+                                                <td><span t-out="l.get('installment_plan_name') or '-'"/></td>
+                                                <td style="text-align:center;"><span t-out="l.get('installments') or 1"/></td>
+                                                <td style="text-align:center;"><span t-out="l.get('installment_percent') or 0"/></td>
+                                                <td style="text-align:center;"><span t-out="l.get('transaction_count') or 0"/></td>
+                                                <td style="text-align:right;">
+                                                    <span t-out="l.get('total_amount') or 0.0"
+                                                        t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                                </td>
+                                                <td><span t-out="l.get('coupons') or '-'"/></td>
+                                            </tr>
+                                        </t>
+
+                                        <!-- ✅ Líneas SIN tarjeta (AGRUPADAS) -->
+                                        <t t-foreach="g.get('non_card_lines') or []" t-as="ncl">
+                                            <tr>
+                                                <td>
+                                                    <span t-out="ncl.get('payment_type') or 'Otros pagos'"/>
+                                                </td>
+                                                <td>
+                                                    <t t-if="ncl.get('mixed_count') and ncl.get('direct_count')">
+                                                        <span style="font-size: 10px; color: #666;">
+                                                            (<span t-out="ncl.get('mixed_count')"/> mixtos, 
+                                                            <span t-out="ncl.get('direct_count')"/> directos)
+                                                        </span>
+                                                    </t>
+                                                </td>
+                                                <td style="text-align:center;">-</td>
+                                                <td style="text-align:center;">-</td>
+                                                <td style="text-align:center;">
+                                                    <span t-out="ncl.get('transaction_count') or 0"/>
+                                                </td>
+                                                <td style="text-align:right;">
+                                                    <span t-out="ncl.get('total_amount') or 0.0"
+                                                        t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                                </td>
+                                                <td>-</td>
+                                            </tr>
+                                        </t>
+
+                                        <!-- ✅ Fila de Subtotal -->
+                                        <tr style="font-weight:bold; border-top: 2px solid #000;">
+                                            <td colspan="4" style="text-align:right;">Subtotal</td>
+                                            <td style="text-align:center;">
+                                                <span t-out="g.get('total_trans') or 0"/>
+                                            </td>
+                                            <td style="text-align:right;">
+                                                <span t-out="g.get('total_amount') or 0.0"
+                                                    t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                            </td>
+                                            <td/>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </t>
+
+                            <!-- ✅ Si NO tiene ningún desglose -->
+                            <t t-else="">
+                                <div style="padding: 8px 12px; background: rgba(0,0,0,0.03); border-radius: 6px; margin-bottom: 10px; font-size: 11px; color: #666;">
+                                    <em>Sin desglose de tarjetas</em>
+                                </div>
+                            </t>
+                        </t>
+
+                        <div style="margin-top: 10px; font-size: 11px; color: #666;">
+                            * El desglose se arma a partir de los pagos (pos.payment) guardados en la sesión.
+                        </div>
+
+                    </t>
+                </div>
+            </t>
+
+        </xpath>
+    </template>
+
+    <!-- ============================================
+         TEMPLATE 80MM - Para impresoras térmicas
+         (misma lógica, + Totales por diario + TODOS los métodos)
+         ============================================ -->
+    <template id="report_saledetails_80mm">
+        <t t-call="web.basic_layout">
+
+            <t t-foreach="docs" t-as="session">
+                <!-- Obtener datos del reporte -->
+                <t t-set="report_data" t-value="env['report.point_of_sale.report_saledetails']._get_report_values(session.ids)"/>
+                <t t-set="card_sessions" t-value="report_data.get('pos_payment_custom_card_sessions', [])"/>
+
+                <div class="page" style="width: 80mm; font-family: monospace; font-size: 14px; padding: 0mm;">
+
+                    <!-- Header -->
+                    <div style="text-align: start; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 5px;">
+                        <div style="font-weight: bold; font-size: 14px;">DETALLE DE PAGOS</div>
+                        <div style="font-size: 12px;"><span t-out="session.name"/></div>
+                        <div style="font-size: 12px;">
+                            <span t-out="session.start_at" t-options="{'widget': 'datetime'}"/>
+                        </div>
+                    </div>
+
+                    <t t-if="card_sessions">
+                        <t t-foreach="card_sessions" t-as="cs">
+                            <t t-set="currency" t-value="env['res.currency'].browse(cs.get('currency_id'))"/>
+                            <t t-set="js" t-value="cs.get('journal_split')"/>
+
+                            <!-- Totales por diario -->
+                            <t t-if="js">
+                                <div style="border-bottom: 1px dashed #000; padding: 5px 0; margin-bottom: 5px;">
+                                    <strong>TOTALES POR DIARIO</strong><br/>
+                                    <div style="font-size: 12px;">
+                                        <span t-out="js.get('non_fiscal').get('journal_name')"/>:
+                                        <t t-if="js.get('non_fiscal').get('amount_total_fmt')">
+                                            <span t-out="js.get('non_fiscal').get('amount_total_fmt')"/>
+                                        </t>
+                                        <t t-else="">
+                                            <span t-out="js.get('non_fiscal').get('amount_total') or 0.0"
+                                                t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                        </t>
+                                    </div>
+                                    <div style="font-size: 12px;">
+                                        <span t-out="js.get('fiscal').get('journal_name')"/>:
+                                        <t t-if="js.get('fiscal').get('amount_total_fmt')">
+                                            <span t-out="js.get('fiscal').get('amount_total_fmt')"/>
+                                        </t>
+                                        <t t-else="">
+                                            <span t-out="js.get('fiscal').get('amount_total') or 0.0"
+                                                t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                        </t>
+                                    </div>
+                                </div>
+                            </t>
+
+                            <!-- Total general -->
+                            <div style="border-bottom: 1px dashed #000; padding: 5px 0; margin-bottom: 5px;">
+                                <strong>TOTAL PAGOS</strong><br/>
+                                Transacciones: <span t-out="cs.get('total_trans') or 0"/><br/>
+                                Importe:
+                                <t t-if="cs.get('total_amount_fmt')">
+                                    <span t-out="cs.get('total_amount_fmt')"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-out="cs.get('total_amount') or 0.0"
+                                        t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                </t>
+                            </div>
+
+                            <!-- Por cada método de pago -->
+                            <t t-foreach="cs.get('groups') or []" t-as="g">
+                                <div style="background: #f0f0f0; padding: 3px; margin: 5px 0; font-weight: bold;">
+                                    <span t-out="g.get('payment_method_name')"/>
+                                </div>
+                                <div style="font-size: 12px; margin-bottom: 3px;">
+                                    Trans: <span t-out="g.get('total_trans') or 0"/> |
+                                    Total:
+                                    <t t-if="g.get('total_amount_fmt')">
+                                        <span t-out="g.get('total_amount_fmt')"/>
+                                    </t>
+                                    <t t-else="">
+                                        <span t-out="g.get('total_amount') or 0.0"
+                                            t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                    </t>
+                                </div>
+
+                                <!-- ✅ Líneas CON tarjeta -->
+                                <t t-foreach="g.get('lines') or []" t-as="l">
+                                    <div style="border-left: 2px solid #ccc; padding-left: 5px; margin: 3px 0; font-size: 12px;">
+                                        <div style="font-weight: bold;">
+                                            <span t-out="l.get('card_name') or '-'"/>
+                                        </div>
+                                        <div>
+                                            Plan: <span t-out="l.get('installment_plan_name') or '-'"/>
+                                        </div>
+                                        <div>
+                                            Cuotas: <span t-out="l.get('installments') or 1"/> |
+                                            Recargo: <span t-out="l.get('installment_percent') or 0"/>%
+                                        </div>
+                                        <div>
+                                            Trans: <span t-out="l.get('transaction_count') or 0"/> |
+                                            Total:
+                                            <t t-if="l.get('total_amount_fmt')">
+                                                <span t-out="l.get('total_amount_fmt')"/>
+                                            </t>
+                                            <t t-else="">
+                                                <span t-out="l.get('total_amount') or 0.0"
+                                                    t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                            </t>
+                                        </div>
+                                        <t t-if="l.get('coupons') and l.get('coupons') != '-'">
+                                            <div style="font-size: 9px; color: #666;">
+                                                Cupón: <span t-out="l.get('coupons')"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+
+                                <!-- ✅ Líneas SIN tarjeta (integradas) -->
+                                <t t-foreach="g.get('non_card_lines') or []" t-as="ncl">
+                                    <div style="border-left: 2px solid #ccc; padding-left: 5px; margin: 3px 0; font-size: 12px;">
+                                        <div style="font-weight: bold;">
+                                            <span t-out="ncl.get('payment_type') or 'Otros pagos'"/>
+                                        </div>
+                                        <div style="font-size: 10px; color: #666;">
+                                            <t t-if="ncl.get('mixed_count') and ncl.get('direct_count')">
+                                                <span t-out="ncl.get('mixed_count')"/> mixtos, 
+                                                <span t-out="ncl.get('direct_count')"/> directos
+                                            </t>
+                                        </div>
+                                        <div>
+                                            Trans: <span t-out="ncl.get('transaction_count') or 0"/> |
+                                            Total:
+                                            <t t-if="ncl.get('total_amount_fmt')">
+                                                <span t-out="ncl.get('total_amount_fmt')"/>
+                                            </t>
+                                            <t t-else="">
+                                                <span t-out="ncl.get('total_amount') or 0.0"
+                                                    t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <!-- ✅ Si NO tiene desglose -->
+                                <t t-if="not g.get('lines') and not g.get('non_card_lines')">
+                                    <div style="padding: 5px; font-size: 11px; color: #666; font-style: italic;">
+                                        Sin desglose
+                                    </div>
+                                </t>
+
+                                <!-- Separador -->
+                                <div style="border-top: 1px solid #000; margin: 8px 0; padding-top: 3px; font-weight: bold; font-size: 11px;">
+                                    Subtotal: <span t-out="g.get('total_trans') or 0"/> trans |
+                                    <t t-if="g.get('total_amount_fmt')">
+                                        <span t-out="g.get('total_amount_fmt')"/>
+                                    </t>
+                                    <t t-else="">
+                                        <span t-out="g.get('total_amount') or 0.0"
+                                            t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                    </t>
+                                </div>
+
+                            </t>
+
+                            <!-- Footer -->
+                            <div style="border-top: 2px solid #000; margin-top: 10px; padding-top: 5px; font-size: 9px; text-align: center;">
+                                Datos de pos.payment de la sesión
+                            </div>
+
+                        </t>
+                    </t>
+
+                    <t t-else="">
+                        <div style="text-align: center; margin: 20px 0; color: #999;">
+                            No hay pagos en esta sesión
+                        </div>
+                    </t>
+
+                </div>
+            </t>
+
+        </t>
+    </template>
+
+
+    <!-- ============================================
+         ACCIÓN DE REPORTE 80MM (DESPUÉS)
+         ============================================ -->
+    <record id="action_report_saledetails_80mm" model="ir.actions.report">
+        <field name="name">Detalle Tarjetas 80mm</field>
+        <field name="model">pos.session</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">pos_payment_custom.report_saledetails_80mm</field>
+        <field name="report_file">pos_payment_custom.report_saledetails_80mm</field>
+        <field name="binding_model_id" ref="point_of_sale.model_pos_session"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="pos_payment_custom.paperformat_80mm"/>
+    </record>
+
+</odoo>

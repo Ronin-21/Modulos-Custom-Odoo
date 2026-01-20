@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
 
+    <!-- Tarjeta de descuento/recargo con dos selectores y cupón -->
     <t t-inherit="point_of_sale.PaymentScreen" t-inherit-mode="extension">
         <xpath expr="//div[contains(@class,'payment-summary')]" position="inside">
 
@@ -8,37 +9,89 @@
                                {{ payAdjActive ? '' : 'o_pos_cash_discount_card--hidden' }}
                                {{ payAdjType === 'surcharge' ? 'o_pos_cash_discount_card--surcharge' : 'o_pos_cash_discount_card--discount' }}">
 
-                <div class="o_pos_cash_discount_card__left">
-                    <div class="o_pos_cash_discount_card__title">
-                        <t t-esc="payAdjTitle"/>
-                    </div>
-
-                    <div class="o_pos_cash_discount_card__meta">
-                        <t t-esc="payAdjMeta"/>
-                    </div>
-
-                    <t t-if="payAdjHasOptions">
-                        <div class="o_pos_cash_discount_card__options">
-                            <select class="o_pos_cash_discount_card__select"
-                                    t-on-change="onPayAdjOptionChange">
-                                <t t-foreach="payAdjOptions" t-as="opt" t-key="opt.id">
-                                    <option t-att-value="opt.id"
-                                            t-att-selected="opt.id === payAdjSelectedOptionId">
-                                        <t t-esc="opt.name"/> (<t t-esc="opt.percent"/>%)
-                                    </option>
-                                </t>
-                            </select>
+                <div class="o_pos_cash_discount_card__content">
+                    
+                    <!-- Header -->
+                    <div class="o_pos_cash_discount_card__header">
+                        <div class="o_pos_cash_discount_card__left">
+                            <div class="o_pos_cash_discount_card__title">
+                                <t t-esc="payAdjTitle"/>
+                            </div>
+                            <div class="o_pos_cash_discount_card__meta">
+                                <t t-esc="payAdjMeta"/>
+                            </div>
                         </div>
-                    </t>
-                </div>
 
-                <div class="o_pos_cash_discount_card__right">
-                    <div class="o_pos_cash_discount_card__amount">
-                        <t t-esc="payAdjAmountFormatted"/>
+                        <div class="o_pos_cash_discount_card__right">
+                            <div class="o_pos_cash_discount_card__amount">
+                                <t t-esc="payAdjAmountFormatted"/>
+                            </div>
+                            <div class="o_pos_cash_discount_card__pill">
+                                <t t-esc="payAdjMethodName"/>
+                            </div>
+                        </div>
                     </div>
-                    <div class="o_pos_cash_discount_card__pill">
-                        <t t-esc="payAdjMethodName"/>
-                    </div>
+
+                    <!-- Selectores -->
+                    <t t-if="payAdjHasCards">
+                        <div class="o_pos_cash_discount_card__selectors">
+                            
+                            <!-- Selector de Tarjeta -->
+                            <div class="o_pos_cash_discount_card__selector_group">
+                                <label class="o_pos_cash_discount_card__label">TARJETA:</label>
+                                <select class="o_pos_cash_discount_card__select"
+                                        t-on-change="onPayAdjCardChange">
+                                    <t t-foreach="payAdjCards" t-as="card" t-key="card.id">
+                                        <option t-att-value="card.id"
+                                                t-att-selected="card.id === payAdjSelectedCardId">
+                                            <t t-esc="card.name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+
+                            <!-- Selector de Cuotas -->
+                            <div class="o_pos_cash_discount_card__selector_group">
+                                <label class="o_pos_cash_discount_card__label">PLAN:</label>
+                                <select class="o_pos_cash_discount_card__select"
+                                        t-on-change="onPayAdjOptionChange">
+                                    <t t-foreach="payAdjOptionsForSelectedCard" t-as="opt" t-key="opt.id">
+                                        <option t-att-value="opt.id"
+                                                t-att-selected="opt.id === payAdjSelectedOptionId">
+                                            <t t-esc="opt.name"/> (<t t-esc="opt.percent"/>%)
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <!-- ✅ NUEVO: Detalle de cuotas -->
+                        <div class="o_pos_cash_discount_card__installment_detail"
+                             t-if="payAdjInstallmentDetail">
+                            <i class="fa fa-credit-card"/> <t t-esc="payAdjInstallmentDetail"/>
+                        </div>
+
+                        <!-- ✅ NUEVO: Input de cupón (solo si la tarjeta lo requiere) -->
+                        <div class="o_pos_cash_discount_card__coupon_section"
+                             t-if="payAdjRequiresCoupon">
+                            <label class="o_pos_cash_discount_card__coupon_label">
+                                <i class="fa fa-barcode"/> Nº CUPÓN (requerido):
+                            </label>
+                            <input type="text"
+                                   class="o_pos_cash_discount_card__coupon_input"
+                                   t-att-value="payAdjCouponNumber"
+                                   t-on-input="onPayAdjCouponInput"
+                                   t-on-blur="onPayAdjCouponBlur"
+                                   placeholder="123-1234"
+                                   maxlength="8"
+                                   inputmode="numeric"
+                                   autocomplete="off"
+                                   required="required"/>
+                        </div>
+
+                    </t>
+
                 </div>
 
             </div>

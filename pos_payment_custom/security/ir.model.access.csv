@@ -1,3 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_pos_pay_adj_opt_manager,pos.payment.method.adjustment.option manager,model_pos_payment_method_adjustment_option,point_of_sale.group_pos_manager,1,1,1,1
-access_pos_pay_adj_opt_admin,pos.payment.method.adjustment.option admin,model_pos_payment_method_adjustment_option,base.group_system,1,1,1,1
+access_pos_payment_method_card_user,pos.payment.method.card.user,model_pos_payment_method_card,point_of_sale.group_pos_user,1,1,1,1
+access_pos_payment_method_card_manager,pos.payment.method.card.manager,model_pos_payment_method_card,point_of_sale.group_pos_manager,1,1,1,1
+access_pos_payment_method_card_option_user,pos.payment.method.card.option.user,model_pos_payment_method_card_option,point_of_sale.group_pos_user,1,1,1,1
+access_pos_payment_method_card_option_manager,pos.payment.method.card.option.manager,model_pos_payment_method_card_option,point_of_sale.group_pos_manager,1,1,1,1
+access_pos_payment_method_adjustment_option_user,pos.payment.method.adjustment.option.user,model_pos_payment_method_adjustment_option,point_of_sale.group_pos_user,1,1,1,1
+access_pos_payment_method_adjustment_option_manager,pos.payment.method.adjustment.option.manager,model_pos_payment_method_adjustment_option,point_of_sale.group_pos_manager,1,1,1,1

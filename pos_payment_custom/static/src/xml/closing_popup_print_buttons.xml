@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="pos_payment_custom_closing_buttons" xml:space="preserve">
+
+    <t t-name="pos_payment_custom.ClosePosPopupPrintButtons"
+       t-inherit="point_of_sale.ClosePosPopup"
+       t-inherit-mode="extension">
+
+        <!-- Anclar al botón de "Venta diaria" por su ícono de descarga (no depende del idioma) -->
+        <xpath expr="//*[self::button or self::a][contains(@class,'btn')][.//i[contains(@class,'fa-download') or contains(@class,'fa-file-download')]]"
+               position="after">
+            <button class="btn btn-secondary ms-2" t-on-click="downloadReport80mm">
+                <i class="fa fa-print me-1"/> Ticket 80mm
+            </button>
+        </xpath>
+
+    </t>
+
+</templates>

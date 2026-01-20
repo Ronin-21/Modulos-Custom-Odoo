@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="pos_payment_custom_closing_templates" xml:space="preserve">
+
+    <!--
+        POS Payment Custom - Detalle de tarjetas en cierre de caja
+
+        Objetivo:
+        - Poder DESGLOSAR por método de pago (ej: CLOVER) las tarjetas usadas:
+          Visa, Master, Naranja, etc + plan de cuotas.
+    -->
+
+    <t t-name="pos_payment_custom.ClosePosPopupCardDetail"
+       t-inherit="point_of_sale.ClosePosPopup"
+       t-inherit-mode="extension">
+
+        <!-- Insertamos el bloque debajo del resumen de métodos de pago -->
+        <xpath expr="//div[contains(@class,'payment-methods-overview')]" position="after">
+
+            <div class="mt-3 p-3" style="border: 1px solid #ddd; border-radius: 6px; background: #f8f9fa;">
+
+                <h5 style="margin: 0 0 10px 0;">
+                    Detalle de tarjetas por método de pago
+                </h5>
+
+                <t t-if="state.card_details_loading">
+                    <div class="alert alert-info mb-0">
+                        <i class="fa fa-spinner fa-spin"/> Cargando detalle...
+                    </div>
+                </t>
+
+                <t t-if="!state.card_details_loading and (!state.card_details_groups or !state.card_details_groups.length)">
+                    <div class="text-muted" style="font-size: 12px;">
+                        No hay pagos con tarjeta para desglosar en esta sesión.
+                    </div>
+                </t>
+
+                <t t-if="!state.card_details_loading and state.card_details_groups and state.card_details_groups.length">
+
+                    <!-- Total general -->
+                    <div class="mb-2" style="font-size: 12px; color: #555;">
+                        <strong>Total tarjetas:</strong>
+                        <t t-esc="state.card_details_total_trans"/> transacciones —
+                        <t t-esc="env.utils.formatCurrency(state.card_details_total_amount or 0, false)"/>
+                    </div>
+
+                    <!-- Por método de pago (CLOVER, Mercado Pago, etc.) -->
+                    <t t-foreach="state.card_details_groups" t-as="group" t-key="group.payment_method_id">
+                        <details class="mb-2">
+                            <summary style="cursor:pointer; font-weight: 600;">
+                                <t t-esc="group.payment_method_name"/>
+                                <span style="font-weight: 400; color: #666;">
+                                    — <t t-esc="group.total_trans"/> trans. —
+                                    <t t-esc="env.utils.formatCurrency(group.total_amount or 0, false)"/>
+                                </span>
+                            </summary>
+
+                            <div class="mt-2">
+                                <table class="table table-sm table-bordered" style="background: white; margin-bottom: 0;">
+                                    <thead style="background-color: #e9ecef;">
+                                        <tr>
+                                            <th style="padding: 8px;">Tarjeta</th>
+                                            <th style="padding: 8px;">Plan</th>
+                                            <th style="padding: 8px; text-align: center;">Cuotas</th>
+                                            <th style="padding: 8px; text-align: center;">Recargo %</th>
+                                            <th style="padding: 8px; text-align: center;">Trans.</th>
+                                            <th style="padding: 8px; text-align: right;">Total</th>
+                                            <th style="padding: 8px;">Cupones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="group.lines" t-as="line"
+                                           t-key="(line.card_name || '') + '-' + (line.installment_plan_name || '') + '-' + (line.installments || 0)">
+                                            <tr>
+                                                <td style="padding: 6px;">
+                                                    <t t-esc="line.card_name"/>
+                                                </td>
+                                                <td style="padding: 6px;">
+                                                    <t t-esc="line.installment_plan_name"/>
+                                                </td>
+                                                <td style="padding: 6px; text-align: center;">
+                                                    <t t-esc="line.installments"/>
+                                                </td>
+                                                <td style="padding: 6px; text-align: center;">
+                                                    <t t-esc="line.installment_percent"/>%
+                                                </td>
+                                                <td style="padding: 6px; text-align: center;">
+                                                    <t t-esc="line.transaction_count"/>
+                                                </td>
+                                                <td style="padding: 6px; text-align: right;">
+                                                    <t t-esc="env.utils.formatCurrency(line.total_amount or 0, false)"/>
+                                                </td>
+                                                <td style="padding: 6px; font-size: 11px; color:#444;">
+                                                    <t t-esc="line.coupons"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+
+                                        <tr style="background: #f1f3f5;">
+                                            <td colspan="4" style="padding: 10px 6px; text-align: right;">
+                                                <strong>Subtotal</strong>
+                                            </td>
+                                            <td style="padding: 10px 6px; text-align: center;">
+                                                <strong t-esc="group.total_trans"/>
+                                            </td>
+                                            <td style="padding: 10px 6px; text-align: right;">
+                                                <strong t-esc="env.utils.formatCurrency(group.total_amount or 0, false)"/>
+                                            </td>
+                                            <td/>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>
+                    </t>
+
+                    <p style="font-size: 11px; color: #666; margin: 8px 0 0 0; font-style: italic;">
+                        * El desglose se arma a partir de los pagos (pos.payment) guardados en la sesión.
+                    </p>
+
+                </t>
+            </div>
+
+        </xpath>
+
+    </t>
+
+</templates>

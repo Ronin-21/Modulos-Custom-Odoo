@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Vista de búsqueda personalizada para pedidos con cupón -->
+    <record id="pos_order_search_coupon_view" model="ir.ui.view">
+        <field name="name">pos.order.search.coupon.view</field>
+        <field name="model">pos.order</field>
+        <field name="arch" type="xml">
+            <search string="Pedidos POS con Cupón">
+                <field name="pos_reference" string="Referencia"/>
+                <field name="partner_id" string="Cliente"/>
+                <field name="coupon_numbers" string="Nº Cupón" filter_domain="[('coupon_numbers', 'ilike', self)]"/>
+                <field name="session_id" string="Sesión"/>
+                
+                <filter string="Con cupón" name="filter_with_coupon" 
+                        domain="[('coupon_numbers', '!=', False)]"/>
+                <filter string="Sin cupón" name="filter_without_coupon" 
+                        domain="[('coupon_numbers', '=', False)]"/>
+                
+                <separator/>
+                
+                <filter string="Hoy" name="filter_today" 
+                        domain="[('date_order', '&gt;=', datetime.datetime.now().replace(hour=0, minute=0, second=0))]"/>
+                <filter string="Esta semana" name="filter_week" 
+                        domain="[('date_order', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                
+                <group expand="0" string="Agrupar por">
+                    <filter string="Sesión" name="group_session" context="{'group_by': 'session_id'}"/>
+                    <filter string="Cliente" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Fecha" name="group_date" context="{'group_by': 'date_order'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para ver pedidos con cupones -->
+    <record id="action_pos_orders_with_coupon" model="ir.actions.act_window">
+        <field name="name">Pedidos con Cupón</field>
+        <field name="res_model">pos.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('coupon_numbers', '!=', False)]</field>
+        <field name="context">{'search_default_filter_with_coupon': 1}</field>
+        <field name="search_view_id" ref="pos_order_search_coupon_view"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay pedidos con números de cupón
+            </p>
+            <p>
+                Los pedidos con métodos de pago que requieren cupón aparecerán aquí.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para acceder a pedidos con cupón -->
+    <menuitem id="menu_pos_orders_with_coupon"
+              name="Pedidos con Cupón"
+              parent="point_of_sale.menu_point_root"
+              action="action_pos_orders_with_coupon"
+              sequence="15"
+              groups="point_of_sale.group_pos_user"/>
+
+</odoo>

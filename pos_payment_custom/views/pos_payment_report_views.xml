@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Vista de búsqueda para pagos con cupón -->
+    <record id="pos_payment_search_coupon_view" model="ir.ui.view">
+        <field name="name">pos.payment.search.coupon.view</field>
+        <field name="model">pos.payment</field>
+        <field name="arch" type="xml">
+            <search string="Pagos POS con Cupón">
+                <field name="coupon_number" string="Nº Cupón" filter_domain="[('coupon_number', 'ilike', self)]"/>
+                <field name="card_name" string="Tarjeta" filter_domain="[('card_name', 'ilike', self)]"/>
+                <field name="payment_method_id" string="Método de Pago"/>
+                <field name="pos_order_id" string="Pedido"/>
+                <field name="session_id" string="Sesión"/>
+                
+                <filter string="Con cupón" name="filter_with_coupon" 
+                        domain="[('coupon_number', '!=', False)]"/>
+                <filter string="Sin cupón" name="filter_without_coupon" 
+                        domain="[('coupon_number', '=', False)]"/>
+                
+                <separator/>
+                
+                <filter string="Hoy" name="filter_today" 
+                        domain="[('create_date', '&gt;=', datetime.datetime.now().replace(hour=0, minute=0, second=0))]"/>
+                
+                <group expand="0" string="Agrupar por">
+                    <filter string="Tarjeta" name="group_card" context="{'group_by': 'card_name'}"/>
+                    <filter string="Método de Pago" name="group_method" context="{'group_by': 'payment_method_id'}"/>
+                    <filter string="Sesión" name="group_session" context="{'group_by': 'session_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Vista de lista mejorada para pagos con cupón -->
+    <record id="pos_payment_list_coupon_view" model="ir.ui.view">
+        <field name="name">pos.payment.list.coupon.view</field>
+        <field name="model">pos.payment</field>
+        <field name="arch" type="xml">
+            <list string="Pagos con Cupón" create="false" edit="false" default_order="create_date desc">
+                <field name="pos_order_id" string="Ordenar"/>
+                <!-- ✅ CAMBIO: Mostrar tarjeta en lugar de método -->
+                <field name="card_name" string="Tarjeta" optional="show"/>
+                <field name="installment_plan_name" string="Plan" optional="show"/>
+                <field name="coupon_number" string="Nº Cupón"/>
+                <field name="amount" string="Importe" sum="Total"/>
+                <field name="session_id" string="Sesión"/>
+                <!-- Método como opcional oculto -->
+                <field name="payment_method_id" string="Método" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ✅ NUEVA: Vista de formulario detallada -->
+    <record id="pos_payment_form_coupon_view" model="ir.ui.view">
+        <field name="name">pos.payment.form.coupon.view</field>
+        <field name="model">pos.payment</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount']" position="after">
+                <field name="coupon_number" placeholder="Ej: 123-1234"/>
+                <field name="card_name" placeholder="Ej: Visa, Mastercard"/>
+                <field name="installments"/>
+                <field name="installment_percent"/>
+                <field name="installment_plan_name"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Acción para ver pagos con cupones -->
+    <record id="action_pos_payment_coupons" model="ir.actions.act_window">
+        <field name="name">Cupones de Pago</field>
+        <field name="res_model">pos.payment</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('coupon_number', '!=', False)]</field>
+        <!-- ✅ CAMBIO: Sin agrupación por defecto, solo filtro de con cupón -->
+        <field name="context">{'search_default_filter_with_coupon': 1}</field>
+        <field name="search_view_id" ref="pos_payment_search_coupon_view"/>
+        <field name="view_id" ref="pos_payment_list_coupon_view"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay pagos con números de cupón
+            </p>
+            <p>
+                Los pagos realizados con métodos que requieren cupón aparecerán aquí.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para acceder a cupones de pago -->
+    <menuitem id="menu_pos_payment_coupons"
+              name="Cupones de Pago"
+              parent="point_of_sale.menu_point_root"
+              action="action_pos_payment_coupons"
+              sequence="16"
+              groups="point_of_sale.group_pos_user"/>
+
+</odoo>
