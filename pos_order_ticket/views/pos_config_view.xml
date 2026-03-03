@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="pos_config_view_form_inherit_order_ticket" model="ir.ui.view">
+        <field name="name">pos.config.form.inherit.order.ticket</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Insertar como "setting" justo después de ePos Printer -->
+            <xpath expr="//setting[@id='other_devices']" position="after">
+                <setting id="order_ticket_setting"
+                         string="Ticket de pedido (comanda)"
+                         help="Muestra el botón 'Pedido' en el POS para imprimir un ticket de pedido (sin precios).">
+                    <field name="enable_order_ticket" readonly="has_active_session"/>
+                </setting>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

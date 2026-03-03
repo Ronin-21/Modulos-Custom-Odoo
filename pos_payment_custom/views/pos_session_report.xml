@@ -227,6 +227,7 @@
                     <div style="text-align: start; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 5px;">
                         <div style="font-weight: bold; font-size: 14px;">DETALLE DE PAGOS</div>
                         <div style="font-size: 12px;"><span t-out="session.name"/></div>
+                        <div style="font-size: 12px;"><span t-out="session.pwm_internal_session_id"/></div>
                         <div style="font-size: 12px;">
                             <span t-out="session.start_at" t-options="{'widget': 'datetime'}"/>
                         </div>

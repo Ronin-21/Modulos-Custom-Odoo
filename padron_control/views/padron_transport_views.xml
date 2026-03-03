@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <record id="action_padron_transport" model="ir.actions.act_window">
+      <field name="name">Control de Traslado</field>
+          <field name="groups_id" eval="[(4, ref('padron_control.group_padron_supervisor')), (4, ref('padron_control.group_padron_admin'))]"/>
+      <field name="res_model">fleet.vehicle</field>
+      <field name="view_mode">list,form</field>
+      <field name="view_ids" eval="[(5,0,0),(0,0,{'sequence':1,'view_mode':'list','view_id':ref('padron_control.view_fleet_vehicle_list_padron_control')}),(0,0,{'sequence':2,'view_mode':'form','view_id':ref('padron_control.view_fleet_vehicle_form_padron_control')})]"/>
+      <field name="context" eval="{'create': False, 'edit': False, 'delete': False}"/>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+          Aquí podés ver los vehículos y sus personas asignadas (con estado de voto).
+        </p>
+      </field>
+    </record>
+
+    <menuitem id="menu_padron_transport" name="Control de Traslado" parent="menu_padron_operacion" action="action_padron_transport" sequence="30"/>
+  </data>
+</odoo>

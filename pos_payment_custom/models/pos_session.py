@@ -17,6 +17,8 @@ class PosSession(models.Model):
             "adjustment_type",
             "adjustment_product_id",
             "cards_config",
+            "discount_percent",
+            "discount_options_config",
         ):
             if fname not in fields:
                 fields.append(fname)

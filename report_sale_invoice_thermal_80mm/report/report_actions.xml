@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="action_report_saleorder_thermal_80mm" model="ir.actions.report">
+        <field name="name">Presupuesto 80mm</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">report_sale_invoice_thermal_80mm.report_saleorder_thermal_80mm</field>
+        <field name="report_file">report_sale_invoice_thermal_80mm.report_saleorder_thermal_80mm</field>
+        <field name="paperformat_id" ref="report_sale_invoice_thermal_80mm.paperformat_thermal_80mm_roll"/>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
+        <field name="binding_view_types">form</field>
+        <field name="print_report_name">'Presupuesto_80mm_%s' % (object.name or '')</field>
+    </record>
+
+    <record id="action_report_invoice_thermal_80mm" model="ir.actions.report">
+        <field name="name">Factura 80mm</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">report_sale_invoice_thermal_80mm.report_invoice_thermal_80mm</field>
+        <field name="report_file">report_sale_invoice_thermal_80mm.report_invoice_thermal_80mm</field>
+        <field name="paperformat_id" ref="report_sale_invoice_thermal_80mm.paperformat_thermal_80mm_roll"/>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+        <field name="binding_view_types">form</field>
+        <field name="print_report_name">'Factura_80mm_%s' % (object.name or '')</field>
+    </record>
+
+</odoo>

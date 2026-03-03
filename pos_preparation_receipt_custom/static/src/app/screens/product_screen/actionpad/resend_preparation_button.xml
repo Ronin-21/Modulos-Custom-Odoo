@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- Botón en pantalla principal (Action Pad), sin abrir Actions -->
+    <t t-inherit="point_of_sale.ActionpadWidget" t-inherit-mode="extension">
+        <xpath expr="//div[contains(@class,'action') and contains(@class,'pad')]" position="inside">
+            <button class="button"
+                    t-on-click="onClickResendPreparationComanda"
+                    t-att-disabled="!pos.get_order() or !pos.get_order().__last_prep_prints">
+                <i class="fa fa-print me-1"/>
+                <span>Reenviar comanda</span>
+            </button>
+        </xpath>
+    </t>
+
+</templates>

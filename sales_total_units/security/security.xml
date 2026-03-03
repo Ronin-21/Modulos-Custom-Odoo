@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="module_category_sales_total_units" model="ir.module.category">
+        <field name="name">Ventas - Descuentos por Volumen</field>
+        <field name="description">Control de la función de descuentos por volumen</field>
+        <field name="sequence">60</field>
+    </record>
+
+    <record id="group_volume_discount_feature" model="res.groups">
+        <field name="name">Descuentos por Volumen</field>
+        <field name="category_id" ref="module_category_sales_total_units"/>
+    </record>
+
+</odoo>

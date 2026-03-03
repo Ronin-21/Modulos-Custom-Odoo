@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <!-- Vista LISTA simplificada para Control de Traslado (Padrón) -->
+    <record id="view_fleet_vehicle_list_padron_control" model="ir.ui.view">
+        <field name="name">fleet.vehicle.list.padron.control</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="arch" type="xml">
+            <list string="Vehículos" create="0" edit="0" delete="0">
+                <field name="license_plate" string="Matrícula"/>
+                <field name="model_id" string="Modelo"/>
+                <field name="driver_id" string="Conductor"/>
+                <field name="padron_person_count" string="Personas"/>
+                <field name="padron_voted_count" string="Votaron"/>
+                <field name="padron_pending_count" string="Faltan"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista FORMULARIO simplificada para Control de Traslado (Padrón) -->
+    <record id="view_fleet_vehicle_form_padron_control" model="ir.ui.view">
+        <field name="name">fleet.vehicle.form.padron.control</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="arch" type="xml">
+            <form string="Vehículo" create="0" edit="0" delete="0">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" name="action_open_padron_persons" class="oe_stat_button" icon="fa-users">
+                            <field name="padron_person_count" widget="statinfo" string="Personas"/>
+                        </button>
+                        <button type="object" name="action_open_padron_pending_persons" class="oe_stat_button" icon="fa-clock-o">
+                            <field name="padron_pending_count" widget="statinfo" string="Faltan"/>
+                        </button>
+                        <button type="object" name="action_open_padron_voted_persons" class="oe_stat_button" icon="fa-check">
+                            <field name="padron_voted_count" widget="statinfo" string="Votaron"/>
+                        </button>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="license_plate" string="Matrícula"/>
+                            <field name="model_id" string="Modelo"/>
+                            <field name="driver_id" string="Conductor"/>
+                        </group>
+                        <group>
+                            <field name="padron_person_count" readonly="1"/>
+                            <field name="padron_voted_count" readonly="1"/>
+                            <field name="padron_pending_count" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Personas asignadas">
+                        <div class="o_row">
+                            <div class="o_col-12">
+                                <button name="action_open_padron_assign_wizard" type="object"
+                                        string="Asignar personas" icon="fa-user-plus"
+                                        class="btn-primary"/>
+                            </div>
+                        </div>
+
+                            <field name="padron_person_ids" readonly="1">
+                                <list create="0" edit="0" delete="0">
+                                    <field name="name" string="Nombre"/>
+                                    <field name="dni" string="DNI"/>
+                                    <field name="tramite" string="Trámite"/>
+                                    <field name="mesa_id" string="Mesa"/>
+</list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from odoo import models, fields
 
 
@@ -9,7 +10,7 @@ class PosPayment(models.Model):
         help="Número de cupón/comprobante de la transacción con tarjeta",
     )
     
-    # ✅ NUEVO: Información detallada de la tarjeta y cuotas
+    # ✅ Información detallada de la tarjeta y cuotas
     card_name = fields.Char(
         string="Tarjeta",
         help="Nombre de la tarjeta utilizada (Visa, Mastercard, Naranja, etc.)",

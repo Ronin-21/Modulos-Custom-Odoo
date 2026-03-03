@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
-from odoo.exceptions import ValidationError
+from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError, UserError
+
+# Reutilizamos el helper que YA tenés en hooks.py (así no duplicamos lógica)
+from ..hooks import _get_or_create_surcharge_product
 
 
 class PosPaymentMethod(models.Model):
@@ -27,6 +30,13 @@ class PosPaymentMethod(models.Model):
         domain=[("available_in_pos", "=", True)],
     )
 
+    discount_percent = fields.Float(
+        string="Porcentaje de descuento (%)",
+        default=0.0,
+        help="Porcentaje fijo de descuento a aplicar cuando este método está en 'Descuento'. "
+            "Ej: 10 = 10%.",
+    )
+
     # ✅ Campos para configuración POR TARJETA
     card_ids = fields.One2many(
         "pos.payment.method.card",
@@ -41,6 +51,12 @@ class PosPaymentMethod(models.Model):
         compute="_compute_cards_config",
         readonly=True,
     )
+
+    @api.constrains("discount_percent")
+    def _check_discount_percent(self):
+        for m in self:
+            if m.discount_percent < 0 or m.discount_percent > 100:
+                raise ValidationError(_("El porcentaje de descuento debe estar entre 0 y 100."))
 
     @api.depends(
         "card_ids",
@@ -70,6 +86,10 @@ class PosPaymentMethod(models.Model):
         "card_ids"
     )
     def _check_adjustment(self):
+        # Permite que el botón funcione aunque el cliente intente “guardar” antes de ejecutar
+        if self.env.context.get("ppc_skip_adjustment_check"):
+            return
+
         for m in self:
             if not m.apply_adjustment:
                 continue
@@ -79,7 +99,8 @@ class PosPaymentMethod(models.Model):
                 # Debe tener producto de recargo
                 if not m.adjustment_product_id:
                     raise ValidationError(
-                        "Si el método tiene Recargo, debe seleccionar un Producto de recargo."
+                        "Si el método tiene Recargo, debe seleccionar un Producto de recargo "
+                        "(o usar el botón para crearlo/traerlo)."
                     )
 
                 # Validar que el producto esté disponible en POS
@@ -102,6 +123,36 @@ class PosPaymentMethod(models.Model):
                             f"La tarjeta '{card.name}' debe tener al menos una opción de cuotas."
                         )
 
+    def action_get_or_create_surcharge_product(self):
+        """Botón: crea o trae el producto de recargo para la empresa del método y lo asigna."""
+        self.ensure_one()
+
+        if not self.apply_adjustment or self.adjustment_type != "surcharge":
+            raise UserError(_("Este botón solo aplica cuando el método tiene ajuste en modo Recargo."))
+
+        company = self.company_id or self.env.company
+
+        # Crea/trae producto por compañía (helper ya existente en hooks.py)
+        product = _get_or_create_surcharge_product(self.env, company)
+
+        # Asegurar que esté disponible en POS (por si existía mal configurado)
+        if "available_in_pos" in product._fields and not product.available_in_pos:
+            product.sudo().write({"available_in_pos": True})
+
+        # Asignar al método (con contexto que evita el constrain si el cliente hace pre-save)
+        self.with_context(ppc_skip_adjustment_check=True).write({"adjustment_product_id": product.id})
+
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Producto de recargo listo"),
+                "message": _("Se asignó el producto '%s' al método de pago.") % (product.display_name,),
+                "type": "success",
+                "sticky": False,
+            },
+        }
+
     def _load_pos_data_fields(self, config_id):
         fields_list = []
         parent = super(PosPaymentMethod, self)
@@ -112,6 +163,7 @@ class PosPaymentMethod(models.Model):
             "apply_adjustment",
             "adjustment_type",
             "adjustment_product_id",
+            "discount_percent",
             "cards_config",
         ]
         for f in extra:

@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- =========================
+         STYLES (INLINE)
+         ========================= -->
+    <template id="thermal_80mm_styles">
+        <style type="text/css">
+            /* Papel térmico */
+            @page { size: 80mm auto; margin: 0mm; }
+
+            /* Odoo a veces agrega padding/márgenes al layout A4: lo anulamos */
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 80mm !important;
+            }
+            main, .o_report_layout, main.o_report_layout {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 80mm !important;
+            }
+            .page, .article, .container, .container-fluid {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Contenedor del ticket */
+            .thermal-page {
+                box-sizing: border-box;
+                width: 76mm;
+                margin: 0 auto;
+                padding: 0 2mm;
+                font-family: "DejaVu Sans Mono","Courier New",Courier,monospace;
+                font-size: 7.8pt;
+                line-height: 1.20;
+                color: #000;
+            }
+
+            .thermal-page .center { text-align: center; }
+            .thermal-page .right  { text-align: right; white-space: nowrap; }
+            .thermal-page .bold   { font-weight: 700; }
+            .thermal-page .small  { font-size: 6.8pt; line-height: 1.10; }
+            .thermal-page .sep    { margin: 4px 0; white-space: pre; }
+
+            table.meta, table.lines, table.totals {
+                font-size: 7.5pt; line-height: 1.08;
+                width: 100%;
+                border-collapse: collapse;
+            }
+            table.meta td, table.lines td, table.totals td {
+                font-size: 7.5pt; line-height: 1.08;
+                padding: 1px 0;
+                vertical-align: top;
+            }
+
+            /* LÍNEAS MÁS CHICAS (producto + importe) */
+            table.lines { font-size: 7.5pt; line-height: 1.08; }
+            table.lines td.desc { width: 70%; word-break: break-word; }
+            table.lines td.amt  { width: 30%; text-align: right; white-space: nowrap; }
+
+            /* Segunda línea: "qty x unit" todavía más chica */
+            table.lines tr.line-detail td { font-size: 6.3pt; }
+
+            /* QR más chico */
+            .qr-box { text-align: center; margin: 4px 0; }
+            .qr-box img {
+                width: 24mm !important;
+                height: 24mm !important;
+                display: inline-block;
+            }
+            .muted { opacity: 0.9; }
+        </style>
+    </template>
+
+    <!-- =========================
+         HELPERS
+         ========================= -->
+
+    <template id="thermal_sep_line">
+        <div class="sep">------------------------------------------</div>
+    </template>
+
+    <!-- Moneda AR simple (sin $A) -->
+    <template id="thermal_amount_ar">
+        <t t-set="amt" t-value="float(amount or 0.0)"/>
+        <t t-set="txt" t-value="'{:,.2f}'.format(amt).replace(',', 'X').replace('.', ',').replace('X', '.')"/>
+        <!-- white-space para que NO corte el $ -->
+        <span style="white-space:nowrap;">$ <t t-esc="txt"/></span>
+    </template>
+
+    <template id="thermal_company_header">
+        <t t-set="company" t-value="o.company_id"/>
+        <t t-set="cp" t-value="company.partner_id"/>
+
+        <div class="center bold">
+            <!-- Si tenés _thermal_fix_text en python, podés usarlo acá:
+                 <t t-esc="o._thermal_fix_text((company.name or '').upper())"/>
+                 Si no, dejalo simple como abajo.
+            -->
+            <t t-esc="(company.name or '').upper()"/>
+        </div>
+
+        <div class="center small" t-if="company.street">
+            <t t-esc="company.street"/>
+        </div>
+
+        <div class="center small">
+            <t t-if="company.city"><t t-esc="company.city"/></t>
+            <t t-if="company.city and company.state_id">, </t>
+            <t t-if="company.state_id"><t t-esc="company.state_id.name"/></t>
+            <t t-if="(company.city or company.state_id) and company.country_id">, </t>
+            <t t-if="company.country_id"><t t-esc="company.country_id.name"/></t>
+        </div>
+
+        <div class="center small" t-if="company.vat">
+            CUIT: <t t-esc="company.vat"/>
+        </div>
+
+        <div class="center small"
+             t-if="cp and cp._fields.get('l10n_ar_afip_responsibility_type_id') and cp.l10n_ar_afip_responsibility_type_id">
+            <t t-esc="cp.l10n_ar_afip_responsibility_type_id.name"/>
+        </div>
+    </template>
+
+    <template id="thermal_partner_block">
+        <div class="mt8">
+            <div class="bold">Cliente</div>
+            <!-- Si tenés _thermal_fix_text en python, podés usarlo acá también -->
+            <div><t t-esc="o.partner_id.name"/></div>
+
+            <!-- <t t-if="o.partner_id and o.partner_id._fields.get('l10n_ar_afip_responsibility_type_id') and o.partner_id.l10n_ar_afip_responsibility_type_id">
+                <div class="small muted">
+                    <t t-esc="o.partner_id.l10n_ar_afip_responsibility_type_id.name"/>
+                </div>
+            </t> -->
+
+            <div class="small" t-if="o.partner_id and o.partner_id.vat">
+                CUIT/DNI: <t t-esc="o.partner_id.vat"/>
+            </div>
+        </div>
+    </template>
+
+    <!-- =========================
+         SALE ORDER (PRESUPUESTO) 80mm
+         ========================= -->
+
+    <template id="report_saleorder_thermal_80mm">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="report_sale_invoice_thermal_80mm.report_saleorder_document_thermal_80mm"
+                   t-lang="doc.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_saleorder_document_thermal_80mm">
+        <t t-call="report_sale_invoice_thermal_80mm.thermal_80mm_styles"/>
+        <t t-set="o" t-value="doc"/>
+
+        <div class="thermal-page">
+            <t t-call="report_sale_invoice_thermal_80mm.thermal_company_header"/>
+            <t t-call="report_sale_invoice_thermal_80mm.thermal_sep_line"/>
+
+            <div class="center bold">PRESUPUESTO</div>
+            <div class="center small" t-if="o.name"><t t-esc="o.name"/></div>
+
+            <t t-call="report_sale_invoice_thermal_80mm.thermal_sep_line"/>
+
+            <table class="meta small">
+                <tr>
+                    <td>Fecha</td>
+                    <td class="right"><span t-field="o.date_order" t-options="{'widget':'date'}"/></td>
+                </tr>
+                <tr t-if="o.validity_date">
+                    <td>Validez</td>
+                    <td class="right"><span t-field="o.validity_date" t-options="{'widget':'date'}"/></td>
+                </tr>
+                <tr t-if="o.user_id">
+                    <td>Vendedor</td>
+                    <td class="right"><t t-esc="o.user_id.name"/></td>
+                </tr>
+            </table>
+
+            <t t-call="report_sale_invoice_thermal_80mm.thermal_partner_block"/>
+            <t t-call="report_sale_invoice_thermal_80mm.thermal_sep_line"/>
+
+            <table class="lines">
+                <t t-foreach="o.order_line" t-as="l">
+                    <t t-if="l.display_type">
+                        <tr>
+                            <td colspan="2" class="bold"><t t-esc="l.name"/></td>
+                        </tr>
+                    </t>
+                    <t t-else="">
+                        <t t-set="qty" t-value="l.product_uom_qty or 0.0"/>
+                        <t t-set="qty_txt" t-value="('%.2f' % qty).rstrip('0').rstrip('.')"/>
+                        <t t-set="line_total" t-value="l.price_total"/>
+                        <t t-set="unit" t-value="(qty and (line_total / qty) or line_total)"/>
+
+                        <tr>
+                            <td class="desc"><t t-esc="l.name"/></td>
+                            <td class="amt">
+                                <t t-set="amount" t-value="line_total"/>
+                                <t t-call="report_sale_invoice_thermal_80mm.thermal_amount_ar"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="small muted">
+                                <t t-esc="qty_txt"/> x
+                                <t t-set="amount" t-value="unit"/>
+                                <t t-call="report_sale_invoice_thermal_80mm.thermal_amount_ar"/>
+                            </td>
+                        </tr>
+                    </t>
+                </t>
+            </table>
+
+            <t t-call="report_sale_invoice_thermal_80mm.thermal_sep_line"/>
+
+            <table class="totals">
+                <tr>
+                    <td>Subtotal</td>
+                    <td class="right">
+                        <t t-set="amount" t-value="o.amount_untaxed"/>
+                        <t t-call="report_sale_invoice_thermal_80mm.thermal_amount_ar"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Impuestos</td>
+                    <td class="right">
+                        <t t-set="amount" t-value="o.amount_tax"/>
+                        <t t-call="report_sale_invoice_thermal_80mm.thermal_amount_ar"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="bold">TOTAL</td>
+                    <td class="right bold">
+                        <t t-set="amount" t-value="o.amount_total"/>
+                        <t t-call="report_sale_invoice_thermal_80mm.thermal_amount_ar"/>
+                    </td>
+                </tr>
+            </table>
+
+            <t t-call="report_sale_invoice_thermal_80mm.thermal_sep_line"/>
+            <div class="center small">Gracias por su compra</div>
+        </div>
+    </template>
+
+    <!-- =========================
+         INVOICE (FACTURA) 80mm ARCA/AFIP
+         ========================= -->
+
+    <template id="report_invoice_thermal_80mm">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="report_sale_invoice_thermal_80mm.report_invoice_document_thermal_80mm"
+                   t-lang="doc.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_invoice_document_thermal_80mm">
+        <t t-call="report_sale_invoice_thermal_80mm.thermal_80mm_styles"/>
+        <t t-set="o" t-value="doc"/>
+
+        <div class="thermal-page">
+            <t t-call="report_sale_invoice_thermal_80mm.thermal_company_header"/>
+            <t t-call="report_sale_invoice_thermal_80mm.thermal_sep_line"/>
+
+            <div class="center bold">FACTURA</div>
+            <div class="center small" t-if="o.name"><t t-esc="o.name"/></div>
+
+            <t t-call="report_sale_invoice_thermal_80mm.thermal_sep_line"/>
+
+            <table class="meta small">
+                <tr>
+                    <td>Fecha</td>
+                    <td class="right">
+                        <span t-field="o.invoice_date" t-options="{'widget':'date'}"/>
+                    </td>
+                </tr>
+                <tr t-if="o.invoice_user_id">
+                    <td>Vendedor</td>
+                    <td class="right"><t t-esc="o.invoice_user_id.name"/></td>
+                </tr>
+            </table>
+
+            <t t-call="report_sale_invoice_thermal_80mm.thermal_partner_block"/>
+            <t t-call="report_sale_invoice_thermal_80mm.thermal_sep_line"/>
+
+            <table class="lines">
+                <t t-foreach="o.invoice_line_ids" t-as="l">
+                    <t t-if="l.display_type">
+                        <tr>
+                            <td colspan="2" class="bold"><t t-esc="l.name"/></td>
+                        </tr>
+                    </t>
+                    <t t-else="">
+                        <t t-set="qty" t-value="l.quantity or 0.0"/>
+                        <t t-set="qty_txt" t-value="('%.2f' % qty).rstrip('0').rstrip('.')"/>
+                        <t t-set="line_total" t-value="l.price_total"/>
+                        <t t-set="unit" t-value="(qty and (line_total / qty) or line_total)"/>
+
+                        <tr>
+                            <td class="desc"><t t-esc="l.name"/></td>
+                            <td class="amt">
+                                <!-- subtotal (sin impuestos) -->
+                                <t t-set="amount" t-value="l.price_subtotal"/>
+                                <t t-call="report_sale_invoice_thermal_80mm.thermal_amount_ar"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="small muted">
+                                <t t-esc="qty_txt"/> x
+                                <t t-set="amount" t-value="unit"/>
+                                <t t-call="report_sale_invoice_thermal_80mm.thermal_amount_ar"/>
+                            </td>
+                        </tr>
+                    </t>
+                </t>
+            </table>
+
+            <t t-call="report_sale_invoice_thermal_80mm.thermal_sep_line"/>
+
+            <table class="totals">
+                <tr>
+                    <td>Subtotal</td>
+                    <td class="right">
+                        <t t-set="amount" t-value="o.amount_untaxed"/>
+                        <t t-call="report_sale_invoice_thermal_80mm.thermal_amount_ar"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Impuestos</td>
+                    <td class="right">
+                        <t t-set="amount" t-value="o.amount_tax"/>
+                        <t t-call="report_sale_invoice_thermal_80mm.thermal_amount_ar"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="bold">TOTAL</td>
+                    <td class="right bold">
+                        <t t-set="amount" t-value="o.amount_total"/>
+                        <t t-call="report_sale_invoice_thermal_80mm.thermal_amount_ar"/>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Bloque fiscal (sin checks extra; solo si existen campos y/o valores) -->
+            <t t-if="o._fields.get('l10n_ar_afip_auth_code') or o._fields.get('l10n_ar_afip_qr_code')">
+                <t t-call="report_sale_invoice_thermal_80mm.thermal_sep_line"/>
+
+                <div class="small" t-if="o._fields.get('l10n_ar_afip_auth_code') and o.l10n_ar_afip_auth_code">
+                    <div>CAE: <span class="bold"><t t-esc="o.l10n_ar_afip_auth_code"/></span></div>
+                    <t t-if="o._fields.get('l10n_ar_afip_auth_code_due') and o.l10n_ar_afip_auth_code_due">
+                        <div>Vto CAE: <span t-field="o.l10n_ar_afip_auth_code_due" t-options="{'widget':'date'}"/></div>
+                    </t>
+                </div>
+
+                <t t-if="o._fields.get('l10n_ar_afip_qr_code') and o.l10n_ar_afip_qr_code">
+                    <div class="qr-box">
+                        <!-- Requiere helper python o similar: o._thermal_afip_qr_src(w,h) -->
+                        <img t-att-src="o._thermal_afip_qr_src(220,220)" alt="QR AFIP"/>
+                        <div class="small center">QR AFIP</div>
+                    </div>
+                </t>
+            </t>
+
+            <t t-call="report_sale_invoice_thermal_80mm.thermal_sep_line"/>
+            <div class="center small">Gracias por su compra</div>
+        </div>
+    </template>
+
+</odoo>

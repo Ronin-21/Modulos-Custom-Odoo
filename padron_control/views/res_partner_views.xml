@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista árbol para padrón -->
+    <record id="view_partner_tree_padron" model="ir.ui.view">
+        <field name="name">res.partner.tree.padron</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="dni"/>
+                <field name="tramite"/>
+                                <field name="padron_vote_state" readonly="1"/>
+                                <field name="padron_vote_datetime" readonly="1"/>
+                                <field name="padron_vote_user_id" readonly="1"/>
+                <field name="mesa_id"/>
+                <field name="vehicle_id" readonly="1"/>
+                <field name="street"/>
+                <field name="city"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_partner_form_padron_inherit" model="ir.ui.view">
+    <field name="name">res.partner.form.padron.inherit</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_form"/>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+        <!-- Campos del padrón integrados al formulario (sin pestaña) -->
+        <xpath expr="//sheet//notebook" position="before">
+            <group string="Padrón"
+                   groups="padron_control.group_padron_operator,padron_control.group_padron_supervisor,padron_control.group_padron_admin">
+                <field name="is_padron_person"/>
+                <group invisible="not is_padron_person">
+                    <field name="dni"/>
+                    <field name="tramite"/>
+                                <field name="padron_vote_state" readonly="1"/>
+                                <field name="padron_vote_datetime" readonly="1"/>
+                                <field name="padron_vote_user_id" readonly="1"/>
+                    <field name="mesa_id"/>
+                    <field name="vehicle_id" readonly="1"/>
+                </group>
+            </group>
+        </xpath>
+    </field>
+</record>
+
+    <record id="view_partner_search_padron" model="ir.ui.view">
+        <field name="name">res.partner.search.padron</field>
+        <field name="model">res.partner</field>        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="dni"/>
+                <field name="tramite"/>
+                                <field name="padron_vote_state" readonly="1"/>
+                                <field name="padron_vote_datetime" readonly="1"/>
+                                <field name="padron_vote_user_id" readonly="1"/>
+                <field name="mesa_id"/>
+                <separator/>
+                <filter string="Solo Padrón" name="only_padron" domain="[('is_padron_person','=',True)]"/>
+                <separator/>
+                <filter string="Agrupar por Mesa" name="group_mesa" context="{'group_by': 'mesa_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_padron_personas" model="ir.actions.act_window">
+        <field name="name">Personas (Padrón)</field>
+            <field name="groups_id" eval="[(4, ref('padron_control.group_padron_supervisor')), (4, ref('padron_control.group_padron_admin'))]"/>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="padron_control.view_partner_search_padron"/>
+        <field name="context">{'search_default_only_padron': 1}</field>
+        <field name="domain">[('is_padron_person','=',True)]</field>
+    </record>
+
+    <menuitem id="menu_padron_personas" name="Personas (Padrón)" parent="padron_control.menu_padron_operacion"
+              action="action_padron_personas" sequence="30"/>
+<!-- Limpieza de formulario para registros del Padrón (solo cuando Es del Padrón = True) -->
+<!-- Limpieza de formulario para registros del Padrón (solo cuando Es del Padrón = True) -->
+<record id="view_partner_form_padron_cleanup_inherit" model="ir.ui.view">
+    <field name="name">res.partner.form.padron.cleanup.inherit</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_form"/>
+    <field name="priority">999</field>
+    <field name="arch" type="xml">
+        <!-- Quitar pestañas: ocultar el notebook completo cuando es del padrón -->
+        <xpath expr="//sheet//notebook" position="attributes">
+            <attribute name="invisible">is_padron_person</attribute>
+        </xpath>
+
+        <!-- Ocultar campos que no se usan en padrón -->
+        <xpath expr="//field[@name='vat']" position="attributes">
+            <attribute name="invisible">is_padron_person</attribute>
+        </xpath>
+        <xpath expr="//field[@name='function']" position="attributes">
+            <attribute name="invisible">is_padron_person</attribute>
+        </xpath>
+        <xpath expr="//field[@name='email']" position="attributes">
+            <attribute name="invisible">is_padron_person</attribute>
+        </xpath>
+        <xpath expr="//field[@name='website']" position="attributes">
+            <attribute name="invisible">is_padron_person</attribute>
+        </xpath>
+        <xpath expr="//field[@name='title']" position="attributes">
+            <attribute name="invisible">is_padron_person</attribute>
+        </xpath>
+        <xpath expr="//field[@name='category_id']" position="attributes">
+            <attribute name="invisible">is_padron_person</attribute>
+        </xpath>
+        <xpath expr="//field[@name='mobile']" position="attributes">
+            <attribute name="invisible">is_padron_person</attribute>
+        </xpath>
+
+        <!-- Opcional: bloquear switch Persona/Empresa para padrón -->
+        <xpath expr="//field[@name='company_type']" position="attributes">
+            <attribute name="invisible">is_padron_person</attribute>
+        </xpath>
+        <xpath expr="//field[@name='is_company']" position="attributes">
+            <attribute name="invisible">is_padron_person</attribute>
+        </xpath>
+        <xpath expr="//field[@name='company_name']" position="attributes">
+            <attribute name="invisible">is_padron_person</attribute>
+        </xpath>
+        <xpath expr="//field[@name='parent_id']" position="attributes">
+            <attribute name="invisible">is_padron_person</attribute>
+        </xpath>
+    </field>
+</record>
+
+</odoo>

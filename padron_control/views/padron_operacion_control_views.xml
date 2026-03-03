@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Vista LIST (Operación) -->
+    <record id="view_partner_list_padron_operacion" model="ir.ui.view">
+        <field name="name">res.partner.list.padron.operacion</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <list string="Control de Votantes" create="false" edit="false" delete="false">
+                <field name="name" string="Nombre"/>
+                <field name="dni" string="DNI"/>
+                <field name="tramite" string="Trámite"/>
+                <field name="mesa_id" string="Mesa"/>
+                <field name="vehicle_id" string="Vehículo"/>
+                <field name="padron_vote_state" string="Estado"/>
+                <field name="padron_vote_datetime" string="Fecha/Hora"/>
+                <field name="padron_vote_user_id" string="Operador"/>
+
+                <button name="action_mark_voted" type="object" string="Marcar Votó"
+                        class="btn-primary" icon="fa-check"
+                        invisible="padron_vote_state == 'voted'"/>
+                <button name="action_unmark_voted" type="object" string="Desmarcar"
+                        class="btn-secondary" icon="fa-undo"
+                        invisible="padron_vote_state != 'voted'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista SEARCH (Operación) -->
+    <record id="view_partner_search_padron_operacion" model="ir.ui.view">
+        <field name="name">res.partner.search.padron.operacion</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <search string="Buscar votantes">
+                <field name="name"/>
+                <field name="dni"/>
+                <field name="tramite"/>
+                <field name="mesa_id"/>
+                <field name="vehicle_id"/>
+
+                <filter string="No votó" name="not_voted" domain="[('padron_vote_state','=','not_voted')]"/>
+                <filter string="Votó" name="voted" domain="[('padron_vote_state','=','voted')]"/>
+
+                <group expand="0" string="Agrupar por">
+                    <filter string="Mesa" name="group_mesa" context="{'group_by':'mesa_id'}"/>
+                    <filter string="Vehículo" name="group_vehicle" context="{'group_by':'vehicle_id'}"/>
+                    <filter string="Estado" name="group_state" context="{'group_by':'padron_vote_state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción + Menú -->
+    <record id="action_padron_control_votantes" model="ir.actions.act_window">
+        <field name="name">Control de Votantes</field>
+            <field name="groups_id" eval="[(4, ref('padron_control.group_padron_supervisor')), (4, ref('padron_control.group_padron_admin'))]"/>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_padron_person','=',True)]</field>
+        <field name="context">{'search_default_not_voted': 1}</field>
+        <field name="view_id" ref="view_partner_list_padron_operacion"/>
+        <field name="search_view_id" ref="view_partner_search_padron_operacion"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Use el buscador por DNI o Trámite y marque el voto.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_padron_control_votantes"
+              name="Control de Votantes"
+              parent="padron_control.menu_padron_operacion"
+              action="action_padron_control_votantes"
+              sequence="10"
+              groups="padron_control.group_padron_operator,padron_control.group_padron_supervisor,padron_control.group_padron_admin"/>
+
+</odoo>

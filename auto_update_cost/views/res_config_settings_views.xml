@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_inherit_auto_update_cost" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.auto.update.cost</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="Precio de Costo Automático" name="auto_update_cost">
+                    <block title="Activar actualización automática del costo de productos" class="o_settings_container">
+
+                        <setting id="auc_enabled" string="Activar">
+                            <field name="auto_update_cost_enabled"/>
+                        </setting>
+
+                        <div class="content-group" invisible="auto_update_cost_enabled == False">
+
+                            <h2 class="mt16">Productos con costo Standard</h2>
+
+                            <setting id="auc_standard_moment"
+                                     string="Momento de actualización (Standard)">
+                                <field name="auto_update_cost_moment" widget="radio" class="o_light_label"/>
+                            </setting>
+
+                            <setting id="auc_standard_strategy"
+                                     string="Estrategia (Standard)">
+                                <field name="auto_update_cost_standard_strategy" widget="radio" class="o_light_label"/>
+                                <div class="text-muted mt8">
+                                    “Promedio (simple)” = promedio de precios de compra registrados, sin ponderar por stock ni cantidades.
+                                </div>
+                            </setting>
+
+                            <setting id="auc_scope"
+                                     string="Alcance multi-empresa">
+                                <field name="auto_update_cost_scope" widget="radio" class="o_light_label"/>
+                            </setting>
+
+                            <h2 class="mt16">Productos con costo Promedio (AVCO)</h2>
+
+                            <setting id="auc_avco_replicate"
+                                     string="AVCO: replicar promedio real a sucursales">
+                                <field name="auto_update_cost_avco_replicate"/>
+                                <div class="text-muted mt8">
+                                    En AVCO, el costo ponderado por stock lo calcula Odoo al recibir (valoración).
+                                    El módulo solo replica ese resultado al validar la recepción.
+                                </div>
+                            </setting>
+
+                            <h2 class="mt16">Cambios manuales de costo</h2>
+
+                            <setting id="auc_manual_propagate"
+                                     string="Propagar cambios manuales">
+                                <field name="auto_update_cost_propagate_manual_cost"/>
+                                <div class="text-muted mt8">
+                                    Por seguridad, por defecto se propaga solo en Standard.
+                                </div>
+                                <div class="content-group mt8" invisible="auto_update_cost_propagate_manual_cost == False">
+                                    <field name="auto_update_cost_propagate_manual_cost_include_avco"/>
+                                    <label for="auto_update_cost_propagate_manual_cost_include_avco"
+                                           string="Permitir también en AVCO (NO recomendado)"/>
+                                </div>
+                            </setting>
+
+                            <h2 class="mt16">BoM</h2>
+
+                            <setting id="auc_bom"
+                                     string="Recalcular BoM">
+                                <field name="auto_update_cost_recalc_bom"/>
+                                <div class="text-muted mt8">
+                                    Recalcula los costos de los BoM cuando se actualiza el costo de un producto pertenciente a la lista de materiales.
+                                </div>
+                            </setting>
+
+                        </div>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

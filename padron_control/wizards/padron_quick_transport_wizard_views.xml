@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_padron_quick_transport_wizard_form" model="ir.ui.view">
+        <field name="name">padron.quick.transport.wizard.form</field>
+        <field name="model">padron.quick.transport.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Marcar Traslado (Rápido)">
+                <sheet>
+                    <group>
+                        <field name="event_id"/>
+                        <field name="identifier" placeholder="Ingresá DNI o Trámite y presioná Enter"/>
+                        <field name="person_id" readonly="1"/>
+                        <field name="mesa_id" readonly="1"/>
+                        <field name="vehicle_id"/>
+                        <field name="transport_status"/>
+                        <field name="note"/>
+                    </group>
+                    <footer>
+                        <button name="action_mark" type="object" string="Marcar" class="btn-primary"/>
+                        <button string="Cerrar" special="cancel" class="btn-secondary"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

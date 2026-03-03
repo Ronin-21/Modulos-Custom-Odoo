@@ -1,0 +1,45 @@
+/* Kiosk mode for Padron operators */
+html.padron-operator-kiosk {
+
+  /* Hide home (apps) */
+  .o_home_menu {
+    display: none !important;
+  }
+
+  /* Keep the top bar for logout, but hide navigation elements */
+  .o_main_navbar {
+    .o_menu_brand,
+    .o_menu_sections,
+    .o_navbar_apps_menu,
+    .o_app_switcher,
+    .o_menu_toggle {
+      display: none !important;
+    }
+  }
+
+  /* Hide control panel (search, breadcrumbs, etc.) */
+  .o_control_panel {
+    display: none !important;
+  }
+
+  /* Remove extra top padding that normally accounts for the control panel */
+  .o_action_manager {
+    padding-top: 0 !important;
+  }
+
+  /* Make the modal the only usable UI */
+  .modal-header .btn-close,
+  .modal-header button.close,
+  /* Odoo dialogs */
+  .o_dialog .o_dialog_header .btn-close,
+  .o_dialog .o_dialog_header button.btn-close,
+  .o_dialog .o_dialog_header .o_dialog_close,
+  .o_dialog .o_dialog_header .o_dialog_close_button {
+    display: none !important;
+  }
+
+  /* Prevent clicking the grey overlay to close */
+  .modal-backdrop {
+    pointer-events: none !important;
+  }
+}

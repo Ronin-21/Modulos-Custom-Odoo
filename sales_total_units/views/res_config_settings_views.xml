@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_inherit" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.volume.discount</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="20"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app name="sales_total_units"
+                     string="Descuentos por Volumen">
+                    <block title="Descuentos por Volumen" name="sales_total_units_block">
+                        <setting id="sales_total_units_enable_setting"
+                                 string="Habilitar descuentos por volumen"
+                                 help="Activa el sistema de descuentos automáticos por litros/unidades vendidas en las órdenes de venta.">
+                            <field name="enable_volume_discount"/>
+                            <div class="content-group" invisible="not enable_volume_discount">
+                                <div class="mt16">
+                                    <button name="%(action_discount_rule)d"
+                                            type="action"
+                                            string="Configurar reglas de descuento"
+                                            class="btn btn-link"
+                                            icon="oi-arrow-right"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

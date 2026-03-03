@@ -47,7 +47,7 @@
                             <field name="active"/>
                         </group>
                     </group>
-                    
+
                     <notebook>
                         <page string="Opciones de Cuotas">
                             <field name="adjustment_option_ids">
@@ -65,8 +65,8 @@
             </form>
         </field>
     </record>
-    
-    <!-- Vista de formulario del método de pago SIMPLIFICADA -->
+
+    <!-- ✅ Vista de formulario del método de pago CON BOTÓN -->
     <record id="pos_payment_method_form_adjustment" model="ir.ui.view">
         <field name="name">pos.payment.method.form.adjustment</field>
         <field name="model">pos.payment.method</field>
@@ -75,20 +75,29 @@
 
             <xpath expr="//group[@name='Payment methods']" position="after">
                 <group string="Descuentos y Recargos" name="payment_adjustments">
-                    
+
                     <field name="apply_adjustment"/>
-                    
-                    <field name="adjustment_type" 
+
+                    <field name="adjustment_type"
                            invisible="not apply_adjustment"/>
 
+                    <field name="discount_percent"
+                           invisible="not apply_adjustment or adjustment_type != 'discount'"/>
+
+                    <!-- Producto de recargo + botón -->
                     <field name="adjustment_product_id"
                            invisible="not apply_adjustment or adjustment_type != 'surcharge'"
-                           required="apply_adjustment and adjustment_type == 'surcharge'"
                            options="{'no_create': True, 'no_create_edit': True}"/>
+
+                    <button name="action_get_or_create_surcharge_product"
+                            type="object"
+                            string="Crear/Traer producto Recargo"
+                            class="btn-primary"
+                            invisible="not apply_adjustment or adjustment_type != 'surcharge' or adjustment_product_id"/>
 
                 </group>
 
-                <!-- Configuración de Tarjetas y Cuotas -->
+                <!-- ✅ Configuración de Tarjetas y Cuotas -->
                 <notebook invisible="not apply_adjustment or adjustment_type != 'surcharge'">
                     <page string="Tarjetas y Cuotas">
                         <field name="card_ids" nolabel="1" context="{'default_payment_method_id': id}">
@@ -103,8 +112,8 @@
                                         <field name="active"/>
                                     </group>
                                 </group>
-                                
-                                <group string="Opciones de Cuotas" string_help="Formato de cupón fijo: 123-1234">
+
+                                <group string="Opciones de Cuotas">
                                     <field name="adjustment_option_ids" nolabel="1" colspan="2">
                                         <list editable="bottom">
                                             <field name="sequence" widget="handle"/>
@@ -116,7 +125,7 @@
                                     </field>
                                 </group>
                             </form>
-                            
+
                             <list>
                                 <field name="sequence" widget="handle"/>
                                 <field name="name"/>
@@ -126,7 +135,7 @@
                         </field>
                     </page>
                 </notebook>
-                
+
             </xpath>
 
         </field>

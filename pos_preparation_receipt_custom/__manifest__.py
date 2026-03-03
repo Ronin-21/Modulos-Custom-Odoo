@@ -10,6 +10,8 @@
             "pos_preparation_receipt_custom/static/src/app/receipt/order_change_receipt_inherit.xml",
             "pos_preparation_receipt_custom/static/src/app/store/pos_store_patch.js",
             "pos_preparation_receipt_custom/static/src/app/receipt/order_change_receipt.scss",
+            "pos_preparation_receipt_custom/static/src/app/screens/product_screen/actionpad/resend_preparation_button.xml",
+            "pos_preparation_receipt_custom/static/src/app/screens/product_screen/actionpad/resend_preparation_button.js",
         ],
     },
     "license": "LGPL-3",

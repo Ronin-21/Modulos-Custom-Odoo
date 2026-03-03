@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="pos_order_ticket.ActionpadWidgetExt"
+    t-inherit="point_of_sale.ActionpadWidget"
+    t-inherit-mode="extension">
+
+        <!-- Insertamos el botón al lado de Pago -->
+        <xpath expr="//button[contains(@class,'pay') or contains(., 'Pago')]" position="before">
+            <button t-if="(pos.config ? pos.config.enable_order_ticket : false)"
+                    class="btn btn-secondary btn-lg"
+                    t-on-click="onClickOrderTicket"
+                    t-att-disabled="!pos.get_order() or !pos.get_order().get_orderlines().length"
+                    title="Imprimir ticket de pedido">
+                <i class="fa fa-print me-1"/>
+                <t t-if="pos.get_order() and pos.get_order().uiState and pos.get_order().uiState.order_ticket_printed">
+                    <span>Reimprimir</span>
+                </t>
+                <t t-else="">
+                    <span>Comanda</span>
+                </t>
+            </button>
+        </xpath>
+
+    </t>
+
+    <!-- Ticket -->
+    <t t-name="pos_order_ticket.OrderTicketReceipt">
+        <div class="pos-receipt">
+            <div class="pos-receipt-header">
+                <div style="text-align:center; font-weight:700;">PEDIDO</div>
+                <t t-if="reprint">
+                    <div style="text-align:center; font-weight:700; margin-top:4px;">DUPLICADO</div>
+                </t>
+                <div style="margin-top:8px;">
+                    <div><strong>Orden:</strong> <t t-esc="header.order_name"/></div>
+                    <div><strong>Fecha:</strong> <t t-esc="header.date"/></div>
+                    <!-- <div><strong>Cajero:</strong> <t t-esc="header.cashier"/></div>
+                    <t t-if="header.partner">
+                        <div><strong>Cliente:</strong> <t t-esc="header.partner"/></div>
+                    </t> -->
+                </div>
+                <hr/>
+            </div>
+
+            <div class="pos-receipt-body">
+                <t t-foreach="lines" t-as="l" t-key="l.name">
+                    <div style="display:flex; justify-content:space-between; gap:8px;">
+                        <div style="min-width:50px;"><strong><t t-esc="l.qty"/></strong>x</div>
+                        <div style="flex:1;">
+                            <div><t t-esc="l.name"/></div>
+                            <t t-if="l.note">
+                                <div style="font-size: 90%;">Obs: <t t-esc="l.note"/></div>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+            </div>
+
+            <hr/>
+            <div class="pos-receipt-footer" style="text-align:center; font-size: 90%;">Gracias</div>
+        </div>
+    </t>
+
+</templates>

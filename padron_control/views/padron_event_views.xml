@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_padron_event_tree" model="ir.ui.view">
+        <field name="name">padron.event.tree</field>
+        <field name="model">padron.event</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_padron_event_form" model="ir.ui.view">
+        <field name="name">padron.event.form</field>
+        <field name="model">padron.event</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_set_active" type="object" string="Activar" class="btn-primary"
+                        groups="padron_control.group_padron_supervisor,padron_control.group_padron_admin"/>
+                    <button name="action_close" type="object" string="Cerrar" class="btn-secondary"
+                        groups="padron_control.group_padron_supervisor,padron_control.group_padron_admin"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active,closed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="date"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_padron_event" model="ir.actions.act_window">
+        <field name="name">Eventos</field>
+            <field name="groups_id" eval="[(4, ref('padron_control.group_padron_supervisor')), (4, ref('padron_control.group_padron_admin'))]"/>
+        <field name="res_model">padron.event</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_padron_eventos" name="Eventos" parent="padron_control.menu_padron_config" action="action_padron_event" sequence="20"/>
+</odoo>

@@ -56,6 +56,66 @@ patch(PosStore.prototype, {
         });
 
         const result = await printer.printReceipt(receipt);
-        return result.successful;
-    },
+
+// Guardamos el último envío a impresoras de preparación para poder "Reenviar comanda"
+// (solo memoria frontend; no afecta el comportamiento normal de Odoo).
+if (result && result.successful && order) {
+    order.__last_prep_prints ||= {};
+    const printerKey =
+        changes.printer_name ||
+        printer?.id ||
+        printer?.name ||
+        "preparation_printer";
+
+    // Guardamos el contexto exacto usado para renderizar el ticket.
+    order.__last_prep_prints[printerKey] = {
+        printer: printer,
+        ctx: {
+            operational_title: title,
+            changes: { ...changes },
+            changedlines: lines,
+            fullReceipt: fullReceipt,
+        },
+        at: Date.now(),
+    };
+}
+
+return result && result.successful;
+},
+
+/**
+ * Reenvía la última comanda impresa (por impresora de preparación) para esta orden.
+ * No modifica el estado "enviado" del core: es un reimpreso manual.
+ *
+ * @returns {Promise<{printed:number, failed:number, missing:number}>}
+ */
+async resendLastPreparationReceipts(order) {
+    const prints = order?.__last_prep_prints || {};
+    const entries = Object.values(prints);
+
+    let printed = 0;
+    let failed = 0;
+    let missing = 0;
+
+    for (const entry of entries) {
+        const printer = entry?.printer;
+        const ctx = entry?.ctx;
+        if (!printer || typeof printer.printReceipt !== "function" || !ctx) {
+            missing++;
+            continue;
+        }
+        const receipt = renderToElement("point_of_sale.OrderChangeReceipt", ctx);
+        try {
+            const result = await printer.printReceipt(receipt);
+            if (result && result.successful) {
+                printed++;
+            } else {
+                failed++;
+            }
+        } catch (e) {
+            failed++;
+        }
+    }
+    return { printed, failed, missing };
+}
 });

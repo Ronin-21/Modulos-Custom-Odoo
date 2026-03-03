@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="paperformat_thermal_80mm_roll" model="report.paperformat">
+        <field name="name">Térmico 80mm (Rollo)</field>
+        <field name="default" eval="False"/>
+        <field name="format">custom</field>
+        <field name="page_width">80</field>
+        <!-- Altura moderada: evita que el visor haga “fit page” y achique todo -->
+        <field name="page_height">297</field>
+        <field name="orientation">Portrait</field>
+
+        <!-- Márgenes: 2mm + contenido 76mm = 80mm -->
+        <field name="margin_top">2</field>
+        <field name="margin_bottom">2</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+
+        <!-- Evita que wkhtmltopdf “encoga” el contenido -->
+        <field name="disable_shrinking" eval="True"/>
+
+        <!-- DPI moderado para una previsualización más natural -->
+        <field name="dpi">90</field>
+    </record>
+</odoo>

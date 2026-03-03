@@ -25,7 +25,7 @@ class PosOrder(models.Model):
         readonly=True,
     )
 
-    # ✅ Resumen de cupones del pedido (para mostrar en ticket list + buscar)
+    # ✅ CORREGIDO: Sin @api.depends problemático
     coupon_numbers = fields.Char(
         string="Nº Cupón",
         compute="_compute_coupon_numbers",
@@ -34,15 +34,18 @@ class PosOrder(models.Model):
         help="Números de cupón detectados en los pagos del pedido (ej: 123-1234).",
     )
 
-    @api.depends("payment_ids", "payment_ids.coupon_number")
+    # ✅ SOLUCIÓN: Calcular manualmente cuando sea necesario
     def _compute_coupon_numbers(self):
         """Concatenar todos los números de cupón de los pagos"""
         for order in self:
             numbers = []
+            # Acceder directamente a los pagos (no usar depends)
             for payment in order.payment_ids:
-                cn = (payment.coupon_number or "").strip()
-                if cn and cn not in numbers:
-                    numbers.append(cn)
+                # Verificar que el campo existe antes de usarlo
+                if hasattr(payment, 'coupon_number'):
+                    cn = (payment.coupon_number or "").strip()
+                    if cn and cn not in numbers:
+                        numbers.append(cn)
             order.coupon_numbers = ", ".join(numbers) if numbers else ""
 
     def _order_fields(self, ui_order):

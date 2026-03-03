@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- App / menú raíz (visible para todos los roles del Padrón) -->
+    <menuitem id="menu_padron_root"
+              name="Padrón"
+              sequence="10"
+              groups="padron_control.group_padron_operator,padron_control.group_padron_supervisor,padron_control.group_padron_admin"/>
+
+    <!-- ========================= -->
+    <!-- OPERADOR: SOLO MARCAR VOTO -->
+    <!-- ========================= -->
+    <record id="action_padron_quick_vote" model="ir.actions.act_window">
+        <field name="name">Marcar Voto (Rápido)</field>
+        <field name="res_model">padron.quick.vote.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <!-- No permite crear/editar/borrar desde la acción -->
+        <field name="context">{'create': False, 'edit': False, 'delete': False}</field>
+    </record>
+
+    <menuitem id="menu_padron_quick_vote"
+              name="Marcar Voto"
+              parent="menu_padron_root"
+              action="action_padron_quick_vote"
+              sequence="1"
+              groups="padron_control.group_padron_operator,padron_control.group_padron_supervisor,padron_control.group_padron_admin"/>
+
+    <!-- ========================= -->
+    <!-- SUPERVISOR / ADMIN -->
+    <!-- ========================= -->
+    <menuitem id="menu_padron_operacion"
+              name="Operación"
+              parent="menu_padron_root"
+              sequence="20"
+              groups="padron_control.group_padron_supervisor,padron_control.group_padron_admin"/>
+
+    <record id="action_padron_quick_transport" model="ir.actions.act_window">
+        <field name="name">Marcar Traslado (Rápido)</field>
+            <field name="groups_id" eval="[(4, ref('padron_control.group_padron_supervisor')), (4, ref('padron_control.group_padron_admin'))]"/>
+        <field name="res_model">padron.quick.transport.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'create': False, 'edit': False, 'delete': False}</field>
+    </record>
+
+    <menuitem id="menu_padron_quick_transport"
+              name="Marcar Traslado (Rápido)"
+              parent="menu_padron_operacion"
+              action="action_padron_quick_transport"
+              sequence="30"
+              groups="padron_control.group_padron_supervisor,padron_control.group_padron_admin"/>
+
+    <menuitem id="menu_padron_config"
+              name="Configuración"
+              parent="menu_padron_root"
+              sequence="90"
+              groups="padron_control.group_padron_supervisor,padron_control.group_padron_admin"/>
+
+</odoo>

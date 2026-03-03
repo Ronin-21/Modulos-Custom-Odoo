@@ -16,11 +16,11 @@ if (!window.__pos_payment_adjustment_loaded__) {
     deleteOrderline: PaymentScreen.prototype.deleteOrderline,
     validateOrder: PaymentScreen.prototype.validateOrder,
     // Opcionales (según versión de POS): si existen, los usaremos para recalcular
-    updateSelectedPaymentline: PaymentScreen.prototype.updateSelectedPaymentline,
+    updateSelectedPaymentline:
+      PaymentScreen.prototype.updateSelectedPaymentline,
     selectPaymentLine: PaymentScreen.prototype.selectPaymentLine,
     selectPaymentline: PaymentScreen.prototype.selectPaymentline,
     onKeypadInput: PaymentScreen.prototype.onKeypadInput,
-
   };
 
   // Guard: evita crash si el buffer numérico intenta reproducir un sonido inexistente (sound undefined)
@@ -86,10 +86,10 @@ if (!window.__pos_payment_adjustment_loaded__) {
     return !v
       ? []
       : Array.isArray(v)
-      ? v
-      : v.records && Array.isArray(v.records)
-      ? v.records
-      : [];
+        ? v
+        : v.records && Array.isArray(v.records)
+          ? v.records
+          : [];
   }
 
   function approx(a, b, eps = 0.01) {
@@ -151,13 +151,14 @@ if (!window.__pos_payment_adjustment_loaded__) {
     }
 
     // Propiedad directa (fallback)
-    const direct = order.selected_paymentline || order.selectedPaymentline || null;
+    const direct =
+      order.selected_paymentline || order.selectedPaymentline || null;
     if (direct) return direct;
 
     // Buscar un flag de selección en la colección
     const pls = getPaymentlines(order, screen);
     const found = pls.find(
-      (pl) => !!pl?.selected || !!pl?.is_selected || !!pl?.isSelected
+      (pl) => !!pl?.selected || !!pl?.is_selected || !!pl?.isSelected,
     );
     return found || getLastPaymentline(order, screen);
   }
@@ -212,8 +213,8 @@ if (!window.__pos_payment_adjustment_loaded__) {
     return line?.get_discount
       ? line.get_discount()
       : typeof line?.discount === "number"
-      ? line.discount
-      : 0;
+        ? line.discount
+        : 0;
   }
 
   function setLineDiscount(line, value) {
@@ -278,7 +279,9 @@ if (!window.__pos_payment_adjustment_loaded__) {
 
     // ¿El usuario tocó el importe manualmente desde la última vez?
     const userChanged =
-      lastSet !== undefined && lastSet !== null && !approx(gross, lastSet, 0.02);
+      lastSet !== undefined &&
+      lastSet !== null &&
+      !approx(gross, lastSet, 0.02);
 
     // Base “verdadera” que usamos para mantener estable cuando cambia el %
     let base =
@@ -445,7 +448,10 @@ if (!window.__pos_payment_adjustment_loaded__) {
   function removeSurchargeLines(order, methodId = null) {
     const lines = getOrderlines(order);
     for (const line of [...lines]) {
-      if (line.__payAdjLine && (!methodId || line.__payAdjMethodId === methodId)) {
+      if (
+        line.__payAdjLine &&
+        (!methodId || line.__payAdjMethodId === methodId)
+      ) {
         order.removeOrderline
           ? order.removeOrderline(line)
           : line.remove && line.remove();
@@ -501,7 +507,7 @@ if (!window.__pos_payment_adjustment_loaded__) {
     }
 
     let line = getOrderlines(order).find(
-      (l) => l.__payAdjLine && l.__payAdjMethodId === mid
+      (l) => l.__payAdjLine && l.__payAdjMethodId === mid,
     );
 
     if (!line) {
@@ -639,7 +645,7 @@ if (!window.__pos_payment_adjustment_loaded__) {
     const selectedNames = new Set(methods.map((m) => (m.name || "").trim()));
 
     const buttons = screen.el.querySelectorAll(
-      "[data-payment-method-id], [data-id], .paymentmethod, .payment-method, button"
+      "[data-payment-method-id], [data-id], .paymentmethod, .payment-method, button",
     );
     buttons.forEach((btn) => {
       const did =
@@ -672,10 +678,17 @@ if (!window.__pos_payment_adjustment_loaded__) {
   function ensureLineSelection(order, method, pl) {
     const cards = getMethodCards(method);
     if (!cards.length) {
-      return { card: null, option: null, percent: 0, cardId: null, optionId: null };
+      return {
+        card: null,
+        option: null,
+        percent: 0,
+        cardId: null,
+        optionId: null,
+      };
     }
 
-    let cardId = Number(pl?.__payAdjCardId || order?.__payAdjSelectedCardId || 0) || null;
+    let cardId =
+      Number(pl?.__payAdjCardId || order?.__payAdjSelectedCardId || 0) || null;
     const card = findCard(method, cardId);
     if (card && Number(card.id) !== Number(cardId)) {
       cardId = card.id;
@@ -683,10 +696,13 @@ if (!window.__pos_payment_adjustment_loaded__) {
     }
 
     const options = getCardOptions(card);
-    let optionId = Number(pl?.__payAdjOptionId || order?.__payAdjSelectedOptionId || 0) || null;
+    let optionId =
+      Number(pl?.__payAdjOptionId || order?.__payAdjSelectedOptionId || 0) ||
+      null;
     let option = null;
     if (options.length) {
-      option = options.find((o) => Number(o.id) === Number(optionId)) || options[0];
+      option =
+        options.find((o) => Number(o.id) === Number(optionId)) || options[0];
       if (option && Number(option.id) !== Number(optionId)) {
         optionId = option.id;
         if (pl) pl.__payAdjOptionId = optionId;
@@ -716,15 +732,27 @@ if (!window.__pos_payment_adjustment_loaded__) {
 
     // --- MODO DESCUENTO (solo válido cuando hay 1 método) ---
     const onlyMethod = unique.size === 1 ? methods[0] : null;
-    if (onlyMethod && isEligible(onlyMethod) && methodType(onlyMethod) === "discount") {
-      // En descuento no usamos líneas de recargo
+
+    if (methodType(onlyMethod) === "discount") {
+      // ✅ Asegurar que no queden líneas de recargo si venimos de tarjeta
       removeSurchargeLines(order);
 
-      const selectedPl = getSelectedPaymentline(order, screen) || getLastPaymentline(order, screen);
-      const sel = getMethodCards(onlyMethod).length
-        ? ensureLineSelection(order, onlyMethod, selectedPl)
-        : { card: null, option: null, percent: 0 };
-      const percent = Number(sel.percent || 0);
+      const sel =
+        isEligible(onlyMethod) && getMethodCards(onlyMethod).length
+          ? ensureLineSelection(order, onlyMethod, selectedPl)
+          : { card: null, option: null, percent: 0 };
+
+      // Percent desde opciones (si hay)
+      let percent = Number(sel.percent || 0);
+
+      // ✅ NUEVO: si NO hay % elegido en opciones, usar % fijo configurado en el método
+      if (!(percent > 0)) {
+        percent = Number(onlyMethod?.discount_percent || 0);
+      }
+
+      // límites razonables
+      if (percent > 99.99) percent = 99.99;
+      if (percent < 0) percent = 0;
 
       // Estado base UI
       order.__payAdjTotalSurcharge = 0;
@@ -759,7 +787,8 @@ if (!window.__pos_payment_adjustment_loaded__) {
     order.__payAdjType = "none";
     order.__payAdjPercent = 0;
     order.__payAdjAmount = 0;
-    order.__payAdjMethodName = unique.size > 1 ? "Mixto" : methods[0]?.name || "";
+    order.__payAdjMethodName =
+      unique.size > 1 ? "Mixto" : methods[0]?.name || "";
     order.__payAdjSelectedCardName = "";
     order.__payAdjSelectedOptionName = "";
 
@@ -790,7 +819,10 @@ if (!window.__pos_payment_adjustment_loaded__) {
       // recargo = pago * percent / (100 + percent)
       const lineSurcharge = (paid * percent) / (100 + percent);
       const key = method.id || method.name;
-      surchargeByMethod.set(key, (surchargeByMethod.get(key) || 0) + lineSurcharge);
+      surchargeByMethod.set(
+        key,
+        (surchargeByMethod.get(key) || 0) + lineSurcharge,
+      );
     }
 
     // Aplicar/actualizar líneas de recargo por método
@@ -822,20 +854,27 @@ if (!window.__pos_payment_adjustment_loaded__) {
     // Datos para la UI (se basan en la paymentline seleccionada)
     const selectedPl = getSelectedPaymentline(order, screen);
     const selectedMethod = resolveMethod(order, selectedPl, null);
-    if (selectedMethod && isEligible(selectedMethod) && getMethodCards(selectedMethod).length) {
+    if (
+      selectedMethod &&
+      isEligible(selectedMethod) &&
+      getMethodCards(selectedMethod).length
+    ) {
       const sel = ensureLineSelection(order, selectedMethod, selectedPl);
       order.__payAdjType = methodType(selectedMethod);
       order.__payAdjPercent = Number(sel.percent || 0);
       order.__payAdjSelectedCardName = sel.card?.name || "";
       order.__payAdjSelectedOptionName = sel.option?.name || "";
-      order.__payAdjMethodName = selectedMethod?.name || order.__payAdjMethodName;
+      order.__payAdjMethodName =
+        selectedMethod?.name || order.__payAdjMethodName;
     } else {
       order.__payAdjType = totalSurcharge > 0 ? "surcharge" : "none";
     }
 
     // Monto mostrado: total de recargo (si existe), si no, el calculado por descuento/recargo clásico
     order.__payAdjAmount = totalSurcharge;
-    order.__payAdjActive = totalSurcharge > 0 || (!!selectedMethod && getMethodCards(selectedMethod).length);
+    order.__payAdjActive =
+      totalSurcharge > 0 ||
+      (!!selectedMethod && getMethodCards(selectedMethod).length);
 
     // Si hay una sola línea de pago con auto-fill, ajustar por el recargo agregado
     fillRemainingIfAuto(order, screen);
@@ -925,7 +964,8 @@ if (!window.__pos_payment_adjustment_loaded__) {
 
       const order = this.currentOrder;
       // Guardar a nivel línea (soporta pagos mixtos)
-      const pl = getSelectedPaymentline(order, this) || getLastPaymentline(order, this);
+      const pl =
+        getSelectedPaymentline(order, this) || getLastPaymentline(order, this);
       if (pl) {
         pl.__payAdjCardId = cardId;
       }
@@ -952,7 +992,8 @@ if (!window.__pos_payment_adjustment_loaded__) {
       const optionId = Number(ev?.target?.value || 0) || null;
       dlog("Option changed to:", optionId);
       const order = this.currentOrder;
-      const pl = getSelectedPaymentline(order, this) || getLastPaymentline(order, this);
+      const pl =
+        getSelectedPaymentline(order, this) || getLastPaymentline(order, this);
       if (pl) {
         pl.__payAdjOptionId = optionId;
       }
@@ -968,7 +1009,8 @@ if (!window.__pos_payment_adjustment_loaded__) {
 
       const order = this.currentOrder;
       // Guardar solo en la línea seleccionada (pagos mixtos)
-      const pl = getSelectedPaymentline(order, this) || getLastPaymentline(order, this);
+      const pl =
+        getSelectedPaymentline(order, this) || getLastPaymentline(order, this);
       if (pl) {
         pl.coupon_number = formatted;
       }
@@ -1028,7 +1070,8 @@ if (!window.__pos_payment_adjustment_loaded__) {
     // ✅ NUEVO: ID de tarjeta seleccionada
     get payAdjSelectedCardId() {
       const order = this.currentOrder;
-      const pl = getSelectedPaymentline(order, this) || getLastPaymentline(order, this);
+      const pl =
+        getSelectedPaymentline(order, this) || getLastPaymentline(order, this);
       return (
         Number(pl?.__payAdjCardId || order?.__payAdjSelectedCardId || 0) || null
       );
@@ -1046,9 +1089,11 @@ if (!window.__pos_payment_adjustment_loaded__) {
 
     get payAdjSelectedOptionId() {
       const order = this.currentOrder;
-      const pl = getSelectedPaymentline(order, this) || getLastPaymentline(order, this);
+      const pl =
+        getSelectedPaymentline(order, this) || getLastPaymentline(order, this);
       return (
-        Number(pl?.__payAdjOptionId || order?.__payAdjSelectedOptionId || 0) || null
+        Number(pl?.__payAdjOptionId || order?.__payAdjSelectedOptionId || 0) ||
+        null
       );
     },
 
@@ -1125,7 +1170,8 @@ if (!window.__pos_payment_adjustment_loaded__) {
     // ✅ NUEVO: Obtener el número de cupón actual
     get payAdjCouponNumber() {
       const order = this.currentOrder;
-      const pl = getSelectedPaymentline(order, this) || getLastPaymentline(order, this);
+      const pl =
+        getSelectedPaymentline(order, this) || getLastPaymentline(order, this);
       return pl?.coupon_number || "";
     },
 
@@ -1150,7 +1196,9 @@ if (!window.__pos_payment_adjustment_loaded__) {
 
       // Fallback: si todas las líneas usan el mismo método, devolverlo
       const pls = getPaymentlines(order, this);
-      const methods = pls.map((pl) => resolveMethod(order, pl, null)).filter(Boolean);
+      const methods = pls
+        .map((pl) => resolveMethod(order, pl, null))
+        .filter(Boolean);
       const unique = new Set(methods.map((m) => m.id || m.name));
       if (methods.length && unique.size === 1) return methods[0];
       return null;
@@ -1168,7 +1216,8 @@ if (!window.__pos_payment_adjustment_loaded__) {
         }
 
         // Si el método tiene tarjetas, inicializar la selección en la línea
-        const method = paymentMethod || resolveMethod(this.currentOrder, pl, null);
+        const method =
+          paymentMethod || resolveMethod(this.currentOrder, pl, null);
         const cards = method ? getMethodCards(method) : [];
         if (cards.length) {
           pl.__payAdjCardId = cards[0].id;
@@ -1178,7 +1227,8 @@ if (!window.__pos_payment_adjustment_loaded__) {
           }
           // fallback a nivel orden
           this.currentOrder.__payAdjSelectedCardId = pl.__payAdjCardId;
-          this.currentOrder.__payAdjSelectedOptionId = pl.__payAdjOptionId || null;
+          this.currentOrder.__payAdjSelectedOptionId =
+            pl.__payAdjOptionId || null;
         }
       }
 
@@ -1230,9 +1280,9 @@ if (!window.__pos_payment_adjustment_loaded__) {
       if (line?.__payAdjLine || line?.__payAdjReadonly) {
         this.env.services.notification.add(
           _t(
-            "Esta línea es un recargo automático y no se puede eliminar manualmente."
+            "Esta línea es un recargo automático y no se puede eliminar manualmente.",
           ),
-          { type: "warning" }
+          { type: "warning" },
         );
         return;
       }
@@ -1259,9 +1309,13 @@ if (!window.__pos_payment_adjustment_loaded__) {
           trySelectPaymentline(this, couponValidation.paymentline);
         }
 
-        this.env.services.notification.add(couponValidation.message, { type: "danger" });
+        this.env.services.notification.add(couponValidation.message, {
+          type: "danger",
+        });
 
-        const input = document.querySelector(".o_pos_cash_discount_card__coupon_input");
+        const input = document.querySelector(
+          ".o_pos_cash_discount_card__coupon_input",
+        );
         if (input) {
           input.classList.add("o_pos_coupon_input--error");
           input.focus();
