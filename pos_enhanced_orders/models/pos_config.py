@@ -9,7 +9,6 @@ class PosConfigFiscalInfo(models.Model):
     show_ticket_col_client = fields.Boolean(string="Columna: Cliente", default=True)
     show_ticket_col_cashier = fields.Boolean(string="Columna: Cajero", default=True)
     show_ticket_col_total = fields.Boolean(string="Columna: Total", default=True)
-    show_ticket_col_coupon = fields.Boolean(string="Columna: Cupón", default=True)
     show_ticket_col_state = fields.Boolean(string="Columna: Estado", default=True)
     show_ticket_col_table = fields.Boolean(string="Columna: Mesa", default=True)
     show_ticket_col_date = fields.Boolean(string="Columna: Fecha", default=True)
@@ -31,4 +30,16 @@ class PosConfigFiscalInfo(models.Model):
         string="Columna: Pagos (métodos de pago)",
         default=True,
         help="Muestra una columna con los métodos de pago usados en la orden (Ej: Efectivo, Tarjeta).",
+    )
+    show_ticket_col_invoice_state = fields.Boolean(
+        string="Columna: Estado factura",
+        default=True,
+        help="Muestra una columna extra con el estado real de la factura (Borrador/Confirmada/Cancelada).",
+    )
+
+    # Botón confirmar factura
+    show_ticket_btn_confirm_invoice = fields.Boolean(
+        string="Botón: Confirmar factura borrador",
+        default=False,
+        help="Muestra un botón para confirmar facturas en borrador directamente desde el POS.",
     )

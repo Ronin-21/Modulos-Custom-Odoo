@@ -1,0 +1,111 @@
+// ============================================================================
+// POS Fiscal Info - Estilos unificados
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Alineación de columnas
+// ----------------------------------------------------------------------------
+.pos-col-left {
+  text-align: left !important;
+}
+
+.pos-col-center {
+  text-align: center !important;
+}
+
+.pos-col-right {
+  text-align: right !important;
+}
+
+// ----------------------------------------------------------------------------
+// Badges base (compartido por todos los badges)
+// ----------------------------------------------------------------------------
+.pos-fiscal-badge,
+.pos-invoice-state-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ----------------------------------------------------------------------------
+// Badges de columna "Número de recibo" (Factura / Sin factura)
+// ----------------------------------------------------------------------------
+.pos-fiscal-badge--facturado {
+  background-color: #d4edda;
+  color: #155724;
+  border-color: #c3e6cb;
+}
+
+.pos-fiscal-badge--sin-factura {
+  background-color: #fff3cd;
+  color: #856404;
+  border-color: #ffeeba;
+}
+
+// ----------------------------------------------------------------------------
+// Badges de columna "Estado factura" (Sin factura/Borrador/Confirmada/Cancelada)
+// ----------------------------------------------------------------------------
+.pos-invoice-state-badge {
+  padding: 3px 8px; // Ligeramente más grandes
+}
+
+.pos-invoice-state-badge--none {
+  background-color: #fff3cd;
+  color: #856404;
+  border-color: #ffeeba;
+}
+
+.pos-invoice-state-badge--draft {
+  background-color: #ffc107;
+  color: #000;
+  border-color: #ffc107;
+}
+
+.pos-invoice-state-badge--posted {
+  background-color: #28a745;
+  color: #fff;
+  border-color: #28a745;
+}
+
+.pos-invoice-state-badge--cancel {
+  background-color: #dc3545;
+  color: #fff;
+  border-color: #dc3545;
+}
+
+// ----------------------------------------------------------------------------
+// Estilos específicos de columnas
+// ----------------------------------------------------------------------------
+
+// Columna "Número de recibo" con badges
+.pos-col-receipt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+
+  .order-number {
+    font-size: 13px;
+    font-weight: 500;
+  }
+}
+
+// Columna "Estado factura"
+.pos-col-invoice-state {
+  align-self: center;
+  // Estilos ya definidos por .pos-col-center
+}
+
+// Columna "Pagos"
+.pos-col-payments {
+  white-space: normal;
+  word-wrap: break-word;
+  max-width: 150px;
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-inherit="point_of_sale.TicketScreen" t-inherit-mode="extension">
+        <!--
+            Insertar boton "Confirmar factura" dentro del div.control-buttons.
+            Solo se muestra si:
+            1. pos.config.show_ticket_btn_confirm_invoice === true
+            2. selectedOrderHasDraftInvoice() === true
+        -->
+        <xpath expr="//div[contains(@class,'control-buttons')]" position="inside">
+            <button
+                t-if="pos.config.show_ticket_btn_confirm_invoice and selectedOrderHasDraftInvoice()"
+                class="confirm-invoice-button control-button btn btn-warning btn-lg lh-lg flex-grow-1 flex-shrink-1"
+                t-on-click="() => this.onConfirmDraftInvoice()">
+                <i class="fa fa-check-circle me-1"/>
+                Confirmar factura
+            </button>
+        </xpath>
+    </t>
+
+</templates>

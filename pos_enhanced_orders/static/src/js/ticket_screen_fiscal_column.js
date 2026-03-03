@@ -2,16 +2,15 @@
 
 import { TicketScreen } from "@point_of_sale/app/screens/ticket_screen/ticket_screen";
 import { patch } from "@web/core/utils/patch";
-import { onMounted, onPatched, onWillUnmount } from "@odoo/owl";
+import { onMounted, onPatched } from "@odoo/owl";
 
 const TAG = "[pos_fiscal_info][ticket_fiscal]";
-const DEBUG = false; // ponelo en true si querés logs
+const DEBUG = false;
 
 function dlog(...args) {
   if (DEBUG) console.log(TAG, ...args);
 }
 
-// Cache RPC: ref (00461-004-0005) -> { invoice_name, is_fiscal }
 const fiscalRpcCache = new Map();
 
 function extractRef(s) {
@@ -46,7 +45,6 @@ function findOrderNumberColumn(row) {
     el.classList?.contains("col"),
   );
 
-  // Buscar columna que contenga "Orden XXXXX-XXX-XXXX"
   for (let i = 0; i < Math.min(cols.length, 4); i++) {
     const text = cols[i]?.textContent || "";
     if (text.toLowerCase().includes("orden") && extractRef(text))
@@ -101,14 +99,12 @@ async function fetchFiscalInfoFromServer(screen, refs) {
 
   const unique = Array.from(new Set(refs)).filter(Boolean);
 
-  // 1) Primero devolver lo que ya tenemos en cache (clave del fix)
   for (const r of unique) {
     if (fiscalRpcCache.has(r)) {
       result.set(r, fiscalRpcCache.get(r));
     }
   }
 
-  // 2) Solo pedir por RPC los que no están cacheados
   const toFetch = unique.filter((r) => !fiscalRpcCache.has(r));
   if (!toFetch.length) return result;
 
@@ -142,7 +138,6 @@ async function fetchFiscalInfoFromServer(screen, refs) {
       result.set(ref, payload);
     }
 
-    // 3) Cache negativo para refs no encontrados (evita loops y “parpadeos”)
     for (const ref of toFetch) {
       if (!result.has(ref)) {
         const payload = {
@@ -159,7 +154,6 @@ async function fetchFiscalInfoFromServer(screen, refs) {
   } catch (e) {
     console.warn(TAG, "⚠️ No se pudo leer info fiscal por RPC:", e);
 
-    // Si falla RPC, igual cacheamos negativo para no repetir infinito
     for (const ref of toFetch) {
       if (!fiscalRpcCache.has(ref)) {
         const payload = {
@@ -196,53 +190,26 @@ function applyFiscalInfo(root, fiscalCache) {
     const invoice_name = fiscalInfo?.invoice_name || "";
     const is_fiscal = fiscalInfo?.is_fiscal || false;
 
+    // ✅ Usar clases en lugar de estilos inline
     orderCol.innerHTML = "";
-    orderCol.style.display = "flex";
-    orderCol.style.flexDirection = "column";
-    orderCol.style.gap = "2px";
-    orderCol.style.alignItems = "flex-start";
+    orderCol.classList.add("pos-col-receipt");
 
     const orderSpan = document.createElement("span");
+    orderSpan.className = "order-number";
     orderSpan.textContent = currentText;
-    orderSpan.style.fontSize = "13px";
-    orderSpan.style.fontWeight = "500";
     orderCol.appendChild(orderSpan);
 
     const badge = document.createElement("span");
+    // ✅ SOLO clases, sin estilos inline
     badge.className = is_fiscal
       ? "pos-fiscal-badge pos-fiscal-badge--facturado"
       : "pos-fiscal-badge pos-fiscal-badge--sin-factura";
 
-    // ✅ Acá aparece el número de factura (FA-B 00006-00000875)
-    badge.textContent = invoice_name || "Sin factura";
-
-    badge.style.padding = "2px 6px";
-    badge.style.borderRadius = "3px";
-    badge.style.fontSize = "10px";
-    badge.style.fontWeight = "600";
-    badge.style.whiteSpace = "nowrap";
-    badge.style.border = "1px solid";
-    badge.style.display = "inline-block";
-    badge.style.maxWidth = "100%";
-    badge.style.overflow = "hidden";
-    badge.style.textOverflow = "ellipsis";
-
-    if (is_fiscal) {
-      badge.style.backgroundColor = "#d4edda";
-      badge.style.color = "#155724";
-      badge.style.borderColor = "#c3e6cb";
-    } else {
-      badge.style.backgroundColor = "#fff3cd";
-      badge.style.color = "#856404";
-      badge.style.borderColor = "#ffeeba";
-    }
-
+    badge.textContent = invoice_name || "Orden POS";
     orderCol.appendChild(badge);
   }
 }
 
-let globalObserver = null;
-let lastRoot = null;
 let timer = null;
 
 function scheduleApply(screen, delay = 120) {
@@ -258,12 +225,10 @@ async function apply(screen) {
     const pos = screen.pos || screen.env?.services?.pos;
     const cfg = pos?.config || {};
 
-    // Si está oculta la columna, no tiene sentido modificarla visualmente
     if (cfg.show_ticket_col_receipt === false) {
       return;
     }
 
-    // Check para NO modificar "Número de recibo" (Factura / Sin factura)
     if (cfg.show_ticket_receipt_fiscal_info === false) {
       return;
     }
@@ -271,18 +236,10 @@ async function apply(screen) {
     const root = findOrdersRoot();
     if (!root) return;
 
-    // Cache desde el POS (si vinieron los campos)
     const cache = buildFiscalCache(screen);
-
-    // Refs visibles en DOM
     const refs = collectRefsFromDOM(root);
-
-    // ✅ Pedimos info fiscal para refs visibles, pero:
-    // - si ya está cacheado, NO hace RPC
-    // - igual nos devuelve el cache para re-aplicar (evita que desaparezca)
     const fetched = await fetchFiscalInfoFromServer(screen, refs);
 
-    // Merge: RPC/cache siempre tiene prioridad sobre lo local
     for (const [ref, payload] of fetched.entries()) {
       cache.set(ref, payload);
     }
@@ -301,36 +258,10 @@ patch(TicketScreen.prototype, {
 
     onMounted(() => {
       scheduleApply(this, 150);
-
-      const root = findOrdersRoot();
-      if (root && root !== lastRoot) {
-        lastRoot = root;
-        if (globalObserver) globalObserver.disconnect();
-
-        globalObserver = new MutationObserver(() => scheduleApply(this, 120));
-        globalObserver.observe(root, { childList: true, subtree: true });
-      }
     });
 
     onPatched(() => {
       scheduleApply(this, 80);
-
-      const root = findOrdersRoot();
-      if (root && root !== lastRoot) {
-        lastRoot = root;
-        if (globalObserver) globalObserver.disconnect();
-
-        globalObserver = new MutationObserver(() => scheduleApply(this, 120));
-        globalObserver.observe(root, { childList: true, subtree: true });
-      }
-    });
-
-    onWillUnmount(() => {
-      if (globalObserver) {
-        globalObserver.disconnect();
-        globalObserver = null;
-      }
-      lastRoot = null;
     });
   },
 });

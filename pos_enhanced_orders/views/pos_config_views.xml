@@ -15,12 +15,15 @@
             <field name="show_ticket_col_client"/>
             <field name="show_ticket_col_cashier"/>
             <field name="show_ticket_col_total"/>
-            <field name="show_ticket_col_coupon"/>
             <field name="show_ticket_col_state"/>
             <field name="show_ticket_col_table"/>
 
             <separator string="Columnas extra"/>
             <field name="show_ticket_col_payments"/>
+            <field name="show_ticket_col_invoice_state"/>
+
+            <separator string="Botones"/>
+            <field name="show_ticket_btn_confirm_invoice"/>
 
             <separator string="Modificaciones"/>
             <field name="show_ticket_receipt_fiscal_info"/>
