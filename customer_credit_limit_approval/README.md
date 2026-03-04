@@ -1,118 +1,175 @@
-# 🏦 Aprobación de Límite de Crédito en Ventas
+# Límite de Crédito del Cliente con Aprobación (Odoo 18)
 
-**Versión:** 1.0  
-**Probado en:** Odoo 18  
-**Dependencias:** `sale_management` (usa chatter y actividades de `mail`)
+**Módulo:** `customer_credit_limit_approval`  
+**Versión:** 18.0.1.0  
+**Licencia:** LGPL-3  
+**Categoría:** Sales  
+**Dependencias:** `sale_management`, `point_of_sale`
 
----
-
-## 📋 Descripción
-
-Este módulo agrega un control de **límite de crédito por cliente** sobre las órdenes de venta.  
-Cuando una venta supera el límite configurado en el cliente, la orden no se confirma de inmediato sino que pasa a un estado de **aprobación de crédito**, donde un usuario con permisos (ERP manager / ventas admin) puede aprobar o rechazar.
-
-El módulo también crea **actividades (campanita)** para avisar a los gerentes que hay una cotización para revisar, y otra actividad para el vendedor cuando la gerencia aprueba o rechaza.
+Controla el **límite de crédito por cliente** y agrega un **flujo de aprobación** cuando una **Orden de Venta** excede el límite permitido. Además, valida el crédito en **POS** cuando se usa **Cuenta de cliente / Cuenta Corriente (pay later)** y permite **ocultar/mostrar el saldo** de clientes en el selector del POS.
 
 ---
 
-## 🎯 Objetivo
+## ✅ Funcionalidades principales
 
-Evitar que se confirmen ventas de clientes que superaron su límite de crédito sin que antes alguien de administración/gerencia lo vea y lo autorice.
+### 1) Límite de crédito por cliente (Contactos)
 
----
+En el cliente (`res.partner`) se agregan:
 
-## ✨ Funcionalidades
+- **Crédito activo ?** (`credit_check`)
+- **Monto de advertencia ?** (`credit_warning`) _(campo disponible; el bloqueo real se hace por el monto de bloqueo)_
+- **Monto de bloqueo ?** (`credit_blocking`)
 
-### 1. Control por cliente
+Incluye validaciones:
 
-En el contacto se usan los campos de crédito del partner:
-
-- **credit_check**: activa/desactiva el control.
-- **credit_blocking**: monto máximo permitido.
-- **amount_due**: deuda actual (related).
-
-La orden de venta toma esos valores y decide si debe pedir aprobación.
+- No permite montos negativos.
+- No permite que _Advertencia_ sea mayor que _Bloqueo_.
 
 ---
 
-### 2. Validación al confirmar
+### 2) Deuda Total (desglose)
 
-Al presionar **Confirmar** en una venta:
+El módulo calcula una **Deuda Total** del cliente (`partner.amount_due`) sumando:
 
-1. El sistema suma la **deuda actual del cliente** (`amount_due`) + **total de la orden**.
-2. Si ese total supera el **límite de bloqueo** del cliente.
-3. Se abre un **wizard** que muestra el exceso y permite “Enviar para aprobación”.
+1. **Deuda facturada (contable):** `(debit - credit)`
+2. **Ventas confirmadas sin facturar:** Órdenes en **Venta** (`state='sale'`) no totalmente facturadas
+3. **POS Cuenta Corriente pendiente:** Órdenes de POS con método de pago llamado **“Cuenta Corriente”** y **sin asiento contable** (`account_move = False`)
 
-Si no lo supera, la orden se confirma normalmente.
+Campos en la pestaña **Cuenta corriente** del contacto:
 
----
+- `amount_due_accounting`
+- `amount_due_sale`
+- `amount_due_pos`
+- `amount_due` (total)
 
-### 3. Estado extra
-
-Se agrega un estado en la orden:
-
-- **`sales_approval`** → “Aprobación de Crédito”.
-
-Mientras la orden está en ese estado, no se confirma.  
-Un gerente puede aprobar o rechazar desde la propia orden.
+> Nota: si no existe un método POS llamado exactamente **“Cuenta Corriente”**, el componente POS queda en 0 y se registra un warning en logs.
 
 ---
 
-### 4. Notificaciones internas
+## 🧾 Flujo en Ventas (Sale Order)
 
-Cuando el vendedor envía a aprobación:
+### ¿Cuándo pide aprobación?
 
-- Se deja una nota en el chatter (sin enviar correo).
-- Se suscribe a los usuarios “gerentes”.
-- Y se crea una **actividad** “Revisar aprobación de crédito” para esos gerentes.
+Al confirmar una Orden de Venta, si se cumple:
 
-Cuando el gerente **aprueba** o **rechaza**:
+- El cliente tiene **Crédito activo**
+- `(Deuda Total del cliente) + (Total de la orden)` **>** `Monto de bloqueo`
+- y la orden **no fue aprobada** previamente (`is_credit_limit_final_approved = False`)
 
-- Se deja otra nota en el chatter.
-- Y se crea una **actividad** para el **vendedor** avisando que ya puede confirmar o que fue rechazado.
-
-Así cada lado recibe su alerta.
+Entonces aparece un **wizard** “Límite de Crédito Excedido” con el **exceso** y opción de **Enviar a aprobación**.
 
 ---
 
-### 5. Permisos
+### Estados agregados a la Orden de Venta
 
-Las acciones de aprobar/rechazar validan que el usuario pertenezca al grupo estándar:
+Se agregan estados al `sale.order`:
 
-- **`base.group_erp_manager`** (Administración / Permisos de acceso).
-
-Podés ampliar esto a otros grupos si lo necesitás.
-
----
-
-## 🧭 Flujo de uso
-
-1. Vendedor crea una cotización.
-2. La intenta confirmar, pero el cliente supera su crédito → aparece el wizard.
-3. Vendedor pulsa **“Enviar para Aprobación de Crédito”**.
-4. La orden pasa a estado **Aprobación de Crédito** y se crean actividades para los gerentes.
-5. Un gerente entra a la orden y pulsa **Aprobar** o **Rechazar**.
-6. Se crea una actividad para el vendedor con el resultado.
-7. Si fue aprobada, el vendedor confirma la orden normalmente.
+- **Aprobación de Crédito** (`sales_approval`)
+- **Aprobado** (`approved`) _(estado disponible en selección; el flujo usa principalmente el flag de aprobado final)_
+- **Rechazado** (`reject`)
 
 ---
 
-## 🐞 Notas sobre entornos de prueba
+### Acciones disponibles
 
-En bases “neutralizadas” (por ejemplo, Odoo.sh de prueba) el módulo publica los mensajes en modo **silencioso**, sin intentar enviar correo, para evitar el popup de “configure la dirección de correo del remitente”.
+#### Enviar a aprobación
+
+- Pasa la orden a `sales_approval`
+- Publica nota en chatter
+- Notifica (suscribe y mensaje) a usuarios de estos grupos:
+  - **ERP Manager** (`base.group_erp_manager`)
+  - **Sales Manager** (`sales_team.group_sale_manager`)
+  - **System** (`base.group_system`)
+- Crea **Actividad** (campanita) para esos managers: “Revisar aprobación de crédito”
+
+#### Aprobar (solo ERP Manager)
+
+- Requiere grupo **ERP Manager**
+- Deja la orden en **Enviada** (`sent`)
+- Marca `is_credit_limit_final_approved = True`
+- Publica nota en chatter
+- Notifica a managers
+- Crea actividad para el **vendedor**: “Orden aprobada: confirmar venta”
+
+#### Rechazar (solo ERP Manager)
+
+- Requiere grupo **ERP Manager**
+- Pasa a `reject`
+- Publica nota en chatter
+- Notifica a managers
+- Crea actividad para el **vendedor**: “Orden rechazada por crédito”
+
+#### Volver a borrador (solo ERP Manager)
+
+- Disponible cuando está en `reject`
+- Resetea `is_credit_limit_final_approved = False`
 
 ---
 
-## 📦 Instalación
+### Control de “dueño” de la cotización
 
-1. Copiar el módulo en la carpeta de addons.
-2. Actualizar lista de aplicaciones.
-3. Instalar el módulo.
-4. Configurar en los contactos el límite de crédito.
-5. Asignar el grupo **Administración / Permisos de acceso** a quienes deban aprobar.
+El módulo evita que un usuario confirme o envíe a aprobación una orden cuyo **vendedor asignado** (`user_id`) es otro, salvo que sea:
+
+- **Sales Manager**, **ERP Manager** (o equivalentes definidos en el código)
 
 ---
 
-**Autor:** Abel Alejandro Acuña  
-**Estado:** Estable ✅  
-**Última actualización:** Noviembre 2025
+## 🧾 Validación en POS (Cuenta de cliente / Cuenta Corriente)
+
+Al sincronizar ventas desde POS (`pos.order.sync_from_ui`), el módulo valida el crédito **solo si**:
+
+- La orden llega en estado `paid`
+- Tiene al menos un pago que parezca “Cuenta de cliente”, detectado por:
+  - `payment_method.type == 'pay_later'`, o
+  - `receivable_account_id` configurada, o
+  - flags equivalentes (`use_customer_account`, `is_customer_account`, `allow_credit`)
+
+Si el cliente:
+
+- No tiene **Crédito activo** → bloquea con error pidiendo activar “Crédito activo”.
+- Excede el límite → bloquea con un mensaje que muestra:
+  - Límite, Deuda Total, Total ticket y Exceso.
+
+> Importante: el cálculo usa **partner.amount_due (Deuda Total)** para que coincida con la lógica de cuenta corriente.
+
+---
+
+## 👁️ Visibilidad del “Saldo” de clientes en POS
+
+### Configuración en Punto de Venta
+
+En `pos.config` se agrega:
+
+- **Mostrar saldo de clientes en POS** (`show_partner_balance`)
+
+Este switch:
+
+- Solo lo pueden ver/cambiar usuarios del grupo:
+  - **“POS: Configurar visibilidad de saldos”** (`customer_credit_limit_approval.group_pos_balance_admin`)
+
+### Efecto en la interfaz POS
+
+Cuando `show_partner_balance` está **apagado**, el frontend:
+
+- Oculta la columna **Saldo** del selector de clientes
+- Oculta la columna/botón de **acciones** (kebab) en ese listado
+
+(Se implementa con un service que agrega una clase CSS al `<html>` y reglas SCSS.)
+
+---
+
+## 🔐 Seguridad
+
+Incluye accesos para el wizard:
+
+- Usuarios internos (`base.group_user`): leer/crear/escribir wizard (sin borrar)
+- ERP Manager (`base.group_erp_manager`): permisos completos sobre el wizard
+
+---
+
+## 📌 Notas técnicas
+
+- Se agrega el campo `accountant_email` en `res.company` (solo campo; no participa del flujo automáticamente).
+- El método POS “Cuenta Corriente” se busca por **nombre exacto**: `Cuenta Corriente`.
+
+---
