@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_stock_location_init_wizard_form" model="ir.ui.view">
+        <field name="name">stock.location.init.wizard.form</field>
+        <field name="model">stock.location.init.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Inicializar Empresas Permitidas">
+                <sheet>
+
+                    <div class="alert alert-info" role="alert">
+                        <strong>Dos formas de usar este wizard:</strong><br/>
+                        <b>A) Selección manual</b> (recomendada): elegir ubicaciones específicas en
+                        "Ubicaciones a procesar" + indicar "Empresas a asignar". Ideal para configurar
+                        ubicaciones de tránsito compartidas una a una.<br/>
+                        <b>B) Automático por modo</b>: dejar "Ubicaciones a procesar" vacío y elegir
+                        el Modo. El wizard procesa todas las que correspondan.
+                    </div>
+
+                    <!-- SELECCIÓN MANUAL DE UBICACIONES -->
+                    <group string="A) Selección manual de ubicaciones (opcional)">
+                        <field name="target_location_ids"
+                               widget="many2many_tags"
+                               options="{'no_create': True}"
+                               string="Ubicaciones a procesar"
+                               help="Si se seleccionan ubicaciones aquí, el Modo se ignora y solo se procesan estas."/>
+                        <field name="fallback_company_ids"
+                               widget="many2many_tags"
+                               options="{'no_create': True}"
+                               string="Empresas a asignar"
+                               help="Empresas que se asignarán a las ubicaciones seleccionadas (o a las sin company_id en modo automático)."/>
+                    </group>
+
+                    <!-- MODO AUTOMÁTICO -->
+                    <group string="B) Modo automático (si no hay selección manual)">
+                        <group>
+                            <field name="mode"
+                                   invisible="target_location_ids != []"/>
+                            <field name="overwrite_existing"/>
+                        </group>
+                        <group>
+                            <field name="include_scrap"/>
+                        </group>
+                    </group>
+
+                    <!-- VISTA PREVIA -->
+                    <group string="Vista previa">
+                        <field name="preview_count_total"
+                               string="Ubicaciones a procesar"
+                               readonly="1"/>
+                        <field name="preview_text"
+                               string=""
+                               nolabel="1"
+                               readonly="1"
+                               widget="text"
+                               style="font-family: monospace; font-size: 11px; min-height: 200px;"/>
+                    </group>
+
+                </sheet>
+
+                <footer>
+                    <button name="action_preview"
+                            type="object"
+                            string="Actualizar vista previa"
+                            class="btn-secondary"/>
+                    <button name="action_apply"
+                            type="object"
+                            string="Aplicar"
+                            class="btn-primary"
+                            confirm="¿Aplicar las empresas permitidas a las ubicaciones indicadas? Esta acción es reversible editando las ubicaciones."/>
+                    <button string="Cancelar"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

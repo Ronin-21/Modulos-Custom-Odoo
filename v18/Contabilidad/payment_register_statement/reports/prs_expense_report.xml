@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <template id="report_prs_expenses_pdf">
+        <t t-call="web.basic_layout">
+            <t t-set="data" t-value="report_data"/>
+            <t t-set="currency" t-value="data.get('currency')"/>
+
+            <style>
+                .prs_hdr { border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 8px; }
+                .prs_title { font-size: 20px; font-weight: 700; }
+                .prs_meta { font-size: 12px; }
+                .prs_tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
+                .prs_tbl th { text-align: left; border-bottom: 2px solid #000; padding: 4px 2px; }
+                .prs_tbl td { padding: 3px 2px; vertical-align: top; }
+                .prs_amt { text-align: right; white-space: nowrap; }
+                .prs_section { font-weight: 700; padding-top: 6px; }
+                .prs_sub { font-style: italic; padding-top: 4px; }
+                .prs_total_row td { border-top: 1px solid #000; font-weight: 700; padding-top: 6px; }
+            </style>
+
+            <div class="page">
+                <div class="prs_hdr">
+                    <div style="display:flex; justify-content:space-between;">
+                        <div>
+                            <div class="prs_title">Gastos / Compras</div>
+                            <div class="prs_meta">
+                                Fecha:
+                                <t t-esc="data.get('date_from') and data.get('date_from').strftime('%d/%m/%Y') or ''"/>
+                                al
+                                <t t-esc="data.get('date_to') and data.get('date_to').strftime('%d/%m/%Y') or ''"/>
+                            </div>
+                        </div>
+                        <div class="prs_meta" style="text-align:right;">
+                            Usuario: <t t-esc="user.name"/><br/>
+                            Página: <span class="page"/>
+                        </div>
+                    </div>
+                </div>
+
+                <t t-if="data.get('single_root')">
+                    <div class="prs_meta" style="margin-bottom:6px;">
+                        <strong>Concepto:</strong> <t t-esc="data.get('single_root')"/>
+                    </div>
+                </t>
+
+                <table class="prs_tbl">
+                    <thead>
+                        <tr>
+                            <th style="width:12%;">Fecha</th>
+                            <th style="width:28%;">Codigo Proveedor</th>
+                            <th>Detalle</th>
+                            <th style="width:14%; text-align:right;">Importe</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <!-- AGRUPADO POR CONCEPTO -->
+                        <t t-if="data.get('mode') == 'concept'">
+                            <t t-foreach="data.get('groups', [])" t-as="g">
+
+                                <t t-if="not data.get('single_root')">
+                                    <tr>
+                                        <td colspan="4" class="prs_section">
+                                            Concepto: <t t-esc="g.get('title')"/>
+                                        </td>
+                                    </tr>
+                                </t>
+
+                                <!-- Líneas del concepto raíz -->
+                                <t t-foreach="g.get('lines', [])" t-as="l">
+                                    <tr>
+                                        <td><t t-esc="l.get('date_str')"/></td>
+                                        <td><t t-esc="l.get('provider')"/></td>
+                                        <td><t t-esc="l.get('detail')"/></td>
+                                        <td class="prs_amt">
+                                            <t t-esc="formatLang(l.get('amount') or 0.0, currency_obj=currency)"/>
+                                        </td>
+                                    </tr>
+                                </t>
+
+                                <!-- Subconceptos -->
+                                <t t-foreach="g.get('subs', [])" t-as="sg">
+                                    <tr>
+                                        <td colspan="4" class="prs_sub">
+                                            <t t-esc="sg.get('title')"/>
+                                        </td>
+                                    </tr>
+
+                                    <t t-foreach="sg.get('lines', [])" t-as="l">
+                                        <tr>
+                                            <td><t t-esc="l.get('date_str')"/></td>
+                                            <td><t t-esc="l.get('provider')"/></td>
+                                            <td><t t-esc="l.get('detail')"/></td>
+                                            <td class="prs_amt">
+                                                <t t-esc="formatLang(l.get('amount') or 0.0, currency_obj=currency)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+
+                                    <tr class="prs_total_row">
+                                        <td colspan="3">Total <t t-esc="sg.get('title')"/></td>
+                                        <td class="prs_amt">
+                                            <t t-esc="formatLang(sg.get('total') or 0.0, currency_obj=currency)"/>
+                                        </td>
+                                    </tr>
+                                </t>
+
+                                <tr class="prs_total_row">
+                                    <td colspan="3">Total <t t-esc="g.get('title')"/></td>
+                                    <td class="prs_amt">
+                                        <t t-esc="formatLang(g.get('total') or 0.0, currency_obj=currency)"/>
+                                    </td>
+                                </tr>
+                            </t>
+
+                            <tr class="prs_total_row">
+                                <td colspan="3">TOTAL GENERAL</td>
+                                <td class="prs_amt">
+                                    <t t-esc="formatLang(data.get('total') or 0.0, currency_obj=currency)"/>
+                                </td>
+                            </tr>
+                        </t>
+
+                        <!-- SOLO POR FECHA -->
+                        <t t-else="">
+                            <t t-foreach="data.get('lines', [])" t-as="l">
+                                <tr>
+                                    <td><t t-esc="l.get('date_str')"/></td>
+                                    <td><t t-esc="l.get('provider')"/></td>
+                                    <td><t t-esc="l.get('detail')"/></td>
+                                    <td class="prs_amt">
+                                        <t t-esc="formatLang(l.get('amount') or 0.0, currency_obj=currency)"/>
+                                    </td>
+                                </tr>
+                            </t>
+
+                            <tr class="prs_total_row">
+                                <td colspan="3">TOTAL GENERAL</td>
+                                <td class="prs_amt">
+                                    <t t-esc="formatLang(data.get('total') or 0.0, currency_obj=currency)"/>
+                                </td>
+                            </tr>
+                        </t>
+
+                    </tbody>
+                </table>
+            </div>
+        </t>
+    </template>
+
+    <record id="action_report_prs_expenses_pdf" model="ir.actions.report">
+        <field name="name">Gastos / Compras</field>
+        <field name="model">prs.expense.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">payment_register_statement.report_prs_expenses_pdf</field>
+        <field name="report_file">payment_register_statement.report_prs_expenses_pdf</field>
+        <field name="print_report_name">'Gastos_Compras'</field>
+    </record>
+
+</odoo>

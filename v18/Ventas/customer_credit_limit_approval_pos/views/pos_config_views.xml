@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_pos_config_form_balance_gate" model="ir.ui.view">
+    <field name="name">pos.config.form.balance.gate</field>
+    <field name="model">pos.config</field>
+    <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//sheet" position="inside">
+        <group string="Saldo de clientes (Crédito)">
+          <field name="show_partner_balance"
+                 groups="customer_credit_limit_approval_pos.group_pos_balance_admin"/>
+        </group>
+      </xpath>
+    </field>
+  </record>
+</odoo>

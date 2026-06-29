@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--
+        noupdate omitido intencionalmente: estos grupos DEBEN actualizarse en cada
+        upgrade para que los implied_ids siempre estén vigentes.
+        NOTA: category_id no se usa — simplify_access_management_v19 lo eliminó de res.groups.
+    -->
+    <data>
+        <record id="group_advance_payment_user" model="res.groups">
+            <field name="name">Pagos Adelantados / Registrar</field>
+            <field name="implied_ids" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
+        </record>
+    </data>
+</odoo>

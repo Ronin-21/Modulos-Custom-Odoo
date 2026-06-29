@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_prs_pos_deposit_confirm_wizard" model="ir.ui.view">
+        <field name="name">prs.pos.deposit.confirm.wizard.form</field>
+        <field name="model">prs.pos.deposit.confirm.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Depósitos POS pendientes">
+                <sheet>
+                    <div class="oe_title">
+                        <h3>
+                            Depósitos pendientes en
+                            <field name="journal_id" readonly="1" nolabel="1"/>
+                        </h3>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="deposit_count" string="Seleccionados"/>
+                            <field name="total_amount" string="Total a recibir"/>
+                        </group>
+                    </group>
+
+                    <!-- Sin depósitos pendientes -->
+                    <div class="alert alert-success text-center"
+                         invisible="deposit_count != 0">
+                        <i class="fa fa-check-circle me-1"/>
+                        No hay depósitos POS pendientes para este diario.
+                    </div>
+
+                    <!-- Lista editable: el admin puede deseleccionar individualmente -->
+                    <field name="deposit_ids"
+                           invisible="deposit_count == 0"
+                           widget="many2many"
+                           nolabel="1">
+                        <list string="Depósitos pendientes"
+                              delete="1"
+                              create="0">
+                            <field name="date" string="Fecha"/>
+                            <field name="coupon_number" string="N° Cupón"/>
+                            <field name="journal_id" string="Caja origen"/>
+                            <field name="amount" string="Importe"/>
+                            <field name="pos_session_id" string="Sesión"/>
+                            <field name="create_uid" string="Operador"/>
+                        </list>
+                    </field>
+
+                </sheet>
+
+                <footer>
+                    <!-- Confirmar solo los seleccionados en la lista -->
+                    <button name="action_confirm_selected"
+                            type="object"
+                            string="Confirmar seleccionados"
+                            class="btn-primary"
+                            invisible="deposit_count == 0"
+                            confirm="¿Confirmar la recepción de los depósitos seleccionados? Se crearán los extractos en la caja destino."/>
+                    <!-- Confirmar todos los pendientes del diario -->
+                    <button name="action_confirm_all"
+                            type="object"
+                            string="Confirmar todos"
+                            class="btn-secondary"
+                            invisible="deposit_count == 0"
+                            confirm="¿Confirmar TODOS los depósitos pendientes del diario? Se crearán los extractos en la caja destino."/>
+                    <button string="Cerrar"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+
+            </form>
+        </field>
+    </record>
+
+    <record id="action_prs_pos_deposit_confirm_wizard" model="ir.actions.act_window">
+        <field name="name">Depósitos POS pendientes</field>
+        <field name="res_model">prs.pos.deposit.confirm.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_prs_pos_deposit_confirm_wizard"/>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

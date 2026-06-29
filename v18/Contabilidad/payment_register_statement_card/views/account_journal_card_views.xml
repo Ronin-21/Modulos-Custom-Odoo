@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="account_journal_form_prs_card" model="ir.ui.view">
+        <field name="name">account.journal.form.prs.card</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.view_account_journal_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Tarjetas PRS" name="prs_card_tab"
+                      invisible="type not in ['bank']">
+
+                    <group>
+                        <field name="prs_card_provider_id"
+                               options="{'no_create': True}"
+                               help="Vincula este diario a un procesador de tarjetas. Cuando se registre un pago en este diario aparecerán los selectores de tarjeta y plan de cuotas."/>
+                        <field name="prs_accreditation_control"
+                               string="Control de acreditaciones"
+                               help="Activado: el usuario confirma manualmente las acreditaciones desde el tablero (botón 'Acreditaciones'). Desactivado: el cron crea los extractos y concilia automáticamente al vencer el plazo."/>
+                    </group>
+
+                    <div class="alert alert-info mb-0" invisible="not prs_card_provider_id">
+                        Este diario actúa como diario <strong>puente (intermediario)</strong> para los pagos con tarjeta procesados por
+                        <strong><field name="prs_card_provider_id" readonly="1" nolabel="1"/></strong>.
+                        El dinero queda aquí transitoriamente hasta que se acredita al diario destino configurado en cada tarjeta o procesador.
+                    </div>
+
+                    <group string="Cuentas contables de comisiones"
+                           invisible="not prs_card_provider_id">
+                        <field name="prs_flow_fee_account_id"
+                               options="{'no_create': True}"
+                               help="Cuenta de gasto donde se imputa la comisión del procesador. Si se deja vacía se usa la cuenta global de Ajustes > Contabilidad."/>
+                        <field name="prs_flow_fee_tax_account_id"
+                               options="{'no_create': True}"
+                               help="Cuenta del IVA sobre la comisión."/>
+                        <field name="prs_flow_withholding_account_id"
+                               options="{'no_create': True}"
+                               help="Cuenta de retenciones aplicadas en la liquidación."/>
+                    </group>
+
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

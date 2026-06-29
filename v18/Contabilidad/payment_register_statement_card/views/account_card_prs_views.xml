@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         account.card — Lista (con columna proveedor)
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="account_card_list" model="ir.ui.view">
+        <field name="name">account.card.list</field>
+        <field name="model">account.card</field>
+        <field name="arch" type="xml">
+            <list string="Tarjetas"
+                  decoration-muted="not active">
+                <field name="name"/>
+                <field name="provider_id" optional="show"/>
+                <field name="payment_method_id" optional="show"/>
+                <field name="settlement_delay_days" string="Acred. (días)"/>
+                <field name="settlement_journal_id" optional="show"/>
+                <field name="fee_percent" string="Comisión %"/>
+                <field name="fee_tax_percent" string="IVA %"/>
+                <field name="withholding_percent" string="Retención %" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" widget="boolean_toggle" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         account.card — Búsqueda
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="account_card_search" model="ir.ui.view">
+        <field name="name">account.card.search</field>
+        <field name="model">account.card</field>
+        <field name="arch" type="xml">
+            <search string="Tarjetas">
+                <field name="name"/>
+                <field name="provider_id"/>
+                <field name="payment_method_id"/>
+                <filter name="by_provider" string="Agrupar por proveedor"
+                        context="{'group_by': 'provider_id'}"/>
+                <filter name="inactive" string="Archivadas"
+                        domain="[('active','=',False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         account.card — Formulario completo
+         Muestra: proveedor, vinculacion PRS, config de comisiones, planes inline
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="account_card_form" model="ir.ui.view">
+        <field name="name">account.card.form</field>
+        <field name="model">account.card</field>
+        <field name="arch" type="xml">
+            <form string="Tarjeta">
+                <header>
+                    <field name="active" invisible="1"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Nombre de la tarjeta"/>
+                        <h1><field name="name" placeholder="Ej: Visa Crédito"/></h1>
+                    </div>
+
+                    <group>
+                        <group string="Identificacion">
+                            <field name="provider_id" options="{'no_create': True}"/>
+                            <field name="payment_method_id"
+                                   options="{'no_create': True}"
+                                   help="Metodo de pago de Odoo vinculado. Permite que el flujo de pagos (PRS) reconozca esta tarjeta automaticamente."/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Numero de comercio">
+                            <field name="merchant_number"
+                                   placeholder="Numero asignado por el proveedor"/>
+                        </group>
+                    </group>
+
+                    <div class="alert alert-info mb-0">
+                        Los valores de acreditacion y comisiones configurados aqui son los <strong>valores por defecto para todos los planes</strong> de esta tarjeta.
+                        Si la tarjeta no tiene un valor, hereda el del <strong>Procesador</strong>. Cada plan puede sobreescribir cualquier valor.
+                        <br/>Jerarquia: <strong>Plan</strong> (mayor prioridad) → <strong>Tarjeta</strong> → <strong>Procesador</strong> (menor prioridad).
+                    </div>
+                    <group string="Acreditacion y comisiones (valores por defecto para todos los planes)">
+                        <group string="Acreditacion">
+                            <field name="settlement_delay_days"/>
+                            <field name="settlement_day_type"/>
+                            <field name="settlement_journal_id" options="{'no_create': True}"/>
+                        </group>
+                        <group string="Comisiones">
+                            <field name="fee_percent"/>
+                            <field name="fee_fixed_amount"/>
+                            <field name="fee_tax_percent"/>
+                            <field name="withholding_percent"/>
+                        </group>
+                    </group>
+
+                    <group string="Planes de cuotas">
+                        <field name="installment_ids" colspan="2" nolabel="1">
+                            <list editable="bottom"
+                                  decoration-muted="not active"
+                                  string="Planes">
+                                <field name="name" placeholder="Ej: 6 cuotas sin interés"/>
+                                <field name="divisor" string="Cuotas"/>
+                                <field name="surcharge_coefficient"
+                                       string="Coef. recargo"
+                                       help="1.0 = sin recargo. 1.06 = +6% al cliente."/>
+                                <field name="bank_discount"
+                                       string="Reintegro banco %"
+                                       optional="hide"/>
+                                <field name="apply_commission_surcharge"
+                                       string="Trasladar comisión"
+                                       optional="show"/>
+                                <!-- Acreditación override (vacío = hereda de la tarjeta) -->
+                                <field name="settlement_delay_days"
+                                       string="Acred. días"
+                                       optional="hide"/>
+                                <field name="settlement_day_type"
+                                       string="Tipo días"
+                                       optional="hide"/>
+                                <field name="settlement_journal_id"
+                                       string="Diario acred."
+                                       optional="hide"/>
+                                <!-- Comisiones override (0 = hereda de la tarjeta) -->
+                                <field name="fee_percent"
+                                       string="Comisión %"
+                                       optional="show"/>
+                                <field name="fee_tax_percent"
+                                       string="IVA %"
+                                       optional="hide"/>
+                                <field name="withholding_percent"
+                                       string="Retención %"
+                                       optional="hide"/>
+                                <field name="active" optional="hide"/>
+                            </list>
+                        </field>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         account.card — Acción
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="action_account_card" model="ir.actions.act_window">
+        <field name="name">Tarjetas</field>
+        <field name="res_model">account.card</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_by_provider': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Crea una nueva tarjeta.</p>
+            <p>Para organizar por proveedor, usa el menu Proveedores de Pago.</p>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         account.card.installment — Lista global y búsqueda
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="account_card_installment_list" model="ir.ui.view">
+        <field name="name">account.card.installment.list</field>
+        <field name="model">account.card.installment</field>
+        <field name="arch" type="xml">
+            <list editable="bottom"
+                  decoration-muted="not active"
+                  string="Planes de cuotas">
+                <field name="card_id"/>
+                <field name="name"/>
+                <field name="divisor" string="Cuotas"/>
+                <field name="surcharge_coefficient" string="Coef."/>
+                <field name="bank_discount" optional="hide"/>
+                <field name="apply_commission_surcharge" string="Trasladar com." optional="show"/>
+                <field name="settlement_delay_days" string="Acred. días" optional="show"/>
+                <field name="settlement_journal_id" string="Diario" optional="hide"/>
+                <field name="fee_percent" string="Comisión %" optional="show"/>
+                <field name="fee_tax_percent" string="IVA %" optional="hide"/>
+                <field name="withholding_percent" string="Retención %" optional="hide"/>
+                <field name="active" widget="boolean_toggle" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="account_card_installment_search" model="ir.ui.view">
+        <field name="name">account.card.installment.search</field>
+        <field name="model">account.card.installment</field>
+        <field name="arch" type="xml">
+            <search string="Planes de cuotas">
+                <field name="card_id"/>
+                <field name="name"/>
+                <filter name="by_card" string="Por tarjeta"
+                        context="{'group_by': 'card_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_account_card_installment" model="ir.actions.act_window">
+        <field name="name">Planes de cuotas</field>
+        <field name="res_model">account.card.installment</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         Menús bajo Contabilidad > Pagos
+         sequence 19 → Proveedores (entrada principal)
+         sequence 20 → Tarjetas (vista global)
+         sequence 21 → Planes de cuotas
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <menuitem
+        id="menu_account_card"
+        name="Tarjetas"
+        action="action_account_card"
+        parent="menu_prs_card_config_root"
+        sequence="20"/>
+
+    <menuitem
+        id="menu_account_card_installment"
+        name="Planes de cuotas"
+        action="action_account_card_installment"
+        parent="menu_prs_card_config_root"
+        sequence="30"/>
+
+</odoo>

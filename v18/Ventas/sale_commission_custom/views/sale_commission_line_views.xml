@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_commission_line_list" model="ir.ui.view">
+        <field name="name">sale.commission.line.list</field>
+        <field name="model">sale.commission.line</field>
+        <field name="arch" type="xml">
+            <list string="Comisiones"
+                  decoration-success="state == 'paid'"
+                  decoration-info="state == 'settled'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="salesperson_id"/>
+                <field name="partner_id"/>
+                <field name="sale_order_id"/>
+                <field name="move_id"/>
+                <field name="invoice_date"/>
+                <field name="payment_date"/>
+                <field name="commission_base_amount" sum="Total base"/>
+                <field name="commission_percent"/>
+                <field name="commission_amount" sum="Total comisión"/>
+                <field name="state"/>
+                <field name="settlement_id"/>
+                <field name="currency_id" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_commission_line_form" model="ir.ui.view">
+        <field name="name">sale.commission.line.form</field>
+        <field name="model">sale.commission.line</field>
+        <field name="arch" type="xml">
+            <form string="Comisión">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="salesperson_id"/>
+                            <field name="partner_id"/>
+                            <field name="sale_order_id"/>
+                            <field name="move_id"/>
+                            <field name="settlement_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="invoice_date" readonly="1"/>
+                            <field name="payment_date"/>
+                            <field name="commission_base_amount"/>
+                            <field name="commission_percent"/>
+                            <field name="commission_amount"/>
+                            <field name="state"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="notes"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_commission_line_search" model="ir.ui.view">
+        <field name="name">sale.commission.line.search</field>
+        <field name="model">sale.commission.line</field>
+        <field name="arch" type="xml">
+            <search string="Buscar comisiones">
+                <field name="name"/>
+                <field name="salesperson_id"/>
+                <field name="partner_id"/>
+                <field name="move_id"/>
+                <filter name="filter_earned" string="Ganadas" domain="[('state', '=', 'earned')]"/>
+                <filter name="filter_settled" string="Confirmadas" domain="[('state', '=', 'settled')]"/>
+                <filter name="filter_paid" string="Pagadas" domain="[('state', '=', 'paid')]"/>
+                <filter name="filter_cancelled" string="Canceladas" domain="[('state', '=', 'cancelled')]"/>
+                <group expand="1" string="Agrupar por">
+                    <filter name="group_salesperson" string="Vendedor" context="{'group_by': 'salesperson_id'}"/>
+                    <filter name="group_state" string="Estado" context="{'group_by': 'state'}"/>
+                    <filter name="group_settlement" string="Liquidación" context="{'group_by': 'settlement_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_commission_line" model="ir.actions.act_window">
+        <field name="name">Comisiones</field>
+        <field name="res_model">sale.commission.line</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

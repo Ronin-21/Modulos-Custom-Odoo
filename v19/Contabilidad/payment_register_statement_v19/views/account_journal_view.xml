@@ -1,0 +1,63 @@
+<odoo>
+    <record id="view_account_journal_form_inherit_auto_extract" model="ir.ui.view">
+        <field name="name">account.journal.form.auto.extract.multi.company</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.view_account_journal_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Odoo 19: insertar dentro de la pestaña Advanced Settings que ya existe -->
+            <xpath expr="//page[@name='advanced_settings']" position="inside">
+
+                <group string="Payment Register"
+                       invisible="type not in ['cash','bank','credit_card']"
+                       col="4">
+
+                    <group string="Activación" colspan="4">
+                        <field name="prs_payment_register_enabled"/>
+                    </group>
+
+                    <group string="Pagos - Extractos"
+                           invisible="not prs_payment_register_enabled"
+                           colspan="2">
+                        <field name="auto_extract_enabled"/>
+                        <field name="prs_auto_reconcile"
+                               invisible="not auto_extract_enabled"/>
+                        <field name="prs_auto_statement_balance"
+                               invisible="type not in ['cash','bank']"/>
+                        <field name="prs_only_reconciled_statements"
+                               invisible="type not in ['cash','bank']"/>
+                        <field name="prs_split_checks_per_statement"
+                               invisible="type not in ['cash','bank']"/>
+                        <field name="prs_warn_missing_memo"/>
+                        <field name="prs_allow_delete_statement_with_payments"
+                               invisible="type not in ['cash','bank']"/>
+                    </group>
+
+                </group>
+
+            </xpath>
+
+            <!-- Posición fiscal automática — aplica a toda factura de este diario -->
+            <xpath expr="//page[@name='advanced_settings']" position="inside">
+                <group string="Posición Fiscal Automática" col="2"
+                       invisible="type not in ['sale','purchase']">
+                    <field name="prs_fiscal_position_id"
+                           options="{'no_create': True}"
+                           placeholder="Sin posición fiscal automática"/>
+                </group>
+            </xpath>
+
+            <!-- Empresas permitidas (solo diarios de efectivo, multiempresa) -->
+            <xpath expr="//page[@name='advanced_settings']" position="inside">
+                <group string="Empresas permitidas"
+                       invisible="type != 'cash'"
+                       col="2">
+                    <field name="allowed_company_ids"
+                           widget="many2many_tags"
+                           options="{'no_create': True}"/>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

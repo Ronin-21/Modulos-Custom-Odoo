@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_splb" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.splb</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="stock.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//app[@name='stock']/block[last()]" position="after">
+                <block title="Ubicaciones por Producto/Sucursal" name="splb_setting_container">
+
+                    <setting id="splb_receipts"
+                             string="Aplicar en recepciones de compra"
+                             help="Al confirmar un albarán de recepción, asigna automáticamente la ubicación de destino configurada para cada producto en el almacén.">
+                        <field name="splb_apply_on_receipts"/>
+                    </setting>
+
+                    <setting id="splb_internals"
+                             string="Aplicar en transferencias internas"
+                             help="Al confirmar una transferencia interna, asigna automáticamente las ubicaciones de origen y destino según la configuración por producto y almacén.">
+                        <field name="splb_apply_on_internals"/>
+                    </setting>
+
+                    <setting id="splb_move_lines"
+                             string="Aplicar también en líneas de operación (detalle)"
+                             help="Además de actualizar el movimiento, también actualiza las líneas de operación detalladas que estén pendientes.">
+                        <field name="splb_apply_on_move_lines"/>
+                    </setting>
+
+                    <setting id="splb_missing_mode"
+                             string="Si falta configuración de ubicación"
+                             help="Define qué ocurre cuando un producto no tiene ubicación habitual configurada para el almacén correspondiente.">
+                        <field name="splb_missing_config_mode" widget="radio"/>
+                    </setting>
+
+                </block>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

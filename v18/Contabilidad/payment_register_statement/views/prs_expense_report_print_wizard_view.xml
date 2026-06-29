@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_prs_expense_report_print_wizard_form" model="ir.ui.view">
+        <field name="name">prs.expense.report.print.wizard.form</field>
+        <field name="model">prs.expense.report.print.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Imprimir Reporte de Gastos">
+                <group>
+                    <field name="group_mode"/>
+                    <group col="2">
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                </group>
+                <footer>
+                    <button string="Imprimir PDF" type="object" name="action_print_pdf" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_prs_expense_report_print_wizard" model="ir.actions.act_window">
+        <field name="name">Imprimir Reporte de Gastos (PDF)</field>
+        <field name="res_model">prs.expense.report.print.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Action menu item in account.payment list view -->
+    <record id="server_action_prs_expense_report_print_pdf" model="ir.actions.server">
+        <field name="name">Imprimir Reporte de Gastos (PDF)</field>
+        <field name="model_id" ref="account.model_account_payment"/>
+        <field name="binding_model_id" ref="account.model_account_payment"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+action = {
+    'type': 'ir.actions.act_window',
+    'res_model': 'prs.expense.report.print.wizard',
+    'name': 'Imprimir Reporte de Gastos (PDF)',
+    'view_mode': 'form',
+    'target': 'new',
+    'context': dict(env.context, active_domain=env.context.get('active_domain', [])),
+}
+        </field>
+    </record>
+
+</odoo>

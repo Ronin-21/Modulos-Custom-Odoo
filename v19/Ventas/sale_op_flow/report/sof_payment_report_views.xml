@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- PIVOT -->
+    <record id="view_sof_payment_report_pivot" model="ir.ui.view">
+        <field name="name">sof.payment.report.pivot</field>
+        <field name="model">sof.payment.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Análisis de Cobros" sample="1">
+                <field name="tender_type" type="row"/>
+                <field name="amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- GRAPH -->
+    <record id="view_sof_payment_report_graph" model="ir.ui.view">
+        <field name="name">sof.payment.report.graph</field>
+        <field name="model">sof.payment.report</field>
+        <field name="arch" type="xml">
+            <graph string="Análisis de Cobros" type="bar" sample="1">
+                <field name="tender_type"/>
+                <field name="amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- LIST -->
+    <record id="view_sof_payment_report_list" model="ir.ui.view">
+        <field name="name">sof.payment.report.list</field>
+        <field name="model">sof.payment.report</field>
+        <field name="arch" type="xml">
+            <list string="Cobros" create="0">
+                <field name="date"/>
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <field name="tender_type"/>
+                <field name="journal_id"/>
+                <field name="card_name" optional="hide"/>
+                <field name="financing_plan_id" optional="hide"/>
+                <field name="direction" widget="badge"
+                       decoration-success="direction == 'inbound'"
+                       decoration-danger="direction == 'outbound'"/>
+                <field name="session_id" optional="show"/>
+                <field name="cashier_id" optional="show"/>
+                <field name="user_id" optional="hide"/>
+                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <field name="amount" sum="Total"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="view_sof_payment_report_search" model="ir.ui.view">
+        <field name="name">sof.payment.report.search</field>
+        <field name="model">sof.payment.report</field>
+        <field name="arch" type="xml">
+            <search string="Análisis de Cobros">
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <field name="session_id"/>
+                <field name="cashier_id"/>
+                <field name="journal_id"/>
+                <separator/>
+                <filter string="Cobros" name="filter_inbound" domain="[('direction', '=', 'inbound')]"/>
+                <filter string="Reintegros" name="filter_outbound" domain="[('direction', '=', 'outbound')]"/>
+                <separator/>
+                <filter string="Efectivo" name="f_cash" domain="[('tender_type', '=', 'cash')]"/>
+                <filter string="Tarjeta" name="f_card" domain="[('tender_type', '=', 'card')]"/>
+                <filter string="Banco / Transferencia" name="f_bank" domain="[('tender_type', '=', 'bank')]"/>
+                <filter string="Cheque" name="f_check" domain="[('tender_type', '=', 'check')]"/>
+                <separator/>
+                <filter string="Hoy" name="f_today"
+                        domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Este mes" name="f_month"
+                        domain="[('date', '&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <group>
+                    <filter string="Tipo de medio" name="g_tender" context="{'group_by': 'tender_type'}"/>
+                    <filter string="Medio (diario)" name="g_journal" context="{'group_by': 'journal_id'}"/>
+                    <filter string="Sesión" name="g_session" context="{'group_by': 'session_id'}"/>
+                    <filter string="Cajero" name="g_cashier" context="{'group_by': 'cashier_id'}"/>
+                    <filter string="Vendedor" name="g_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Sucursal" name="g_company" context="{'group_by': 'company_id'}"
+                            groups="base.group_multi_company"/>
+                    <filter string="Fecha" name="g_date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_sof_payment_report" model="ir.actions.act_window">
+        <field name="name">Cobros (por sesión / medio / tarjeta)</field>
+        <field name="res_model">sof.payment.report</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_sof_payment_report_search"/>
+        <field name="context">{'search_default_filter_inbound': 1, 'search_default_g_tender': 1, 'search_default_f_month': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin cobros en el período</p>
+            <p>Análisis de los cobros de caja por tipo de medio, sesión, cajero y sucursal.</p>
+        </field>
+    </record>
+
+</odoo>

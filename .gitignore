@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Odoo local / datos sensibles
+*.log
+*.conf
+.env
+.env.*
+filestore/
+sessions/
+*.dump
+*.sql
+*.zip
+*.tar
+*.gz
+AGENTS.md
+
+# Backups / bases
+BASES ODOO/
+backups/
+dumps/
+
+# VS Code local
+.vscode/settings.json
+
+# OS
+.DS_Store
+Thumbs.db

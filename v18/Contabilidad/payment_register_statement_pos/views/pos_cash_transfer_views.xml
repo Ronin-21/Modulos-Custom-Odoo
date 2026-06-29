@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Form: botón "Confirmar recepción" y badge de estado ─────────── -->
+    <record id="view_pos_cash_transfer_form_prs_inherit" model="ir.ui.view">
+        <field name="name">pos.cash.transfer.form.prs</field>
+        <field name="model">pos.cash.transfer</field>
+        <field name="inherit_id" ref="pos_cash_transfer.view_pos_cash_transfer_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Campo invisible necesario para el botón -->
+            <field name="state" position="before">
+                <field name="prs_pending_validation" invisible="1"/>
+            </field>
+
+            <!-- Botón de confirmación en el header -->
+            <button name="action_cancel" position="before">
+                <button name="action_confirm_reception"
+                        type="object"
+                        string="Confirmar recepción"
+                        class="btn-primary"
+                        invisible="not prs_pending_validation"
+                        confirm="¿Confirmar que el efectivo llegó a la caja destino? Se creará el extracto bancario."
+                        groups="account.group_account_manager"/>
+            </button>
+
+            <!-- Botón para limpiar restos dejados por anulaciones de versiones viejas -->
+            <button name="action_cancel" position="after">
+                <button name="action_prs_cleanup_cancelled_residuals"
+                        type="object"
+                        string="Limpiar restos"
+                        class="btn-secondary"
+                        invisible="state != 'cancelled'"
+                        confirm="Se buscarán y eliminarán extractos/asientos residuales del depósito anulado por cupón e importe. ¿Continuar?"
+                        groups="account.group_account_manager"/>
+            </button>
+
+            <!-- Badge visual de pendiente -->
+            <field name="statement_line_to_id" position="after">
+                <div class="alert alert-warning mt-2 mb-0"
+                     invisible="not prs_pending_validation">
+                    <i class="fa fa-clock-o me-1"/>
+                    <strong>Pendiente de validación:</strong>
+                    El extracto en
+                    <field name="destination_journal_id" readonly="1" nolabel="1"/>
+                    aún no fue confirmado. El administrador debe
+                    presionar <strong>"Confirmar recepción"</strong>
+                    cuando el efectivo llegue físicamente.
+                </div>
+            </field>
+
+        </field>
+    </record>
+
+    <!-- ── List: columna de estado y botón de confirmación ─────────────── -->
+    <record id="view_pos_cash_transfer_list_prs_inherit" model="ir.ui.view">
+        <field name="name">pos.cash.transfer.list.prs</field>
+        <field name="model">pos.cash.transfer</field>
+        <field name="inherit_id" ref="pos_cash_transfer.view_pos_cash_transfer_tree"/>
+        <field name="arch" type="xml">
+
+            <field name="state" position="after">
+                <field name="prs_pending_validation" invisible="1"/>
+                <button name="action_confirm_reception"
+                        type="object"
+                        string="Confirmar recepción"
+                        icon="fa-check-circle"
+                        invisible="not prs_pending_validation"
+                        confirm="¿Confirmar que el efectivo llegó a la caja destino?"
+                        groups="account.group_account_manager"/>
+            </field>
+
+        </field>
+    </record>
+
+    <!-- ── Action: depósitos pendientes de validación ───────────────────── -->
+    <record id="action_pos_cash_transfer_pending" model="ir.actions.act_window">
+        <field name="name">Depósitos POS pendientes</field>
+        <field name="res_model">pos.cash.transfer</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('prs_pending_validation', '=', True)]</field>
+        <field name="context">{'search_default_prs_pending_validation': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay depósitos POS pendientes de validación.
+            </p>
+            <p>
+                Cuando un operador POS realice un depósito en un diario con
+                "Requerir validación" activo, aparecerá aquí hasta que el
+                administrador confirme la recepción del efectivo.
+            </p>
+        </field>
+    </record>
+
+
+
+</odoo>

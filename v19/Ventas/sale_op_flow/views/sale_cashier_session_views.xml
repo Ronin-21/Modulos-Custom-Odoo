@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════
+         KANBAN — Selector de sesión (pantalla de entrada al módulo)
+         El vendedor ve las sesiones abiertas y elige en cuál trabajar.
+         Similar a la pantalla de selección del POS, en backend puro.
+    ═══════════════════════════════════════════════════════ -->
+    <!--
+        Kanban de sesiones activas — pantalla de entrada al módulo.
+        create="0": las sesiones las crea el cajero desde Caja → Mi Sesión.
+        Sin oe_kanban_global_click: los botones controlan la navegación.
+        Botón principal → nueva cotización (flujo del vendedor).
+        Botón secundario → ver detalle de la sesión.
+    -->
+    <record id="view_sale_cashier_session_kanban" model="ir.ui.view">
+        <field name="name">sale.cashier.session.kanban</field>
+        <field name="model">sale.cashier.session</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" create="0" edit="0" delete="0">
+                <field name="name"/>
+                <field name="cashier_id"/>
+                <field name="company_id"/>
+                <field name="date"/>
+                <field name="state"/>
+                <field name="opening_balance"/>
+                <field name="total_orders"/>
+                <field name="total_collected"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div>
+                                    <strong class="fs-5">
+                                        <field name="name"/>
+                                    </strong>
+                                    <div class="text-muted small">
+                                        Cajero: <field name="cashier_id"/>
+                                    </div>
+                                    <div class="small mt-1">
+                                        <span class="badge text-bg-secondary">
+                                            <field name="company_id"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row text-center border-top border-bottom py-2 my-2">
+                                <div class="col-4">
+                                    <div class="fw-bold text-primary fs-5">
+                                        <field name="total_orders"/>
+                                    </div>
+                                    <div class="text-muted small">Pedidos</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fw-bold text-success fs-6">
+                                        <field name="total_collected" widget="monetary"/>
+                                    </div>
+                                    <div class="text-muted small">Cobrado</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fw-bold fs-6">
+                                        <field name="opening_balance" widget="monetary"/>
+                                    </div>
+                                    <div class="text-muted small">Fondo inicial</div>
+                                </div>
+                            </div>
+                            <!--
+                                Accesos operativos de la sesión.
+                                El supervisor hereda vendedor + cajero, por eso NO se declaran
+                                botones exclusivos de supervisor: así evita duplicados.
+                            -->
+                            <button name="action_open_quotations_list"
+                                    type="object"
+                                    class="btn btn-success w-100 mb-2"
+                                    groups="sale_op_flow.group_sale_vendor">
+                                Ingresar a Ventas
+                            </button>
+                            <button name="action_open_cashier_queue"
+                                    type="object"
+                                    class="btn btn-success w-100 mb-2"
+                                    groups="sale_op_flow.group_sale_cashier">
+                                Ingresar a Cobros
+                            </button>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- LIST -->
+    <record id="view_sale_cashier_session_list" model="ir.ui.view">
+        <field name="name">sale.cashier.session.list</field>
+        <field name="model">sale.cashier.session</field>
+        <field name="arch" type="xml">
+            <list string="Sesiones de caja"
+                  delete="0"
+                  decoration-success="state == 'validated'"
+                  decoration-warning="state == 'closed'"
+                  decoration-info="state == 'open'">
+                <field name="name"/>
+                <field name="cashier_id"/>
+                <field name="date"/>
+                <field name="opening_date"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'validated'"
+                       decoration-warning="state == 'closed'"
+                       decoration-info="state == 'open'"/>
+                <field name="total_orders"/>
+                <field name="total_collected"/>
+                <field name="total_expected_rendition" optional="show"/>
+                <field name="total_real" optional="show"/>
+                <field name="total_difference" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM — chatter con sintaxis Odoo 17+ (<chatter/>) -->
+    <record id="view_sale_cashier_session_form" model="ir.ui.view">
+        <field name="name">sale.cashier.session.form</field>
+        <field name="model">sale.cashier.session</field>
+        <field name="arch" type="xml">
+            <form string="Sesión de Caja" create="0" delete="0">
+                <header>
+                    <button name="action_open_cash_in_wizard"
+                            string="↑ Ingreso de efectivo"
+                            type="object"
+                            invisible="state != 'open' or not can_do_cash_moves"/>
+                    <button name="action_open_cash_out_wizard"
+                            string="↓ Egreso de efectivo"
+                            type="object"
+                            invisible="state != 'open' or not can_do_cash_moves"/>
+                    <button name="action_open_close_wizard"
+                            string="Cerrar sesión"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'open'"/>
+                    <button name="action_validate_session"
+                            string="✅ Validar sesión"
+                            type="object"
+                            class="btn-success"
+                            invisible="state not in ('closed', 'pending_validation')"
+                            groups="sale_op_flow.group_sale_supervisor"
+                            confirm="¿Confirmás la validación? Se creará el asiento contable si hay diferencia."/>
+                    <button name="action_reopen_session"
+                            string="Reabrir sesión"
+                            type="object"
+                            invisible="state not in ('closed', 'pending_validation')"
+                            groups="sale_op_flow.group_sale_supervisor"/>
+                    <field name="state" widget="statusbar" statusbar_visible="open,closed,pending_validation,validated"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_latam_checks"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-money"
+                                invisible="latam_check_count == 0">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="latam_check_count"/>
+                                </span>
+                                <span class="o_stat_text">Cheques</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Datos de la sesión">
+                            <field name="cashier_id" readonly="1"/>
+                            <field name="date" readonly="1"/>
+                            <field name="opening_date" readonly="1"/>
+                            <field name="opening_balance" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="1"/>
+                        </group>
+                        <group string="Totales">
+                            <field name="total_orders"/>
+                            <field name="total_collected" string="Total cobrado (pedidos)"/>
+                            <field name="total_account_payments" string="Cobranzas a cuenta"
+                                   invisible="not total_account_payments and state == 'open'"/>
+                            <field name="total_cash_in" string="Ingresos de efectivo"
+                                   invisible="not total_cash_in and state == 'open'"/>
+                            <field name="total_cash_out" string="Egresos de efectivo"
+                                   invisible="not total_cash_out and state == 'open'"/>
+                            <field name="total_expected_rendition" string="Esperado rendición"/>
+                            <field name="total_real" invisible="state == 'open'"/>
+                            <field name="total_difference" invisible="state == 'open'"/>
+                        </group>
+                    </group>
+                    <group string="Cierre" invisible="state == 'open'">
+                        <field name="closed_date" readonly="1"/>
+                        <field name="notes" readonly="state == 'validated'"/>
+                    </group>
+                    <group string="Validación supervisor" invisible="state != 'validated'">
+                        <field name="validated_by" readonly="1"/>
+                        <field name="validated_date" readonly="1"/>
+                        <field name="cash_difference_move_id" readonly="1" invisible="not cash_difference_move_id"/>
+                        <field name="cash_difference_move_ids" widget="many2many_tags" readonly="1" invisible="not cash_difference_move_ids"/>
+                    </group>
+                    <notebook>
+                        <page string="Movimientos de caja" name="cash_moves">
+                            <field name="cash_move_ids" readonly="state != 'open' or not can_do_cash_moves">
+                                <list editable="bottom"
+                                      decoration-success="move_type == 'in'"
+                                      decoration-danger="move_type == 'out'">
+                                    <field name="date" readonly="1"/>
+                                    <field name="move_type" widget="badge"
+                                           decoration-success="move_type == 'in'"
+                                           decoration-danger="move_type == 'out'"/>
+                                    <field name="amount"/>
+                                    <field name="reason"/>
+                                    <field name="user_id" readonly="1"/>
+                                </list>
+                            </field>
+                            <group>
+                                <group>
+                                    <field name="total_cash_in" string="Total ingresos"/>
+                                    <field name="total_cash_out" string="Total egresos"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Pedidos cobrados" name="orders">
+                            <field name="order_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="amount_with_adjustment" string="Cobrado"/>
+                                    <field name="final_payment_journal_id"/>
+                                    <field name="financing_plan_id"/>
+                                    <field name="collected_date"/>
+                                    <field name="operational_state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Cobranzas a cuenta" name="account_payments">
+                            <field name="account_payment_cc_ids" nolabel="1" readonly="1">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="name" string="Pago"/>
+                                    <field name="partner_id" string="Cliente"/>
+                                    <field name="journal_id" string="Medio"/>
+                                    <field name="memo" string="Nota / Concepto"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="op_sale_order_id" column_invisible="1"/>
+                                    <field name="payment_type" column_invisible="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Rendición" name="rendicion" invisible="state == 'open'">
+                            <field name="line_ids" readonly="state == 'validated'">
+                                <list editable="bottom">
+                                    <field name="payment_journal_id"/>
+                                    <field name="amount_expected"/>
+                                    <field name="amount_real"/>
+                                    <field name="difference"/>
+                                    <field name="notes"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="view_sale_cashier_session_search" model="ir.ui.view">
+        <field name="name">sale.cashier.session.search</field>
+        <field name="model">sale.cashier.session</field>
+        <field name="arch" type="xml">
+            <search string="Sesiones de caja">
+                <field name="name"/>
+                <field name="cashier_id" string="Cajero" readonly="1"/>
+                <filter string="Abiertas" name="filter_open" domain="[('state', '=', 'open')]"/>
+                <filter string="Cerradas" name="filter_closed" domain="[('state', '=', 'closed')]"/>
+                <filter string="Validadas" name="filter_validated" domain="[('state', '=', 'validated')]"/>
+                <filter string="Hoy" name="filter_today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Por cajero" name="groupby_cashier" context="{'group_by': 'cashier_id'}"/>
+                <filter string="Por fecha" name="groupby_date" context="{'group_by': 'date'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION: Selector de sesión para VENDEDOR (pantalla de entrada) -->
+    <!-- Action: abrir formulario de NUEVA sesión directamente (sin lista intermedia) -->
+    <record id="action_cashier_session_new_form" model="ir.actions.act_window">
+        <field name="name">Nueva Sesión de Caja</field>
+        <field name="res_model">sale.cashier.session</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+        <record id="action_session_selector_vendor" model="ir.actions.act_window">
+        <field name="name">Sesiones Activas</field>
+        <field name="res_model">sale.cashier.session</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('state', '=', 'open'), ('company_id', 'in', allowed_company_ids)]</field>
+        <field name="context">{'default_cashier_id': uid, 'create': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No hay sesiones de caja abiertas</p>
+            <p>Para comenzar a operar, abrí una nueva sesión de caja para el día de hoy.</p>
+            <p>
+                <a name="%(sale_op_flow.action_cashier_open_wizard)d" type="action"
+                   class="btn btn-primary btn-lg mt-2">
+                    ➕ Abrir sesión de caja
+                </a>
+            </p>
+        </field>
+    </record>
+
+    <!-- ACTION: Mi sesión (cajero) -->
+    <record id="action_cashier_session_my" model="ir.actions.act_window">
+        <field name="name">Sesiones abiertas de caja</field>
+        <field name="res_model">sale.cashier.session</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('state', '=', 'open'), ('company_id', 'in', allowed_company_ids)]</field>
+        <field name="context">{'default_cashier_id': uid}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin sesión abierta</p>
+            <p>Hacé clic en <b>Nuevo</b> para abrir la sesión de caja del día.</p>
+        </field>
+    </record>
+
+    <record id="action_cashier_session_all" model="ir.actions.act_window">
+        <field name="name">Historial de sesiones</field>
+        <field name="res_model">sale.cashier.session</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_sale_cashier_session_search"/>
+    </record>
+
+    <record id="action_cashier_session_pending_validation" model="ir.actions.act_window">
+        <field name="name">Cierres pendientes de validación</field>
+        <field name="res_model">sale.cashier.session</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', '=', 'pending_validation')]</field>
+    </record>
+
+    <record id="action_cashier_session_with_diff" model="ir.actions.act_window">
+        <field name="name">Sesiones con diferencias</field>
+        <field name="res_model">sale.cashier.session</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('total_difference', '!=', 0), ('state', 'in', ['pending_validation', 'validated'])]</field>
+    </record>
+
+</odoo>

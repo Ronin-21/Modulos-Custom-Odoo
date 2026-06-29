@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Muestra un aviso en el wizard de depósito POS cuando el diario destino
+         requiere validación manual del administrador. -->
+    <record id="view_pos_cash_transfer_confirm_prs_inherit" model="ir.ui.view">
+        <field name="name">pos.cash.transfer.wizard.confirm.prs</field>
+        <field name="model">pos.cash.transfer.wizard</field>
+        <field name="inherit_id" ref="pos_cash_transfer.view_pos_cash_transfer_confirm_summary_form"/>
+        <field name="arch" type="xml">
+
+            <field name="confirmation_text" position="after">
+                <div class="alert alert-info mt-2"
+                     invisible="not destination_journal_id or not destination_journal_id.prs_pos_deposit_require_validation">
+                    <i class="fa fa-info-circle me-1"/>
+                    <strong>Validación pendiente:</strong>
+                    El extracto en la caja destino
+                    <field name="destination_journal_id" readonly="1" class="fw-bold"/>
+                    NO se creará automáticamente. El administrador deberá
+                    confirmarlo manualmente desde el tablero de conciliación
+                    bancaria cuando el efectivo llegue físicamente.
+                </div>
+            </field>
+
+        </field>
+    </record>
+</odoo>

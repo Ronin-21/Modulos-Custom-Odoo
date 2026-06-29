@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Categoría -->
+        <record id="module_sale_commission" model="ir.module.category">
+            <field name="name">Comisiones de Ventas</field>
+            <field name="sequence">25</field>
+        </record>
+
+        <!-- Grupos -->
+        <record id="group_commission_salesperson" model="res.groups">
+            <field name="name">Vendedor (solo lectura)</field>
+            <field name="category_id" ref="module_sale_commission"/>
+        </record>
+
+        <record id="group_commission_manager" model="res.groups">
+            <field name="name">Gerente Comercial</field>
+            <field name="category_id" ref="module_sale_commission"/>
+            <field name="implied_ids"
+                   eval="[(4, ref('group_commission_salesperson'))]"/>
+        </record>
+
+        <record id="group_commission_accounting" model="res.groups">
+            <field name="name">Gerente Contable</field>
+            <field name="category_id" ref="module_sale_commission"/>
+            <field name="implied_ids"
+                   eval="[(4, ref('group_commission_salesperson'))]"/>
+        </record>
+
+        <record id="group_commission_admin" model="res.groups">
+            <field name="name">Administrador de Comisiones</field>
+            <field name="category_id" ref="module_sale_commission"/>
+            <field name="implied_ids"
+                   eval="[(4, ref('group_commission_manager')),
+                          (4, ref('group_commission_accounting'))]"/>
+        </record>
+
+        <!-- Reglas de registro -->
+        <!-- Vendedor: solo ve sus propias comisiones -->
+        <record id="rule_commission_line_salesperson" model="ir.rule">
+            <field name="name">Comisiones: solo propias (vendedor)</field>
+            <field name="model_id" ref="model_sale_commission_line"/>
+            <field name="domain_force">
+                [('salesperson_id', '=', user.id)]
+            </field>
+            <field name="groups"
+                   eval="[(4, ref('group_commission_salesperson'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Gerente y admin: ven todas -->
+        <record id="rule_commission_line_manager" model="ir.rule">
+            <field name="name">Comisiones: todas (gerente)</field>
+            <field name="model_id" ref="model_sale_commission_line"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups"
+                   eval="[(4, ref('group_commission_manager')),
+                          (4, ref('group_commission_admin'))]"/>
+        </record>
+
+        <!-- Liquidaciones: vendedor solo ve las propias -->
+        <record id="rule_settlement_salesperson" model="ir.rule">
+            <field name="name">Liquidaciones: solo propias (vendedor)</field>
+            <field name="model_id"
+                   ref="model_sale_commission_settlement"/>
+            <field name="domain_force">
+                [('salesperson_id', '=', user.id)]
+            </field>
+            <field name="groups"
+                   eval="[(4, ref('group_commission_salesperson'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+    </data>
+</odoo>

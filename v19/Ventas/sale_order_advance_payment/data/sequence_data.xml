@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+        <!--
+            Secuencia de respaldo para el modelo sale.order.advance.payment.
+            La numeración principal usa el nombre de la Orden de Venta + '-01'.
+            Esta secuencia queda disponible para uso futuro.
+        -->
+        <record id="sequence_sale_advance_payment" model="ir.sequence">
+            <field name="name">Pago Adelantado Orden de Venta</field>
+            <field name="code">sale.order.advance.payment</field>
+            <field name="prefix">SAP/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="number_increment">1</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

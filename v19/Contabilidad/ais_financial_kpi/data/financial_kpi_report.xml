@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo auto_sequence="1">
+
+    <!-- ==========================================================
+         INDICADORES FINANCIEROS — account.report definition
+         Patrón: aggregation + cross_report, igual que Executive Summary
+         Balance Sheet codes: CA, BA, REC, CL, CL2, EQ, TA (from_beginning)
+         P&L codes: REV, COS, EXP, NEP             (strict_range)
+         ========================================================== -->
+
+    <record id="ais_financial_kpi_report" model="account.report">
+        <field name="name">Indicadores Financieros</field>
+        <field name="filter_date_range" eval="True"/>
+        <field name="default_opening_date_filter">this_year</field>
+        <field name="filter_multi_company">selector</field>
+        <field name="column_ids">
+            <record id="ais_financial_kpi_report_col" model="account.report.column">
+                <field name="name">Valor</field>
+                <field name="expression_label">balance</field>
+            </record>
+        </field>
+        <field name="line_ids">
+
+            <!-- ====================================================
+                 SECCIÓN 1: LIQUIDEZ
+                 ==================================================== -->
+            <record id="lb_kpi_sec_liquidez" model="account.report.line">
+                <field name="name">Liquidez</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+
+                    <!-- 1. Liquidez Corriente = Activo Corriente / Pasivo Corriente
+                         Mide la capacidad de cubrir deudas de corto plazo con activos corrientes.
+                         Referencia: CA / CL del Balance Sheet Enterprise. -->
+                    <record id="lb_kpi_liq_corriente" model="account.report.line">
+                        <field name="name">Liquidez Corriente</field>
+                        <field name="code">LB_LIQ</field>
+                        <field name="expression_ids">
+                            <record id="lb_kpi_liq_corriente_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">LB_LIQ.ca / LB_LIQ.cl</field>
+                                <field name="subformula">ignore_zero_division</field>
+                                <field name="figure_type">float</field>
+                                <field name="auditable" eval="False"/>
+                            </record>
+                            <record id="lb_kpi_liq_corriente_ca" model="account.report.expression">
+                                <field name="label">ca</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">CA.balance</field>
+                                <field name="date_scope">from_beginning</field>
+                                <field name="subformula">cross_report(account_reports.balance_sheet)</field>
+                            </record>
+                            <record id="lb_kpi_liq_corriente_cl" model="account.report.expression">
+                                <field name="label">cl</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">CL.balance</field>
+                                <field name="date_scope">from_beginning</field>
+                                <field name="subformula">cross_report(account_reports.balance_sheet)</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <!-- 2. Prueba Ácida = (Caja + Cuentas por Cobrar) / Pasivo Corriente
+                         Excluye activos de menor liquidez (stocks).
+                         Usa BA (cash/banks) + REC (receivables) del Balance Sheet. -->
+                    <record id="lb_kpi_prueba_acida" model="account.report.line">
+                        <field name="name">Prueba Ácida</field>
+                        <field name="code">LB_PRAC</field>
+                        <field name="expression_ids">
+                            <record id="lb_kpi_prueba_acida_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">(LB_PRAC.ba + LB_PRAC.rec) / LB_PRAC.cl</field>
+                                <field name="subformula">ignore_zero_division</field>
+                                <field name="figure_type">float</field>
+                                <field name="auditable" eval="False"/>
+                            </record>
+                            <record id="lb_kpi_prueba_acida_ba" model="account.report.expression">
+                                <field name="label">ba</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">BA.balance</field>
+                                <field name="date_scope">from_beginning</field>
+                                <field name="subformula">cross_report(account_reports.balance_sheet)</field>
+                            </record>
+                            <record id="lb_kpi_prueba_acida_rec" model="account.report.expression">
+                                <field name="label">rec</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">REC.balance</field>
+                                <field name="date_scope">from_beginning</field>
+                                <field name="subformula">cross_report(account_reports.balance_sheet)</field>
+                            </record>
+                            <record id="lb_kpi_prueba_acida_cl" model="account.report.expression">
+                                <field name="label">cl</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">CL.balance</field>
+                                <field name="date_scope">from_beginning</field>
+                                <field name="subformula">cross_report(account_reports.balance_sheet)</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <!-- 3. Prueba Seca (Cash Ratio) = Caja y Bancos / Pasivo Corriente
+                         Solo activos de liquidez inmediata (BA = bank & cash). -->
+                    <record id="lb_kpi_prueba_seca" model="account.report.line">
+                        <field name="name">Prueba Seca</field>
+                        <field name="code">LB_PRSEC</field>
+                        <field name="expression_ids">
+                            <record id="lb_kpi_prueba_seca_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">LB_PRSEC.ba / LB_PRSEC.cl</field>
+                                <field name="subformula">ignore_zero_division</field>
+                                <field name="figure_type">float</field>
+                                <field name="auditable" eval="False"/>
+                            </record>
+                            <record id="lb_kpi_prueba_seca_ba" model="account.report.expression">
+                                <field name="label">ba</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">BA.balance</field>
+                                <field name="date_scope">from_beginning</field>
+                                <field name="subformula">cross_report(account_reports.balance_sheet)</field>
+                            </record>
+                            <record id="lb_kpi_prueba_seca_cl" model="account.report.expression">
+                                <field name="label">cl</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">CL.balance</field>
+                                <field name="date_scope">from_beginning</field>
+                                <field name="subformula">cross_report(account_reports.balance_sheet)</field>
+                            </record>
+                        </field>
+                    </record>
+
+                </field>
+            </record>
+
+            <!-- ====================================================
+                 SECCIÓN 2: ROTACIÓN
+                 ==================================================== -->
+            <record id="lb_kpi_sec_rotacion" model="account.report.line">
+                <field name="name">Rotación</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+
+                    <!-- 4. Período Promedio de Cobro (DSO)
+                         = (Cuentas por Cobrar / Ventas) × Días del período
+                         REC del Balance Sheet (snapshot) / REV del P&amp;L (período). -->
+                    <record id="lb_kpi_ppc" model="account.report.line">
+                        <field name="name">Período Promedio de Cobro (días)</field>
+                        <field name="code">LB_PPC</field>
+                        <field name="expression_ids">
+                            <record id="lb_kpi_ppc_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">LB_PPC.rec / LB_PPC.rev * LB_PPC.ndays</field>
+                                <field name="subformula">ignore_zero_division</field>
+                                <field name="green_on_positive" eval="False"/>
+                                <field name="figure_type">float</field>
+                                <field name="auditable" eval="False"/>
+                            </record>
+                            <record id="lb_kpi_ppc_rec" model="account.report.expression">
+                                <field name="label">rec</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">REC.balance</field>
+                                <field name="date_scope">from_beginning</field>
+                                <field name="subformula">cross_report(account_reports.balance_sheet)</field>
+                            </record>
+                            <record id="lb_kpi_ppc_rev" model="account.report.expression">
+                                <field name="label">rev</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">REV.balance</field>
+                                <field name="date_scope">strict_range</field>
+                                <field name="subformula">cross_report(account_reports.profit_and_loss)</field>
+                            </record>
+                            <record id="lb_kpi_ppc_ndays" model="account.report.expression">
+                                <field name="label">ndays</field>
+                                <field name="engine">custom</field>
+                                <field name="formula">_report_custom_engine_lb_kpi_ndays</field>
+                                <field name="auditable" eval="False"/>
+                            </record>
+                        </field>
+                    </record>
+
+                    <!-- 5. Período Promedio de Pago (DPO)
+                         = (Cuentas por Pagar / (CMV + Gastos)) × Días del período
+                         CL2 (Payables) del Balance Sheet / (COS + EXP) del P&amp;L. -->
+                    <record id="lb_kpi_ppp" model="account.report.line">
+                        <field name="name">Período Promedio de Pago (días)</field>
+                        <field name="code">LB_PPP</field>
+                        <field name="expression_ids">
+                            <record id="lb_kpi_ppp_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">LB_PPP.cl2 / (LB_PPP.cos + LB_PPP.exp) * LB_PPP.ndays</field>
+                                <field name="subformula">ignore_zero_division</field>
+                                <field name="green_on_positive" eval="False"/>
+                                <field name="figure_type">float</field>
+                                <field name="auditable" eval="False"/>
+                            </record>
+                            <record id="lb_kpi_ppp_cl2" model="account.report.expression">
+                                <field name="label">cl2</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">CL2.balance</field>
+                                <field name="date_scope">from_beginning</field>
+                                <field name="subformula">cross_report(account_reports.balance_sheet)</field>
+                            </record>
+                            <record id="lb_kpi_ppp_cos" model="account.report.expression">
+                                <field name="label">cos</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">COS.balance</field>
+                                <field name="date_scope">strict_range</field>
+                                <field name="subformula">cross_report(account_reports.profit_and_loss)</field>
+                            </record>
+                            <record id="lb_kpi_ppp_exp" model="account.report.expression">
+                                <field name="label">exp</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">EXP.balance</field>
+                                <field name="date_scope">strict_range</field>
+                                <field name="subformula">cross_report(account_reports.profit_and_loss)</field>
+                            </record>
+                            <record id="lb_kpi_ppp_ndays" model="account.report.expression">
+                                <field name="label">ndays</field>
+                                <field name="engine">custom</field>
+                                <field name="formula">_report_custom_engine_lb_kpi_ndays</field>
+                                <field name="auditable" eval="False"/>
+                            </record>
+                        </field>
+                    </record>
+
+                </field>
+            </record>
+
+            <!-- ====================================================
+                 SECCIÓN 3: RENTABILIDAD
+                 ==================================================== -->
+            <record id="lb_kpi_sec_rentabilidad" model="account.report.line">
+                <field name="name">Rentabilidad</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+
+                    <!-- 6. ROA — Return on Assets = Utilidad Neta / Activo Total × 100
+                         NEP del P&amp;L (período) / TA del Balance Sheet (snapshot). -->
+                    <record id="lb_kpi_roa" model="account.report.line">
+                        <field name="name">ROA — Retorno sobre Activos (%)</field>
+                        <field name="code">LB_ROA</field>
+                        <field name="expression_ids">
+                            <record id="lb_kpi_roa_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">LB_ROA.nep / LB_ROA.ta * 100</field>
+                                <field name="subformula">ignore_zero_division</field>
+                                <field name="figure_type">percentage</field>
+                                <field name="auditable" eval="False"/>
+                            </record>
+                            <record id="lb_kpi_roa_nep" model="account.report.expression">
+                                <field name="label">nep</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">NEP.balance</field>
+                                <field name="date_scope">strict_range</field>
+                                <field name="subformula">cross_report(account_reports.profit_and_loss)</field>
+                            </record>
+                            <record id="lb_kpi_roa_ta" model="account.report.expression">
+                                <field name="label">ta</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">TA.balance</field>
+                                <field name="date_scope">from_beginning</field>
+                                <field name="subformula">cross_report(account_reports.balance_sheet)</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <!-- 7. ROI — Return on Investment = Utilidad Neta / Patrimonio Neto × 100
+                         NEP del P&amp;L / EQ (Equity) del Balance Sheet.
+                         Nota: el "ROI" del Executive Summary nativo de Odoo es en realidad ROA
+                         (net profit / total assets). Este indicador usa el Patrimonio Neto. -->
+                    <record id="lb_kpi_roi" model="account.report.line">
+                        <field name="name">ROI — Retorno sobre Inversión (%)</field>
+                        <field name="code">LB_ROI</field>
+                        <field name="expression_ids">
+                            <record id="lb_kpi_roi_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">LB_ROI.nep / LB_ROI.eq * 100</field>
+                                <field name="subformula">ignore_zero_division</field>
+                                <field name="figure_type">percentage</field>
+                                <field name="auditable" eval="False"/>
+                            </record>
+                            <record id="lb_kpi_roi_nep" model="account.report.expression">
+                                <field name="label">nep</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">NEP.balance</field>
+                                <field name="date_scope">strict_range</field>
+                                <field name="subformula">cross_report(account_reports.profit_and_loss)</field>
+                            </record>
+                            <record id="lb_kpi_roi_eq" model="account.report.expression">
+                                <field name="label">eq</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">EQ.balance</field>
+                                <field name="date_scope">from_beginning</field>
+                                <field name="subformula">cross_report(account_reports.balance_sheet)</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <!-- 8. EBITDA = Utilidad Neta + Depreciaciones y Amortizaciones
+                         NEP del P&amp;L + sum de cuentas tipo expense_depreciation del período.
+                         En Odoo, las cuentas de D&amp;A (expense_depreciation) están en OEXP
+                         (Otros Gastos), debajo de la línea de Utilidad Operativa (INC). Por eso
+                         se reconstruye desde NEP añadiendo la D&amp;A deducida vía OEXP. -->
+                    <record id="lb_kpi_ebitda" model="account.report.line">
+                        <field name="name">EBITDA</field>
+                        <field name="code">LB_EBITDA</field>
+                        <field name="expression_ids">
+                            <record id="lb_kpi_ebitda_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">LB_EBITDA.nep + LB_EBITDA.dep</field>
+                                <field name="figure_type">monetary</field>
+                                <field name="auditable" eval="False"/>
+                            </record>
+                            <record id="lb_kpi_ebitda_nep" model="account.report.expression">
+                                <field name="label">nep</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">NEP.balance</field>
+                                <field name="date_scope">strict_range</field>
+                                <field name="subformula">cross_report(account_reports.profit_and_loss)</field>
+                            </record>
+                            <!-- Suma debit-credit de cuentas de depreciación del período.
+                                 Resultado positivo (gasto = débito > crédito) que se agrega
+                                 de vuelta a NEP para llegar al EBITDA. -->
+                            <record id="lb_kpi_ebitda_dep" model="account.report.expression">
+                                <field name="label">dep</field>
+                                <field name="engine">domain</field>
+                                <field name="formula" eval="[('account_id.account_type', '=', 'expense_depreciation'), ('parent_state', '=', 'posted')]"/>
+                                <field name="date_scope">strict_range</field>
+                                <field name="subformula">sum</field>
+                                <field name="auditable" eval="False"/>
+                            </record>
+                        </field>
+                    </record>
+
+                </field>
+            </record>
+
+        </field>
+    </record>
+
+    <!-- ==========================================================
+         ACTION — abre el reporte en el framework de account_reports
+         ========================================================== -->
+    <record id="action_ais_financial_kpi_report" model="ir.actions.client">
+        <field name="name">Indicadores Financieros</field>
+        <field name="tag">account_report</field>
+        <field name="context" eval="{'report_id': ref('ais_financial_kpi.ais_financial_kpi_report')}"/>
+    </record>
+
+    <!-- ==========================================================
+         MENÚ — bajo Contabilidad > Reportes > Gestión
+         (mismo padre que Executive Summary nativo de Odoo)
+         ========================================================== -->
+    <menuitem
+        id="menu_ais_financial_kpi_report"
+        name="Indicadores Financieros"
+        parent="account.account_reports_management_menu"
+        action="action_ais_financial_kpi_report"
+        groups="account.group_account_readonly,account.group_account_basic"
+        sequence="300"/>
+
+</odoo>

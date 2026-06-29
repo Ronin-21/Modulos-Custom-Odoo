@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_prs_money_flow" model="ir.ui.view">
+        <field name="name">res.config.settings.prs.money.flow</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="Cobros y Flujo de Pagos" name="payment_register_statement_v19">
+                    <block title="Flujo de Pagos" name="prs_money_flow_settings_block">
+                        <setting id="prs_money_flow_enabled_setting"
+                                 string="Flujo de Pagos"
+                                 help="Activa el menu y la generacion de flujos proyectados para acreditaciones, cheques y pagos de la empresa actual.">
+                            <field name="prs_money_flow_enabled"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

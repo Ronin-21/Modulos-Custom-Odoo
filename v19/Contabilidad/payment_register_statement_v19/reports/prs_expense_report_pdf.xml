@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <report
+        id="report_prs_expense_payments_pdf"
+        model="prs.expense.report.print.wizard"
+        string="Reporte de gastos"
+        report_type="qweb-pdf"
+        name="payment_register_statement_v19.report_prs_expense_payments_pdf"
+        file="payment_register_statement_v19.report_prs_expense_payments_pdf"
+        print_report_name="'Reporte de gastos - %s' % (object.id)"
+    />
+
+    <template id="report_prs_expense_payments_pdf">
+        <t t-call="web.external_layout">
+            <t t-set="o" t-value="docs"/>
+            <div class="page">
+                <h2>Gastos / Compras</h2>
+                <t t-set="groups" t-value="o._get_grouped_data()"/>
+                <t t-foreach="groups" t-as="g">
+                    <t t-if="g['title']">
+                        <h4 style="margin-top: 14px; border-top: 1px solid #bbb; padding-top: 6px;">
+                            <span t-esc="g['title']"/>
+                        </h4>
+                    </t>
+
+                    <table class="table table-sm o_main_table" style="width:100%; font-size: 10px;">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Número</th>
+                                <th>Diario</th>
+                                <th>Método</th>
+                                <th>Proveedor</th>
+                                <th>Concepto</th>
+                                <th>Detalle</th>
+                                <th class="text-end">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="g['payments']" t-as="p">
+                                <tr>
+                                    <td><span t-esc="p.date"/></td>
+                                    <td><span t-esc="p.name"/></td>
+                                    <td><span t-esc="p.journal_id.display_name"/></td>
+                                    <td><span t-esc="p.payment_method_line_id.display_name"/></td>
+                                    <td><span t-esc="p.partner_id.display_name"/></td>
+                                    <td><span t-esc="p.prs_expense_concept_id.display_name or ''"/></td>
+                                    <td><span t-esc="p.memo or ''"/></td>
+                                    <td class="text-end">
+                                        <span t-esc="format_amount(p.amount, p.currency_id)"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="7" class="text-end">Total</th>
+                                <th class="text-end">
+                                    <span t-esc="format_amount(g['total'], (g['payments'] and g['payments'][0].currency_id) or o.env.company.currency_id)"/>
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </t>
+            </div>
+        </t>
+    </template>
+
+</odoo>

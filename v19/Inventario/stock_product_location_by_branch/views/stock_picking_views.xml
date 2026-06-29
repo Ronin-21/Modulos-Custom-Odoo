@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         Extiende el formulario de albarán:
+         - Botón "Aplicar Ubicaciones Automáticas" en la cabecera
+         - Checkbox para desactivar la lógica automática en este albarán
+    ════════════════════════════════════════════════════════════════════ -->
+    <record id="view_picking_form_splb" model="ir.ui.view">
+        <field name="name">stock.picking.form.splb</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Botón en la cabecera, visible cuando el albarán está en estado
+                 confirmado/listo y el tipo es recepción o transferencia interna -->
+            <xpath expr="//header" position="inside">
+                <button name="action_splb_apply_auto_locations"
+                        type="object"
+                        string="Aplicar Ubicaciones Automáticas"
+                        class="btn-secondary"
+                        invisible="state in ('done', 'cancel') or picking_type_code not in ('incoming', 'internal')"
+                        confirm="¿Desea re-aplicar las ubicaciones habituales a todos los movimientos pendientes de este albarán? Esto sobreescribirá las ubicaciones actuales."/>
+            </xpath>
+
+            <!-- Campo de desactivación en la pestaña de información adicional
+                 o en un grupo separado dentro del formulario -->
+            <xpath expr="//page[@name='extra']" position="inside">
+                <group string="Ubicaciones por Sucursal" col="2">
+                    <field name="splb_disable_auto"
+                           invisible="picking_type_code not in ('incoming', 'internal')"/>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

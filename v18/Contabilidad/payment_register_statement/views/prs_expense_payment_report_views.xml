@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Dedicated list view for expense payment report -->
+    <record id="view_prs_expense_payment_report_list" model="ir.ui.view">
+        <field name="name">prs.expense.payment.report.list</field>
+        <field name="model">account.payment</field>
+        <field name="arch" type="xml">
+            <list string="Reporte de Gastos / Compras" create="false" delete="false">
+                <field name="date"/>
+                <field name="journal_id"/>
+                <field name="payment_method_line_id" string="Método de pago"/>
+                <field name="partner_id" string="Proveedor"/>
+                <field name="prs_expense_concept_id" string="Concepto"/>
+                <field name="prs_is_misc_expense" string="Gastos Varios"/>
+                <field name="prs_invoice_numbers" string="Factura vinculada"/>
+                <field name="amount" widget="monetary" string="Importe"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Dedicated search view -->
+    <record id="view_prs_expense_payment_report_search" model="ir.ui.view">
+        <field name="name">prs.expense.payment.report.search</field>
+        <field name="model">account.payment</field>
+        <field name="arch" type="xml">
+            <search string="Buscar pagos">
+                <field name="date"/>
+                <field name="journal_id"/>
+                <field name="payment_method_line_id"/>
+                <field name="partner_id"/>
+                <field name="prs_expense_concept_id"/>
+                <field name="prs_is_misc_expense"/>
+
+                <separator/>
+                <filter string="Gastos Varios" name="prs_misc_expense" domain="[('prs_is_misc_expense','=',True)]"/>
+
+                <group expand="0" string="Agrupar por">
+                    <filter string="Concepto" name="group_by_prs_expense_concept" context="{'group_by': 'prs_expense_concept_id'}"/>
+                    <filter string="Proveedor" name="group_by_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Diario" name="group_by_journal" context="{'group_by': 'journal_id'}"/>
+                    <filter string="Método de pago" name="group_by_payment_method" context="{'group_by': 'payment_method_line_id'}"/>
+                    <filter string="Mes" name="group_by_month" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

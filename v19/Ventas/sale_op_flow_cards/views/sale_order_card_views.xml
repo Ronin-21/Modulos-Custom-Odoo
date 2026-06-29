@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sale_order_form_prs_card" model="ir.ui.view">
+        <field name="name">sale.order.form.prs.card</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_op_flow.view_sale_order_form_sof"/>
+        <field name="arch" type="xml">
+
+            <!-- Selectores de tarjeta y plan en la solapa Flujo Operativo -->
+            <xpath expr="//page[@name='sof_operational']//field[@name='financing_plan_id']" position="after">
+                <!-- Campo técnico para controlar visibilidad -->
+                <field name="prs_card_provider_id" invisible="1"/>
+
+                <field name="prs_card_id"
+                       readonly="operational_state not in ('quotation', 'confirmed')"
+                       options="{'no_create': True}"
+                       groups="sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_supervisor"
+                       invisible="not prs_card_provider_id"/>
+
+                <field name="prs_installment_id"
+                       readonly="operational_state not in ('quotation', 'confirmed')"
+                       options="{'no_create': True}"
+                       groups="sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_supervisor"
+                       invisible="not prs_card_id"/>
+            </xpath>
+
+            <!-- Ocultar "Ajuste de precio" cuando hay plan de cuotas con tarjeta -->
+            <xpath expr="//page[@name='sof_operational']//field[@name='adjustment_type']/.." position="attributes">
+                <attribute name="invisible">not financing_plan_id or prs_installment_id</attribute>
+            </xpath>
+
+            <!-- Panel informativo de cuotas (alternativo a "Ajuste de precio") -->
+            <xpath expr="//page[@name='sof_operational']//field[@name='amount_per_installment']/.." position="after">
+                <group invisible="not prs_installment_id">
+                    <group string="Cuotas con tarjeta">
+                        <field name="prs_installment_count" string="Cuotas" readonly="1"/>
+                        <field name="prs_surcharge_rate" string="Recargo (%)" readonly="1"/>
+                        <field name="prs_commission_passthrough_rate" string="Comisión trasladada (%)" readonly="1"
+                               invisible="not prs_commission_passthrough_rate"/>
+                        <field name="prs_surcharge_amount" string="Monto recargo" readonly="1"/>
+                        <field name="prs_total_with_surcharge" string="Total con recargo" readonly="1"/>
+                        <field name="prs_amount_per_installment" string="Valor por cuota" readonly="1"/>
+                    </group>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="module_category_installation_material" model="ir.module.category">
+        <field name="name">Control de Materiales de Instalación</field>
+        <field name="description">Gestión de materiales de instalación: retiros, devoluciones y cierre.</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="res_groups_privilege_installation_material" model="res.groups.privilege">
+        <field name="name">Control de Materiales de Instalación</field>
+        <field name="category_id" ref="module_category_installation_material"/>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="group_installation_user" model="res.groups">
+        <field name="name">Usuario</field>
+        <field name="privilege_id" ref="res_groups_privilege_installation_material"/>
+        <field name="comment">Puede ver controles de materiales, retiros y devoluciones.</field>
+    </record>
+
+    <record id="group_installation_responsible" model="res.groups">
+        <field name="name">Responsable</field>
+        <field name="privilege_id" ref="res_groups_privilege_installation_material"/>
+        <field name="implied_ids" eval="[(4, ref('group_installation_user'))]"/>
+        <field name="comment">Puede crear retiros y devoluciones de materiales de instalación.</field>
+    </record>
+
+    <record id="group_installation_admin" model="res.groups">
+        <field name="name">Administrador</field>
+        <field name="privilege_id" ref="res_groups_privilege_installation_material"/>
+        <field name="implied_ids" eval="[(4, ref('group_installation_responsible'))]"/>
+        <field name="comment">Puede cerrar, reabrir, cancelar instalaciones y configurar ubicaciones/tipos.</field>
+        <field name="user_ids" eval="[(4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- Regla multi-compañía sobre el control -->
+    <record id="installation_material_company_rule" model="ir.rule">
+        <field name="name">Control de materiales: multi-compañía</field>
+        <field name="model_id" ref="model_sale_installation_material"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="global" eval="True"/>
+    </record>
+
+</odoo>

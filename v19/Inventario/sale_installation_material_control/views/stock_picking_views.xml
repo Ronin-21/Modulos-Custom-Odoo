@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_picking_form_installation" model="ir.ui.view">
+        <field name="name">stock.picking.form.installation</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Instalación" name="installation"
+                      invisible="not installation_id">
+                    <group>
+                        <group>
+                            <field name="installation_id"/>
+                            <field name="installation_move_type"/>
+                            <field name="installation_responsible_id"/>
+                        </group>
+                        <group>
+                            <field name="installation_sale_order_id"/>
+                            <field name="installation_project_id"/>
+                        </group>
+                    </group>
+                    <div class="oe_button_box">
+                        <button name="action_open_installation_withdrawal" type="object"
+                                string="Crear retiro" class="btn-primary"
+                                groups="sale_installation_material_control.group_installation_responsible"/>
+                        <button name="action_open_installation_return" type="object"
+                                string="Registrar devolución"
+                                groups="sale_installation_material_control.group_installation_responsible"/>
+                        <button name="action_view_installation_control" type="object"
+                                string="Ver control de materiales"/>
+                    </div>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_picking_internal_search_installation" model="ir.ui.view">
+        <field name="name">stock.picking.search.installation</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter name="filter_installation" string="Movimientos de instalación"
+                        domain="[('installation_id', '!=', False)]"/>
+                <filter name="group_installation_move_type" string="Tipo de instalación"
+                        context="{'group_by': 'installation_move_type'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

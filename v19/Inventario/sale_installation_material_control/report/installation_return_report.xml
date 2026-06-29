@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_installation_return_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Comprobante de Devolución de Materiales</h2>
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <strong>Número:</strong> <span t-field="o.name"/><br/>
+                                <strong>Fecha:</strong>
+                                <span t-field="o.date_done" t-options="{'widget': 'datetime'}"/><br/>
+                                <strong>Responsable / Instalador:</strong>
+                                <span t-field="o.installation_responsible_id"/><br/>
+                                <strong>Registrado por:</strong> <span t-field="o.create_uid"/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Control:</strong> <span t-field="o.installation_id.name"/><br/>
+                                <strong>Orden de venta:</strong>
+                                <span t-field="o.installation_sale_order_id.name"/><br/>
+                                <strong>Cliente:</strong> <span t-field="o.partner_id"/><br/>
+                                <strong>Proyecto / Tarea:</strong>
+                                <span t-field="o.installation_project_id.name"/>
+                                <span t-if="o.installation_id.task_id">
+                                    / <span t-field="o.installation_id.task_id.name"/>
+                                </span>
+                            </div>
+                        </div>
+                        <table class="table table-sm mt-4">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th class="text-end">Cantidad devuelta</th>
+                                    <th class="text-end">Usado real acumulado</th>
+                                    <th>Unidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.move_ids" t-as="m">
+                                    <td><span t-field="m.product_id"/></td>
+                                    <td class="text-end"><span t-field="m.quantity"/></td>
+                                    <td class="text-end">
+                                        <span t-esc="m.installation_line_id.used_qty"/>
+                                    </td>
+                                    <td><span t-field="m.product_uom"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <p>____________________________</p>
+                                <p>Firma del instalador</p>
+                            </div>
+                            <div class="col-6">
+                                <p>____________________________</p>
+                                <p>Firma de depósito</p>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <strong>Observaciones:</strong>
+                                <span t-field="o.note"/>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

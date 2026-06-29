@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_prs_payment_method_internal_config_list" model="ir.ui.view">
+        <field name="name">prs.payment.method.internal.config.list</field>
+        <field name="model">prs.payment.method.internal.config</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="merchant_number"/>
+                <field name="settlement_delay_days"/>
+                <field name="settlement_day_type"/>
+                <field name="settlement_journal_id"/>
+                <field name="fee_percent"/>
+                <field name="fee_fixed_amount"/>
+                <field name="fee_tax_percent"/>
+                <field name="withholding_percent"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_prs_payment_method_brand_plan_list" model="ir.ui.view">
+        <field name="name">prs.payment.method.brand.plan.list</field>
+        <field name="model">prs.payment.method.brand.plan</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="merchant_number" optional="hide"/>
+                <field name="installments"/>
+                <field name="percent"/>
+                <field name="prs_apply_commission_surcharge" optional="show"/>
+                <field name="settlement_delay_days" optional="show"/>
+                <field name="settlement_day_type" optional="hide"/>
+                <field name="settlement_journal_id" optional="hide"/>
+                <field name="fee_percent" optional="show"/>
+                <field name="fee_fixed_amount" optional="hide"/>
+                <field name="fee_tax_percent" optional="hide"/>
+                <field name="withholding_percent" optional="hide"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_prs_payment_method_brand_plan_form" model="ir.ui.view">
+        <field name="name">prs.payment.method.brand.plan.form</field>
+        <field name="model">prs.payment.method.brand.plan</field>
+        <field name="arch" type="xml">
+            <form string="Plan">
+                <sheet>
+                    <group>
+                        <group string="Identificacion">
+                            <field name="name"/>
+                            <field name="brand_method_id" domain="[('primary_payment_method_id','!=',False)]" context="{'active_test': False}"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="merchant_number"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Cuotas / Recargo venta">
+                            <field name="installments"/>
+                            <field name="percent"/>
+                            <field name="prs_apply_commission_surcharge"/>
+                        </group>
+                    </group>
+                    <group string="Acreditacion y coeficientes">
+                        <group>
+                            <field name="settlement_delay_days"/>
+                            <field name="settlement_day_type"/>
+                            <field name="settlement_journal_id"/>
+                        </group>
+                        <group>
+                            <field name="fee_percent"/>
+                            <field name="fee_fixed_amount"/>
+                            <field name="fee_tax_percent"/>
+                            <field name="withholding_percent"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_prs_payment_method_brand_plan" model="ir.actions.act_window">
+        <field name="name">Planes de Pago</field>
+        <field name="res_model">prs.payment.method.brand.plan</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('brand_method_id.primary_payment_method_id', '!=', False)]</field>
+        <field name="context">{'active_test': False}</field>
+        <field name="help" type="html"><p class="o_view_nocontent_smiling_face">Crea planes por marca/metodo.</p></field>
+    </record>
+
+    <record id="payment_method_form_prs_internal_settings" model="ir.ui.view">
+        <field name="name">payment.method.form.prs.brand.internal.settings</field>
+        <field name="model">payment.method</field>
+        <field name="inherit_id" ref="payment.payment_method_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="before">
+                <field name="primary_payment_method_id" invisible="1"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+
+                <page name="prs_brand_internal_payment_settings" string="Ajustes Pagos Internos" invisible="not primary_payment_method_id">
+                    <group string="Configuracion por empresa">
+                        <field name="prs_internal_config_ids" nolabel="1" context="{'default_payment_method_id': id}">
+                            <list editable="bottom">
+                                <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="merchant_number"/>
+                                <field name="settlement_delay_days"/>
+                                <field name="settlement_day_type"/>
+                                <field name="settlement_journal_id"/>
+                                <field name="fee_percent"/>
+                                <field name="fee_fixed_amount"/>
+                                <field name="fee_tax_percent"/>
+                                <field name="withholding_percent"/>
+                            </list>
+                        </field>
+                    </group>
+                </page>
+                <page name="prs_brand_plans" string="Planes" invisible="not primary_payment_method_id">
+                    <field name="prs_brand_plan_ids" context="{'default_brand_method_id': id, 'active_test': False}">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="name"/>
+                            <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                            <field name="merchant_number" optional="hide"/>
+                            <field name="installments"/>
+                            <field name="percent"/>
+                            <field name="prs_apply_commission_surcharge" optional="show"/>
+                            <field name="settlement_delay_days" optional="show"/>
+                            <field name="settlement_day_type" optional="hide"/>
+                            <field name="settlement_journal_id" optional="hide"/>
+                            <field name="fee_percent" optional="show"/>
+                            <field name="fee_fixed_amount" optional="hide"/>
+                            <field name="fee_tax_percent" optional="hide"/>
+                            <field name="withholding_percent" optional="hide"/>
+                            <field name="active"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

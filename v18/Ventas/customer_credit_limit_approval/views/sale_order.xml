@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_order_form_inherit" model="ir.ui.view">
+        <field name="name">view.sale.order.form.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Banner de alerta cuando está excedido -->
+            <xpath expr="//header" position="after">
+                <div class="alert alert-warning text-center o_form_header"
+                     invisible="is_credit_limit_approval == False"
+                     role="status">
+                    <div>
+                        <strong>⚠️ Aprobación de Límite de Crédito Requerida</strong><br/>
+                        <strong>Límite de bloqueo: <field name="customer_blocking_limit"/></strong><br/>
+                        <strong>Monto adeudado: <field name="amount_due"/></strong>
+                    </div>
+                </div>
+            </xpath>
+
+            <!-- Botones solo para gerencia -->
+            <xpath expr="//header" position="inside">
+                <button name="approve_credit_limit"
+                        string="✅ Aprobar"
+                        type="object"
+                        class="oe_highlight"
+                        groups="customer_credit_limit_approval.group_credit_approver"
+                        invisible="state != 'sales_approval'"/>
+                <button name="reject_credit_limit"
+                        string="❌ Rechazar"
+                        type="object"
+                        class="oe_highlight btn-danger"
+                        groups="customer_credit_limit_approval.group_credit_approver"
+                        invisible="state != 'sales_approval'"/>
+                <button name="action_confirm"
+                        string="✅ Confirmar pedido"
+                        type="object"
+                        class="oe_highlight"
+                        groups="customer_credit_limit_approval.group_credit_approver"
+                        invisible="state != 'approved'"
+                        context="{'credit_warning_acknowledged': True}"/>
+                <button name="reset_to_draft"
+                        string="🔄 Volver a Borrador"
+                        type="object"
+                        groups="customer_credit_limit_approval.group_credit_approver"
+                        invisible="state not in ('reject', 'approved')"/>
+            </xpath>
+
+            <!-- Campos de crédito en la orden -->
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+                <field name="company_currency_id" invisible="1"/>
+                <field name="is_credit_limit_approval" invisible="1"/>
+                <field name="is_credit_limit_final_approved" invisible="1"/>
+                <field name="customer_blocking_limit"
+                       string="Límite de Crédito"
+                       readonly="1"
+                       invisible="partner_id.credit_check == False"/>
+                <field name="amount_due"
+                       string="Monto Adeudado"
+                       readonly="1"
+                       invisible="partner_id.credit_check == False"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cashier_account_payment_wizard_form" model="ir.ui.view">
+        <field name="name">sale.cashier.account.payment.wizard.form</field>
+        <field name="model">sale.cashier.account.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cobranza de Cuenta Corriente">
+                <div class="alert alert-warning" role="alert" invisible="cashier_session_id">
+                    <strong>Sin sesión de caja abierta.</strong>
+                    Abrí una sesión desde <strong>Caja → Mi Sesión → Nuevo</strong>
+                    o ingresá desde <strong>Sesión Activa</strong>.
+                </div>
+                <group>
+                    <group>
+                        <field name="company_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="cashier_session_id" invisible="1"/>
+                        <field name="session_info" readonly="1"/>
+                        <field name="partner_id"
+                               context="{'res_partner_search_mode': 'customer', 'show_vat': True}"
+                               options="{'no_create_edit': True}"/>
+                    </group>
+                    <group>
+                        <field name="partner_total_due" class="oe_inline"/>
+                    </group>
+                </group>
+
+                <separator string="Facturas abiertas de esta sucursal"/>
+                <field name="open_invoice_ids" nolabel="1" readonly="1"
+                       invisible="not partner_id">
+                    <list create="0" delete="0" edit="0">
+                        <field name="name" string="Comprobante"/>
+                        <field name="invoice_date" string="Fecha"/>
+                        <field name="invoice_date_due" string="Vencimiento"/>
+                        <field name="amount_total" string="Total"/>
+                        <field name="amount_residual" string="Pendiente"/>
+                        <field name="payment_state" widget="badge"
+                               decoration-warning="payment_state in ('not_paid', 'partial')"
+                               decoration-info="payment_state == 'in_payment'"/>
+                        <field name="company_id" column_invisible="1"/>
+                        <field name="currency_id" column_invisible="1"/>
+                    </list>
+                </field>
+
+                <separator string="Pago a cuenta"/>
+                <group>
+                    <group>
+                        <field name="amount" required="1"/>
+                        <field name="payment_journal_id" required="1" options="{'no_create': True}"/>
+                    </group>
+                    <group>
+                        <field name="memo" required="1"
+                               placeholder="Obligatorio. Ej: pago a cuenta / contra factura 0001-00012 / seña..."/>
+                    </group>
+                </group>
+
+                <footer>
+                    <button name="action_confirm" string="Registrar pago" type="object"
+                            class="btn-primary" invisible="not cashier_session_id"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_cashier_account_payment" model="ir.actions.act_window">
+        <field name="name">Cuenta Corriente</field>
+        <field name="res_model">sale.cashier.account.payment.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{}</field>
+    </record>
+</odoo>

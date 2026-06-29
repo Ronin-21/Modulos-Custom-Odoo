@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!--
+            Categoría propia del módulo.
+            visible=False → NO aparece en la lista de Apps/Módulos de Odoo,
+            pero SÍ genera la sección en la pestaña "Permisos de acceso"
+            del formulario de usuario (comportamiento estándar de Odoo).
+        -->
+        <record id="module_category_allowed_companies" model="ir.module.category">
+            <field name="name">Inventario — Empresas Permitidas</field>
+            <field name="sequence">200</field>
+            <field name="visible" eval="False"/>
+        </record>
+
+        <!--
+            Grupo de acceso.
+            Al ser el único grupo de la categoría, Odoo lo muestra como
+            un checkbox simple (no como selección radio).
+            Se asigna por defecto al superadmin y al usuario admin.
+        -->
+        <record id="group_allowed_companies_admin" model="res.groups">
+            <field name="name">Administrar Empresas Permitidas</field>
+            <field name="category_id" ref="module_category_allowed_companies"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
+
+    </data>
+</odoo>

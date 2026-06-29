@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         Vista Lista (árbol editable)
+    ════════════════════════════════════════════════════════════════════ -->
+    <record id="view_stock_product_branch_location_tree" model="ir.ui.view">
+        <field name="name">stock.product.branch.location.tree</field>
+        <field name="model">stock.product.branch.location</field>
+        <field name="arch" type="xml">
+            <list string="Ubicaciones por Producto/Sucursal"
+                  editable="bottom"
+                  decoration-muted="not active">
+                <field name="company_id"
+                       groups="base.group_multi_company"
+                       optional="show"/>
+                <field name="warehouse_id" optional="show"/>
+                <field name="product_id"/>
+                <field name="product_tmpl_id" optional="hide"/>
+                <field name="location_id"/>
+                <field name="notes" optional="hide"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         Vista Formulario
+    ════════════════════════════════════════════════════════════════════ -->
+    <record id="view_stock_product_branch_location_form" model="ir.ui.view">
+        <field name="name">stock.product.branch.location.form</field>
+        <field name="model">stock.product.branch.location</field>
+        <field name="arch" type="xml">
+            <form string="Ubicación de Producto por Sucursal">
+                <sheet>
+                    <widget name="web_ribbon"
+                            title="Archivado"
+                            bg_color="text-bg-danger"
+                            invisible="active"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="product_id"
+                                   placeholder="Seleccione un producto…"
+                                   domain="[('is_storable', '=', True)]"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Empresa y Almacén">
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                            <field name="warehouse_id"
+                                   domain="[('company_id', '=', company_id)]"/>
+                        </group>
+                        <group string="Ubicación">
+                            <field name="location_id"
+                                   domain="[('usage','=','internal'),('active','=',True)]"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Información adicional">
+                        <field name="product_tmpl_id" readonly="1"/>
+                        <field name="notes" placeholder="Observaciones opcionales…"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         Vista Búsqueda + Filtros + Agrupación
+    ════════════════════════════════════════════════════════════════════ -->
+    <record id="view_stock_product_branch_location_search" model="ir.ui.view">
+        <field name="name">stock.product.branch.location.search</field>
+        <field name="model">stock.product.branch.location</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Configuración de Ubicación">
+
+                <!-- Búsqueda rápida -->
+                <field name="product_id" string="Producto"/>
+                <field name="product_tmpl_id" string="Plantilla"/>
+                <field name="warehouse_id" string="Almacén"/>
+                <field name="location_id" string="Ubicación"/>
+                <field name="company_id"
+                       string="Empresa"
+                       groups="base.group_multi_company"/>
+
+                <!-- Filtros predefinidos -->
+                <filter string="Activos" name="active" domain="[('active','=',True)]"/>
+                <filter string="Archivados" name="inactive" domain="[('active','=',False)]"/>
+                <separator/>
+                <filter string="Mi empresa"
+                        name="my_company"
+                        domain="[('company_id','in',allowed_company_ids)]"/>
+
+                <!-- Agrupación -->
+                <group>
+                    <filter string="Empresa"
+                            name="group_company"
+                            context="{'group_by': 'company_id'}"
+                            groups="base.group_multi_company"/>
+                    <filter string="Almacén"
+                            name="group_warehouse"
+                            context="{'group_by': 'warehouse_id'}"/>
+                    <filter string="Producto"
+                            name="group_product"
+                            context="{'group_by': 'product_id'}"/>
+                    <filter string="Ubicación"
+                            name="group_location"
+                            context="{'group_by': 'location_id'}"/>
+                </group>
+
+            </search>
+        </field>
+    </record>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         Acción de ventana
+    ════════════════════════════════════════════════════════════════════ -->
+    <record id="action_stock_product_branch_location" model="ir.actions.act_window">
+        <field name="name">Ubicaciones por Producto/Sucursal</field>
+        <field name="res_model">stock.product.branch.location</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id"
+               ref="view_stock_product_branch_location_search"/>
+        <field name="context">{
+            'search_default_active': 1
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay configuraciones de ubicación definidas.
+            </p>
+            <p>
+                Cree una configuración para indicar la <strong>ubicación habitual</strong>
+                de cada producto en cada almacén/sucursal.
+                <br/>
+                Esta configuración se aplicará automáticamente en recepciones de compra
+                y transferencias internas.
+            </p>
+        </field>
+    </record>
+
+</odoo>

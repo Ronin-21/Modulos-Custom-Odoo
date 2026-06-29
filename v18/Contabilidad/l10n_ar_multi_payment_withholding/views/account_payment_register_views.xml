@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_payment_register_form_ar_withholding_usability" model="ir.ui.view">
+        <field name="name">account.payment.register.form.ar.withholding.usability</field>
+        <field name="model">account.payment.register</field>
+        <field name="inherit_id" ref="l10n_ar_withholding.view_account_payment_register_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Check visible arriba -->
+            <xpath expr="//group[./group[@name='group1'] and ./group[@name='group2']]" position="before">
+                <group>
+                    <group>
+                        <field name="use_multi_payment"/>
+                    </group>
+                    <group/>
+                </group>
+            </xpath>
+
+            <!-- evitar duplicado -->
+            <xpath expr="//field[@name='group_payment']" position="after">
+                <field name="use_multi_payment" invisible="1"/>
+            </xpath>
+
+            <!-- En modo multi-pago, ocultar group1 solo si no hay opción de agrupar.
+                 Si hay can_group_payments, mantener visible para mostrar el checkbox. -->
+            <xpath expr="//group[@name='group1']" position="attributes">
+                <attribute name="invisible">use_multi_payment and not can_group_payments</attribute>
+            </xpath>
+
+            <!-- Dentro de group1, ocultar diario/método/importe en modo multi
+                 (se reemplazan por las líneas de pago múltiple) -->
+            <xpath expr="//group[@name='group1']//field[@name='journal_id']" position="attributes">
+                <attribute name="invisible">use_multi_payment</attribute>
+            </xpath>
+            <xpath expr="//group[@name='group1']//field[@name='payment_method_line_id']" position="attributes">
+                <attribute name="invisible">use_multi_payment</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='partner_bank_id']" position="attributes">
+                <attribute name="invisible">use_multi_payment or not show_partner_bank_account or not can_edit_wizard or (can_group_payments and not group_payment)</attribute>
+            </xpath>
+
+            <!-- bloque multi a ancho completo antes del notebook -->
+            <xpath expr="//notebook" position="before">
+                <!-- Información de tipo de cambio para facturas en moneda extranjera -->
+                <div class="alert alert-info mb-2" role="alert" invisible="not x_ar_is_foreign_currency_invoice">
+                    <field name="x_ar_is_foreign_currency_invoice" invisible="1"/>
+                    <strong>Factura en moneda extranjera</strong>
+                    <div class="row mt-1">
+                        <div class="col-4">
+                            <span class="text-muted">TC factura:</span>
+                            <field name="x_ar_invoice_exchange_rate" class="fw-bold ms-1"/>
+                        </div>
+                        <div class="col-4">
+                            <span class="text-muted">Importe a pagar:</span>
+                            <field name="x_ar_invoice_converted_amount" class="fw-bold ms-1"/>
+                        </div>
+                        <div class="col-4" invisible="x_ar_exchange_rate_difference == 0">
+                            <span class="text-muted">Dif. por TC:</span>
+                            <field name="x_ar_exchange_rate_difference" class="fw-bold ms-1 text-warning"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-100" invisible="not use_multi_payment">
+                    <separator string="Múltiples métodos de pago"/>
+
+                    <group col="4">
+                        <field name="x_ar_document_total_amount" readonly="1"/>
+                                                <field name="x_ar_withholding_total" readonly="1"/>
+                        <field name="x_ar_payment_instrument_amount" readonly="1"/>
+                        <field name="x_ar_multi_total" readonly="1"/>
+                        <field name="x_ar_multi_difference" readonly="1"/>
+                    </group>
+
+                    <div class="text-muted mb-1">
+                        Cargá manualmente las líneas de pago. Si el total de las líneas es menor al neto pendiente, la diferencia quedará como saldo abierto.
+                    </div>
+
+                    <div role="alert"
+                         class="alert alert-info mt-2"
+                         invisible="x_ar_multi_difference &lt;= 0">
+                        Quedará saldo abierto por la diferencia indicada.
+                    </div>
+
+                    <field name="payment_line_ids" nolabel="1" colspan="2">
+                        <list editable="bottom">
+                            <field name="x_is_check_line" column_invisible="True"/>
+                            <field name="journal_id"/>
+                            <field name="payment_method_line_id"/>
+                            <field name="amount" readonly="x_is_check_line"
+                                   decoration-muted="x_is_check_line"/>
+                            <field name="partner_bank_id" optional="hide"/>
+                            <field name="communication" optional="show"/>
+                        </list>
+                    </field>
+
+                    <div role="alert"
+                         class="alert alert-warning mt-2"
+                         invisible="not l10n_ar_adjustment_warning">
+                        El importe real de los cheques debe coincidir con la línea de pago por cheque y con el neto esperado.
+                    </div>
+                </div>
+            </xpath>
+
+            <!-- Pestaña cheques: reemplaza la del módulo base para evitar duplicados.
+                 En modo simple se muestra siempre (como el original).
+                 En modo multi solo cuando hay línea de cheque. -->
+            <xpath expr="//notebook//page[.//field[@name='l10n_latam_new_check_ids'] or .//field[@name='l10n_latam_move_check_ids']]" position="replace">
+                <page string="Cheques" invisible="(not use_multi_payment and payment_method_code not in ['new_third_party_checks', 'own_checks', 'in_third_party_checks', 'out_third_party_checks', 'return_third_party_checks']) or (use_multi_payment and not x_ar_has_multi_check_line)">
+                    <div class="w-100 d-block">
+
+                        <!-- Modo simple: cheques nuevos/propios -->
+                        <div class="w-100 d-block" invisible="use_multi_payment">
+                            <field name="l10n_latam_new_check_ids" nolabel="1"
+                                   invisible="payment_method_code not in ['new_third_party_checks', 'own_checks']">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="bank_id"/>
+                                    <field name="issuer_vat"/>
+                                    <field name="payment_date"/>
+                                    <field name="amount"/>
+                                </list>
+                            </field>
+                            <field name="l10n_latam_move_check_ids" nolabel="1"
+                                   domain="[('payment_method_code', '=', 'new_third_party_checks'), ('current_journal_id', '=', journal_id), ('company_id', '=', company_id)] if payment_type == 'outbound' else [('payment_method_code', '=', 'new_third_party_checks'), ('current_journal_id', '=', False), ('company_id', '=', company_id)]"
+                                   options="{'no_create': True}"
+                                   invisible="payment_method_code not in ['in_third_party_checks', 'out_third_party_checks', 'return_third_party_checks']">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="bank_id"/>
+                                    <field name="issuer_vat"/>
+                                    <field name="payment_date"/>
+                                    <field name="amount"/>
+                                </list>
+                            </field>
+                        </div>
+
+                        <!-- Modo multi: cheques nuevos/propios -->
+                        <div class="w-100 d-block" invisible="not use_multi_payment or not x_ar_multi_has_new_checks">
+                            <separator string="Cheques nuevos / propios"/>
+                            <field name="l10n_latam_new_check_ids" nolabel="1">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="bank_id"/>
+                                    <field name="issuer_vat"/>
+                                    <field name="payment_date"/>
+                                    <field name="amount"/>
+                                </list>
+                            </field>
+                        </div>
+
+                        <!-- Modo multi: cheques de terceros existentes -->
+                        <div class="w-100 d-block" invisible="not use_multi_payment or not x_ar_multi_has_existing_checks">
+                            <separator string="Cheques de terceros seleccionados"/>
+                            <field name="x_ar_multi_existing_check_journal_id" invisible="1"/>
+                            <field name="l10n_latam_move_check_ids" nolabel="1"
+                                domain="[('payment_method_code', '=', 'new_third_party_checks'), ('current_journal_id', '=', x_ar_multi_existing_check_journal_id), ('company_id', '=', company_id)]"
+                                options="{'no_create': True}">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="bank_id"/>
+                                    <field name="issuer_vat"/>
+                                    <field name="payment_date"/>
+                                    <field name="amount"/>
+                                </list>
+                            </field>
+                        </div>
+
+                    </div>
+                </page>
+            </xpath>
+
+            <!-- Ocultar abajo información duplicada cuando hay multi pago -->
+
+            <!-- Cantidad neta -->
+            <xpath expr="//field[@name='l10n_ar_net_amount']" position="attributes">
+                <attribute name="invisible">use_multi_payment</attribute>
+            </xpath>
+
+            <!-- Mensaje aclaratorio AR -->
+            <xpath expr="//group[group/field[@name='l10n_ar_net_amount']]" position="inside">
+                <p colspan="2" class="text-muted" invisible="country_code != 'AR' or use_multi_payment">
+                    El documento se cancela por el total, pero el medio de pago real se registra por el neto luego de descontar retenciones.
+                </p>
+            </xpath>
+
+            <!-- Ocultar resumen inferior duplicado si hay multi -->
+            <xpath expr="//group[group/field[@name='l10n_ar_net_amount']]" position="after">
+                <group invisible="country_code != 'AR' or use_multi_payment">
+                    <group string="Resumen de pago con retenciones">
+                        <field name="x_ar_document_total_amount" readonly="1"/>
+                                                <field name="x_ar_withholding_total" readonly="1"/>
+                        <field name="x_ar_payment_instrument_amount" readonly="1"/>
+                        <field name="x_ar_check_amount_total" readonly="1" invisible="not x_ar_is_check_payment"/>
+                    </group>
+                    <group string="Interpretación">
+                        <field name="x_ar_document_total_amount" invisible="1"/>
+                        <field name="x_ar_withholding_total" invisible="1"/>
+                        <field name="x_ar_payment_instrument_amount" invisible="1"/>
+
+                        <label for="x_ar_document_total_amount" string="Total del documento o pago base"/>
+                        <label for="x_ar_withholding_total" string="Importe total retenido"/>
+                        <label for="x_ar_payment_instrument_amount" string="Importe real del cheque / banco / efectivo"/>
+                    </group>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

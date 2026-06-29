@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Vista simplificada de res.partner para creación rápida de clientes.
+        Se usa como quick_create_view en el campo partner_id de sale.order.
+        Cuando el vendedor escribe un nombre no encontrado y hace clic en
+        "Crear y editar...", se abre ESTE formulario en vez del form completo.
+
+        Campos mínimos obligatorios + los más útiles para el contexto de venta.
+        El campo customer_rank=1 se setea vía contexto (default_customer_rank).
+    -->
+    <!--
+        El form simplificado se usa cuando se referencia como quick_create_view.
+        Sin priority: no afecta el comportamiento global de creación de partners.
+    -->
+    <record id="view_partner_quick_create_sof" model="ir.ui.view">
+        <field name="name">res.partner.quick.create.sof</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <form string="Crear Cliente">
+                <sheet>
+                    <div class="oe_title">
+                        <h2>Nuevo Cliente</h2>
+                    </div>
+
+                    <group>
+                        <field name="company_type"
+                               widget="radio"
+                               options="{'horizontal': True}"/>
+                    </group>
+
+                    <group>
+                        <group string="Datos del cliente">
+                            <field name="name"
+                                   placeholder="Nombre completo o razón social..."
+                                   required="1"/>
+                            <field name="vat"
+                                   string="CUIT / DNI"
+                                   placeholder="20-12345678-9"/>
+                            <field name="parent_id"
+                                   string="Empresa a la que pertenece"
+                                   invisible="company_type == 'company'"
+                                   domain="[('is_company', '=', True)]"
+                                   placeholder="Empresa (opcional)"/>
+                        </group>
+                        <group string="Contacto">
+                            <field name="phone" placeholder="+54 351 / celular..."/>
+                            <field name="email" placeholder="email@ejemplo.com"/>
+                        </group>
+                    </group>
+
+                    <group string="Dirección (opcional)">
+                        <field name="street" placeholder="Calle y número"/>
+                        <field name="city" placeholder="Ciudad o localidad"/>
+                    </group>
+
+                    <!-- Campos técnicos ocultos: se setean automáticamente -->
+                    <field name="customer_rank" invisible="1"/>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

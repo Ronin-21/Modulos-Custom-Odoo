@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menú raíz -->
+    <menuitem id="menu_sale_commission_root"
+              name="Comisiones"
+              sequence="45"
+              groups="sale_commission_custom.group_commission_salesperson"
+              web_icon="sale_commission_custom,static/description/icon.png"/>
+
+    <!-- Comisiones -->
+    <menuitem id="menu_commission_lines"
+              name="Comisiones"
+              parent="menu_sale_commission_root"
+              action="action_commission_line"
+              sequence="10"/>
+
+    <!-- Liquidaciones -->
+    <menuitem id="menu_commission_settlements"
+              name="Liquidaciones"
+              parent="menu_sale_commission_root"
+              action="action_commission_settlement"
+              sequence="20"
+              groups="sale_commission_custom.group_commission_manager"/>
+
+    <menuitem id="menu_commission_settlement_wizard"
+              name="Nueva liquidación"
+              parent="menu_sale_commission_root"
+              action="action_commission_settlement_wizard"
+              sequence="25"
+              groups="sale_commission_custom.group_commission_manager"/>
+
+    <!-- Configuración -->
+    <menuitem id="menu_commission_config"
+              name="Configuración"
+              parent="menu_sale_commission_root"
+              action="action_commission_config"
+              sequence="90"
+              groups="sale_commission_custom.group_commission_admin"/>
+</odoo>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Filtros por tipo de flujo en la vista de búsqueda -->
+    <record id="view_prs_money_flow_search_card" model="ir.ui.view">
+        <field name="name">prs.money.flow.search.card</field>
+        <field name="model">prs.money.flow</field>
+        <field name="inherit_id" ref="payment_register_statement.view_prs_money_flow_search"/>
+        <field name="arch" type="xml">
+            <filter name="planned" position="before">
+                <filter name="card_settlement" string="Liquidaciones de tarjeta" domain="[('flow_type','=','card_settlement')]"/>
+                <filter name="direct_payment" string="Pagos directos" domain="[('flow_type','=','payment')]"/>
+                <separator/>
+            </filter>
+        </field>
+    </record>
+
+    <!-- Smart button de comisión en el formulario de flujo -->
+    <record id="view_prs_money_flow_form_card" model="ir.ui.view">
+        <field name="name">prs.money.flow.form.card</field>
+        <field name="model">prs.money.flow</field>
+        <field name="inherit_id" ref="payment_register_statement.view_prs_money_flow_form"/>
+        <field name="arch" type="xml">
+            <button name="action_open_statement_line" position="after">
+                <button name="action_open_commission_move" type="object" class="oe_stat_button" icon="fa-money" invisible="not commission_move_id">
+                    <field name="commission_move_count" widget="statinfo" string="Comisión"/>
+                </button>
+            </button>
+        </field>
+    </record>
+
+</odoo>

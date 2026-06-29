@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Extensión del formulario de sale.order para Odoo 19.
+
+        Agrega en las líneas del pedido:
+
+        1. decoration-info: líneas de piezas (is_part_line=True) en azul claro.
+
+        2. Campos ocultos necesarios para lógica de vista.
+
+        3. Botón 🧩 (puzzle): abre lista nativa de product.part con buscador,
+           filtros y grupos (Odoo nativo). Solo visible en líneas padre con despiece.
+
+        4. Botón 🔄 (refresh): actualiza cantidades de piezas ya insertadas.
+           Solo visible cuando parts_loaded=True (ya hay piezas en el pedido).
+    -->
+    <record id="sale_order_form_view_parts" model="ir.ui.view">
+        <field name="name">sale.order.form.despiece</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- 1. Colorear líneas de piezas en azul claro -->
+            <xpath expr="//field[@name='order_line']/list" position="attributes">
+                <attribute name="decoration-info">is_part_line</attribute>
+            </xpath>
+
+            <!-- 2. Campos ocultos para lógica de vista -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='display_type']"
+                   position="before">
+                <field name="has_product_parts" column_invisible="1"/>
+                <field name="is_part_line" column_invisible="1"/>
+                <field name="parts_loaded" column_invisible="1"/>
+                <field name="parent_line_id" column_invisible="1"/>
+            </xpath>
+
+            <!-- 3 y 4. Botones de despiece y actualización -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_template_id']"
+                   position="after">
+
+                <!--
+                    Botón despiece: abre la lista nativa de product.part
+                    con buscador, filtros y grupos (Odoo nativo).
+                    Visible: producto tiene despiece Y la línea no es una pieza.
+                -->
+                <button name="action_open_parts_wizard"
+                        type="object"
+                        icon="fa-puzzle-piece"
+                        title="Ver / Insertar Piezas del Despiece"
+                        invisible="not has_product_parts or is_part_line"/>
+
+                <!--
+                    Botón actualizar: sincroniza cantidades de piezas ya insertadas
+                    con la cantidad actual del producto padre.
+                    Visible: ya hay piezas insertadas Y la línea no es una pieza.
+                -->
+                <button name="action_update_part_quantities"
+                        type="object"
+                        icon="fa-refresh"
+                        title="Actualizar cantidades de piezas insertadas"
+                        invisible="not parts_loaded or is_part_line"/>
+
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

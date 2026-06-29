@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         ACCIÓN DE REPORTE
+    ═══════════════════════════════════════════════════════════ -->
+    <record id="action_report_partner_account_statement" model="ir.actions.report">
+        <field name="name">Estado de Cuenta</field>
+        <field name="model">res.partner</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">customer_credit_limit_approval.report_partner_account_statement</field>
+        <field name="report_file">customer_credit_limit_approval.report_partner_account_statement</field>
+        <field name="print_report_name">'Estado de Cuenta - %s' % object.name</field>
+        <field name="binding_model_id" eval="False"/>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         TEMPLATE INTERNO — contenido de una página
+    ═══════════════════════════════════════════════════════════ -->
+    <template id="report_partner_account_statement_document">
+        <t t-set="currency" t-value="doc.company_id.currency_id or env.company.currency_id"/>
+        <t t-set="today_str" t-value="datetime.date.today().strftime('%d/%m/%Y')"/>
+
+        <!-- Facturas abiertas -->
+        <t t-set="open_invoices" t-value="env['account.move'].search([
+            ('partner_id', 'child_of', doc.id),
+            ('move_type', '=', 'out_invoice'),
+            ('state', '=', 'posted'),
+            ('payment_state', 'not in', ['paid', 'reversed']),
+        ], order='invoice_date_due asc')"/>
+
+        <!-- Notas de crédito abiertas (reducen saldo) -->
+        <t t-set="open_refunds" t-value="env['account.move'].search([
+            ('partner_id', 'child_of', doc.id),
+            ('move_type', '=', 'out_refund'),
+            ('state', '=', 'posted'),
+            ('payment_state', 'not in', ['paid', 'reversed']),
+        ], order='invoice_date asc')"/>
+
+        <!-- Órdenes confirmadas sin facturar completamente -->
+        <t t-set="open_orders" t-value="env['sale.order'].search([
+            ('partner_id', 'child_of', doc.id),
+            ('state', '=', 'sale'),
+            ('invoice_status', '!=', 'invoiced'),
+        ], order='date_order asc')"/>
+
+        <!-- Totales -->
+        <t t-set="total_invoices"
+           t-value="sum(open_invoices.mapped('amount_residual')) - sum(open_refunds.mapped('amount_residual'))"/>
+        <t t-set="total_orders"
+           t-value="sum(open_orders.mapped('amount_total'))"/>
+        <t t-set="grand_total"
+           t-value="total_invoices + total_orders"/>
+        <t t-set="util_pct"
+           t-value="doc.credit_blocking and round(grand_total / doc.credit_blocking * 100, 1) or 0.0"/>
+
+        <t t-call="web.external_layout">
+            <!-- Dirección del cliente para el bloque de encabezado -->
+            <t t-set="address">
+                <address class="mb-0">
+                    <strong t-out="doc.name"/>
+                    <div t-if="doc.street" t-out="doc.street"/>
+                    <div t-if="doc.street2" t-out="doc.street2"/>
+                    <div>
+                        <span t-if="doc.city" t-out="doc.city"/>
+                        <span t-if="doc.state_id">, <t t-out="doc.state_id.name"/></span>
+                        <span t-if="doc.zip"> <t t-out="doc.zip"/></span>
+                    </div>
+                    <div t-if="doc.country_id" t-out="doc.country_id.name"/>
+                    <div t-if="doc.phone" t-out="doc.phone"/>
+                    <div t-if="doc.email" t-out="doc.email"/>
+                </address>
+                <p t-if="doc.vat" class="mb-0">
+                    CUIT/RUT: <span t-out="doc.vat"/>
+                </p>
+            </t>
+
+            <div class="page">
+
+                <!-- ── Título ── -->
+                <div class="row mb-3">
+                    <div class="col-8">
+                        <h2 class="mb-0">Estado de Cuenta</h2>
+                    </div>
+                    <div class="col-4 text-end">
+                        <p class="mb-0 text-muted">Fecha: <t t-out="today_str"/></p>
+                    </div>
+                </div>
+
+                <!-- ── Resumen de crédito ── -->
+                <t t-if="doc.credit_check">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <strong>Resumen de Crédito</strong>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-sm mb-0">
+                                <tbody>
+                                    <tr t-if="doc.credit_warning">
+                                        <td>Límite de advertencia</td>
+                                        <td class="text-end">
+                                            <span t-out="doc.credit_warning"
+                                                  t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Límite de bloqueo</td>
+                                        <td class="text-end">
+                                            <span t-out="doc.credit_blocking"
+                                                  t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Deuda contable (facturas abiertas)</td>
+                                        <td class="text-end">
+                                            <span t-out="total_invoices"
+                                                  t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ventas sin facturar</td>
+                                        <td class="text-end">
+                                            <span t-out="total_orders"
+                                                  t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                    </tr>
+                                    <tr class="fw-bold">
+                                        <td>Deuda total</td>
+                                        <td class="text-end">
+                                            <span t-out="grand_total"
+                                                  t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="doc.credit_blocking">
+                                        <td>Utilización del límite</td>
+                                        <td class="text-end">
+                                            <strong
+                                                t-att-class="util_pct &gt; 100 and 'text-danger' or (util_pct &gt; 80 and 'text-warning' or 'text-success')">
+                                                <t t-out="util_pct"/>%
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="alert alert-info mb-4">
+                        Este cliente no tiene control de crédito activo.
+                    </div>
+                </t>
+
+                <!-- ── Facturas abiertas ── -->
+                <h5 class="mt-3">Facturas Abiertas</h5>
+                <t t-if="open_invoices or open_refunds">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Número</th>
+                                <th>Fecha</th>
+                                <th>Vencimiento</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-end">Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="open_invoices" t-as="inv"
+                                t-att-class="inv.invoice_date_due and inv.invoice_date_due &lt; datetime.date.today() and 'table-danger' or ''">
+                                <td>
+                                    <span t-field="inv.name"/>
+                                    <small t-if="inv.invoice_date_due and inv.invoice_date_due &lt; datetime.date.today()"
+                                           class="text-danger ms-1">(vencida)</small>
+                                </td>
+                                <td><span t-field="inv.invoice_date" t-options='{"widget": "date"}'/></td>
+                                <td><span t-field="inv.invoice_date_due" t-options='{"widget": "date"}'/></td>
+                                <td class="text-end">
+                                    <span t-field="inv.amount_total"
+                                          t-options='{"display_currency": inv.currency_id}'/>
+                                </td>
+                                <td class="text-end">
+                                    <span t-field="inv.amount_residual"
+                                          t-options='{"display_currency": inv.currency_id}'/>
+                                </td>
+                            </tr>
+                            <tr t-foreach="open_refunds" t-as="ref" class="text-success">
+                                <td>
+                                    <span t-field="ref.name"/>
+                                    <small class="ms-1">(nota de crédito)</small>
+                                </td>
+                                <td><span t-field="ref.invoice_date" t-options='{"widget": "date"}'/></td>
+                                <td>—</td>
+                                <td class="text-end">
+                                    <span t-out="-ref.amount_total"
+                                          t-options='{"widget": "monetary", "display_currency": ref.currency_id}'/>
+                                </td>
+                                <td class="text-end">
+                                    <span t-out="-ref.amount_residual"
+                                          t-options='{"widget": "monetary", "display_currency": ref.currency_id}'/>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-bold">
+                                <td colspan="4">Total saldo contable</td>
+                                <td class="text-end">
+                                    <span t-out="total_invoices"
+                                          t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </t>
+                <t t-else="">
+                    <p class="text-muted fst-italic">Sin facturas abiertas.</p>
+                </t>
+
+                <!-- ── Órdenes de venta sin facturar ── -->
+                <h5 class="mt-3">Órdenes de Venta sin Facturar</h5>
+                <t t-if="open_orders">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Orden</th>
+                                <th>Fecha</th>
+                                <th>Estado facturación</th>
+                                <th class="text-end">Total orden</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="open_orders" t-as="order">
+                                <td><span t-field="order.name"/></td>
+                                <td><span t-field="order.date_order" t-options='{"widget": "date"}'/></td>
+                                <td><span t-field="order.invoice_status"/></td>
+                                <td class="text-end">
+                                    <span t-field="order.amount_total"
+                                          t-options='{"display_currency": order.currency_id}'/>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-bold">
+                                <td colspan="3">Total ventas sin facturar</td>
+                                <td class="text-end">
+                                    <span t-out="total_orders"
+                                          t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </t>
+                <t t-else="">
+                    <p class="text-muted fst-italic">Sin órdenes pendientes de facturar.</p>
+                </t>
+
+                <!-- ── Total general ── -->
+                <t t-if="doc.credit_check">
+                    <div class="row justify-content-end mt-3">
+                        <div class="col-5">
+                            <table class="table table-sm">
+                                <tbody>
+                                    <tr class="fw-bold border-top">
+                                        <td>DEUDA TOTAL</td>
+                                        <td class="text-end">
+                                            <span t-out="grand_total"
+                                                  t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </t>
+
+            </div><!-- /page -->
+        </t><!-- /external_layout -->
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         TEMPLATE EXTERNO — entry point del reporte
+    ═══════════════════════════════════════════════════════════ -->
+    <template id="report_partner_account_statement">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="customer_credit_limit_approval.report_partner_account_statement_document"/>
+            </t>
+        </t>
+    </template>
+
+</odoo>

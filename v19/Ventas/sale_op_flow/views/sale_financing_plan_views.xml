@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_financing_plan_list" model="ir.ui.view">
+        <field name="name">sale.financing.plan.list</field>
+        <field name="model">sale.financing.plan</field>
+        <field name="arch" type="xml">
+            <list string="Planes de pago">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="payment_journal_id"/>
+                <field name="card_name"/>
+                <field name="installments"/>
+                <field name="adjustment_type"/>
+                <field name="adjustment_rate" string="%" optional="show"/>
+                <field name="is_pay_later" optional="show"
+                       decoration-warning="is_pay_later"/>
+                <field name="is_check_payment" optional="show"
+                       decoration-info="is_check_payment"/>
+                <field name="requires_coupon" optional="show"/>
+                <field name="requires_voucher" optional="show"/>
+                <field name="active" optional="hide"/>
+                <field name="company_id"
+                       decoration-info="not company_id"
+                       optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sale_financing_plan_form" model="ir.ui.view">
+        <field name="name">sale.financing.plan.form</field>
+        <field name="model">sale.financing.plan</field>
+        <field name="arch" type="xml">
+            <form string="Plan de pago">
+                <sheet>
+                    <widget name="web_ribbon" title="Archivado" bg_color="bg-danger" invisible="active"/>
+                    <widget name="web_ribbon" title="Global" bg_color="text-bg-info" invisible="company_id"/>
+                    <widget name="web_ribbon" title="Cta. Corriente" bg_color="text-bg-warning" invisible="not is_pay_later"/>
+                    <widget name="web_ribbon" title="Cheque" bg_color="text-bg-info" invisible="not is_check_payment"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nombre del plan..."/></h1>
+                    </div>
+
+                    <!-- Banner informativo cuando es CC -->
+                    <div class="alert alert-warning mb-3" role="alert" invisible="not is_pay_later">
+                        Este plan es de <strong>pago diferido</strong>. Al usarlo en el cobro, la factura
+                        queda pendiente con el término de pago indicado. El pedido puede despacharse igual.
+                    </div>
+                    <!-- Banner informativo cuando es cheque -->
+                    <div class="alert alert-info mb-3" role="alert" invisible="not is_check_payment">
+                        Este plan registra un <strong>cheque de tercero recibido</strong>.
+                        El cajero deberá ingresar número, banco y fecha de cobro del cheque.
+                        El diario debe tener habilitado el método <em>Cheques de terceros recibidos</em>.
+                    </div>
+
+                    <group>
+                        <group string="Tipo de pago">
+                            <field name="is_pay_later" invisible="is_check_payment"/>
+                            <field name="is_check_payment" invisible="is_pay_later"/>
+                            <field name="payment_term_id"
+                                   invisible="not is_pay_later"
+                                   required="is_pay_later"
+                                   placeholder="Seleccionar plazo de vencimiento..."/>
+                        </group>
+                        <group string="Medio de pago" invisible="is_pay_later">
+                            <field name="payment_journal_id"
+                                   required="is_check_payment"
+                                   placeholder="Seleccionar diario de cheques..."/>
+                            <field name="card_name" invisible="is_check_payment" placeholder="Visa, Mastercard, Naranja..."/>
+                            <field name="installments" invisible="is_check_payment"/>
+                            <field name="requires_coupon" invisible="is_check_payment"/>
+                            <field name="requires_voucher" invisible="is_check_payment or requires_coupon"/>
+                        </group>
+                    </group>
+                    <group invisible="is_pay_later or is_check_payment">
+                        <group string="Ajuste de precio">
+                            <field name="adjustment_type"/>
+                            <field name="adjustment_rate" invisible="adjustment_type == 'none'"/>
+                            <field name="adjustment_product_id"
+                                   invisible="adjustment_type == 'none'"
+                                   required="adjustment_type != 'none' and adjustment_rate > 0"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Configuración">
+                            <field name="sequence"/>
+                            <field name="active"/>
+                            <field name="company_id"
+                                   placeholder="Vacío = disponible en todas las empresas"
+                                   help="Dejá vacío para que este plan aparezca en todas las empresas. Si seleccionás una empresa, solo será visible en esa sucursal."/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notas">
+                            <field name="notes" placeholder="Notas internas..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sale_financing_plan_search" model="ir.ui.view">
+        <field name="name">sale.financing.plan.search</field>
+        <field name="model">sale.financing.plan</field>
+        <field name="arch" type="xml">
+            <search string="Planes de pago">
+                <field name="name"/>
+                <field name="payment_journal_id" string="Medio de pago"/>
+                <field name="card_name" string="Tarjeta"/>
+                <field name="company_id" string="Empresa"/>
+                <filter string="Globales" name="filter_global" domain="[('company_id', '=', False)]"/>
+                <filter string="Cuenta Corriente" name="filter_pay_later" domain="[('is_pay_later', '=', True)]"/>
+                <filter string="Cheques" name="filter_check" domain="[('is_check_payment', '=', True)]"/>
+                <separator/>
+                <filter string="Descuentos" name="filter_discount" domain="[('adjustment_type', '=', 'discount')]"/>
+                <filter string="Recargos" name="filter_surcharge" domain="[('adjustment_type', '=', 'surcharge')]"/>
+                <filter string="Sin ajuste" name="filter_none" domain="[('adjustment_type', '=', 'none')]"/>
+                <filter string="Archivados" name="filter_inactive" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Por empresa" name="groupby_company" context="{'group_by': 'company_id'}"/>
+                <filter string="Por medio de pago" name="groupby_journal" context="{'group_by': 'payment_journal_id'}"/>
+                <filter string="Por tipo de ajuste" name="groupby_type" context="{'group_by': 'adjustment_type'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sale_financing_plan" model="ir.actions.act_window">
+        <field name="name">Planes de pago</field>
+        <field name="res_model">sale.financing.plan</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_sale_financing_plan_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Crea el primer plan de pago</p>
+            <p>Define medios de pago con descuentos o recargos: efectivo, tarjeta, cuotas, etc.</p>
+        </field>
+    </record>
+</odoo>

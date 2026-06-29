@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Dominios comerciales para todos los usuarios, incluidos administradores.
+        En esta versión no existe bypass por grupo o por permiso de administrador:
+        los checks efectivos del contacto son la fuente de verdad.
+    -->
+
+    <!-- VENTAS: solo se seleccionan contactos disponibles para Ventas -->
+    <record id="view_sale_order_form_mcc_partner_domain" model="ir.ui.view">
+        <field name="name">sale.order.form.mcc.partner.domain</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="priority" eval="999990"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="domain">[('mcc_effective_sale_available','=',True)]</attribute>
+                <attribute name="context">{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True, 'mcc_business_usage': 'sale'}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- COMPRAS: solo se seleccionan contactos disponibles para Compras -->
+    <record id="view_purchase_order_form_mcc_partner_domain" model="ir.ui.view">
+        <field name="name">purchase.order.form.mcc.partner.domain</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="priority" eval="999990"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="domain">[('mcc_effective_purchase_available','=',True)]</attribute>
+                <attribute name="context">{'res_partner_search_mode': 'supplier', 'show_vat': True, 'mcc_business_usage': 'purchase'}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- CONTABILIDAD: solo se seleccionan contactos disponibles para Contabilidad -->
+    <record id="view_account_move_form_mcc_partner_domain" model="ir.ui.view">
+        <field name="name">account.move.form.mcc.partner.domain</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="priority" eval="999990"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="domain">[('mcc_effective_accounting_available','=',True)]</attribute>
+                <attribute name="context">{'mcc_business_usage': 'accounting'}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

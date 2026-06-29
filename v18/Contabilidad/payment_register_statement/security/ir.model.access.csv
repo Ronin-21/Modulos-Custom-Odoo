@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_account_bank_statement_line,access account.bank.statement.line,account.model_account_bank_statement_line,base.group_user,1,0,1,0
+access_prs_internal_transfer_wizard,access prs.internal.transfer.wizard,payment_register_statement.model_prs_internal_transfer_wizard,base.group_user,1,1,1,1
+access_prs_expense_concept,prs.expense.concept,model_prs_expense_concept,account.group_account_user,1,1,1,1

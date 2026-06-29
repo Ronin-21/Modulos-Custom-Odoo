@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_move_commission_button" model="ir.ui.view">
+        <field name="name">account.move.commission.button</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" type="object"
+                        name="action_view_commissions"
+                        icon="fa-percent"
+                        invisible="not is_commissionable or commission_count == 0">
+                    <field name="commission_count" widget="statinfo"
+                           string="Comisiones"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_move_commission_check_button" model="ir.ui.view">
+        <field name="name">account.move.commission.check</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" type="object"
+                        name="action_force_commission_check"
+                        icon="fa-refresh"
+                        invisible="not is_commissionable"
+                        title="Verificar comisión">
+                    <span class="o_stat_text">Verificar comisión</span>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_move_commission_fields" model="ir.ui.view">
+        <field name="name">account.move.commission.fields</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='other_info']" position="inside">
+                <group string="Comisión"
+                       invisible="not is_commissionable"
+                       groups="sale_commission_custom.group_commission_salesperson">
+                    <field name="is_commissionable" readonly="1"/>
+                    <field name="commission_salesperson_id" readonly="1"/>
+                    <field name="commission_sale_order_id" readonly="1"/>
+                    <field name="commission_state" readonly="1"/>
+                    <field name="effective_payment_date" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

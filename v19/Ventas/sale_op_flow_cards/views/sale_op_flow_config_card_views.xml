@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sale_op_flow_config_wizard_form_prs_card" model="ir.ui.view">
+        <field name="name">sale.op.flow.config.wizard.form.prs.card</field>
+        <field name="model">sale.op.flow.config.wizard</field>
+        <field name="inherit_id" ref="sale_op_flow.view_sale_op_flow_config_wizard_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group[1]" position="before">
+                <group string="Tarjetas">
+                    <field name="sof_card_surcharge_product_id"
+                           options="{'no_open': True}"
+                           placeholder="Seleccioná un producto de servicio..."/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

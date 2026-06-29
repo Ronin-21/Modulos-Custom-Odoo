@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_stock_location_empresa_wizard_form" model="ir.ui.view">
+        <field name="name">stock.location.empresa.wizard.form</field>
+        <field name="model">stock.location.empresa.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Detalle de Compatibilidad por Empresa">
+                <sheet>
+
+                    <div class="alert alert-info" role="alert"
+                         invisible="estado == 'done'">
+                        Seleccione una empresa y haga clic en <b>Ejecutar análisis</b>
+                        para ver qué ubicaciones compartidas son accesibles o bloqueadas
+                        para esa empresa, junto con el detalle de quants y movimientos afectados.
+                    </div>
+
+                    <group string="Empresa a analizar">
+                        <field name="company_id" options="{'no_create': True}"/>
+                        <field name="estado" invisible="1"/>
+                    </group>
+
+                    <!-- Resumen (post-ejecución) -->
+                    <group string="Resumen" invisible="estado != 'done'">
+                        <group>
+                            <field name="loc_accesibles_count" string="Ubicaciones accesibles" readonly="1"/>
+                            <field name="loc_bloqueadas_count" string="Ubicaciones bloqueadas" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="quants_bloqueados_count" string="Quants en ubs. bloqueadas" readonly="1"/>
+                            <field name="move_lines_count" string="Move lines pendientes afectadas" readonly="1"/>
+                        </group>
+                        <field name="summary" string="" nolabel="1" readonly="1" widget="text"
+                               style="font-family: monospace; font-size: 12px;"/>
+                    </group>
+
+                    <!-- Ubicaciones accesibles -->
+                    <group string="✓ Ubicaciones accesibles para esta empresa"
+                           invisible="estado != 'done' or loc_accesibles_count == 0">
+                        <field name="loc_accesibles_text" string="" nolabel="1" readonly="1" widget="text"
+                               style="font-family: monospace; font-size: 11px;"/>
+                    </group>
+
+                    <!-- Ubicaciones bloqueadas -->
+                    <group string="✗ Ubicaciones bloqueadas para esta empresa"
+                           invisible="estado != 'done' or loc_bloqueadas_count == 0">
+                        <div class="alert alert-warning" role="alert">
+                            La ubicación tiene <b>allowed_company_ids</b> configurado pero
+                            no incluye a esta empresa. Hay quants de esta empresa en esas ubicaciones.
+                        </div>
+                        <field name="loc_bloqueadas_text" string="" nolabel="1" readonly="1" widget="text"
+                               style="font-family: monospace; font-size: 11px;"/>
+                    </group>
+
+                    <!-- Quants bloqueados -->
+                    <group string="Quants en ubicaciones bloqueadas"
+                           invisible="estado != 'done' or quants_bloqueados_count == 0">
+                        <field name="quants_bloqueados_text" string="" nolabel="1" readonly="1" widget="text"
+                               style="font-family: monospace; font-size: 11px;"/>
+                    </group>
+
+                    <!-- Move lines pendientes -->
+                    <group string="Move lines pendientes afectadas"
+                           invisible="estado != 'done' or move_lines_count == 0">
+                        <div class="alert alert-warning" role="alert">
+                            Estas move lines usan ubicaciones bloqueadas y deberían revisarse
+                            antes de ejecutar una limpieza.
+                        </div>
+                        <field name="move_lines_text" string="" nolabel="1" readonly="1" widget="text"
+                               style="font-family: monospace; font-size: 11px;"/>
+                    </group>
+
+                    <div class="alert alert-success" role="alert"
+                         invisible="estado != 'done' or loc_bloqueadas_count != 0">
+                        ✓ Esta empresa no tiene conflictos en ubicaciones compartidas.
+                    </div>
+
+                </sheet>
+                <footer>
+                    <button name="action_run" type="object"
+                            string="Ejecutar análisis" class="btn-primary"/>
+                    <button name="action_open_cleanup" type="object"
+                            string="Abrir Limpieza de Quants" class="btn-secondary"
+                            invisible="estado != 'done' or quants_bloqueados_count == 0"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_stock_location_empresa_wizard" model="ir.actions.act_window">
+        <field name="name">Detalle por Empresa</field>
+        <field name="res_model">stock.location.empresa.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem
+        id="menu_stock_location_empresa"
+        name="Detalle por Empresa"
+        parent="stock_location_allowed_companies.menu_stock_allowed_companies_root"
+        action="action_stock_location_empresa_wizard"
+        sequence="30"
+        groups="stock_location_allowed_companies.group_allowed_companies_admin"/>
+
+</odoo>

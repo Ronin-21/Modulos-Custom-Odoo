@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_prs_expense_concept_list" model="ir.ui.view">
+        <field name="name">prs.expense.concept.list</field>
+        <field name="model">prs.expense.concept</field>
+        <field name="arch" type="xml">
+            <list string="Conceptos de gastos">
+                <field name="complete_name"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_prs_expense_concept_form" model="ir.ui.view">
+        <field name="name">prs.expense.concept.form</field>
+        <field name="model">prs.expense.concept</field>
+        <field name="arch" type="xml">
+            <form string="Concepto de gasto">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="parent_id" options="{'no_create': True}"/>
+                        <field name="active"/>
+                    </group>
+                    <group>
+                        <field name="complete_name" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Subconceptos">
+                            <field name="child_ids" context="{'default_parent_id': id}">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="active" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_prs_expense_concept" model="ir.actions.act_window">
+        <field name="name">Conceptos de gastos</field>
+        <field name="res_model">prs.expense.concept</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_prs_expense_concept"
+              name="Conceptos de gastos"
+              parent="account.menu_finance_configuration"
+              action="action_prs_expense_concept"
+              sequence="250"/>
+</odoo>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_stock_location_diagnostic_wizard_form" model="ir.ui.view">
+        <field name="name">stock.location.diagnostic.wizard.form</field>
+        <field name="model">stock.location.diagnostic.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Diagnóstico de Empresas Permitidas">
+                <sheet>
+
+                    <div class="alert alert-info" role="alert">
+                        <strong>Instrucciones:</strong>
+                        Haga clic en <em>Ejecutar diagnóstico</em> para analizar
+                        incompatibilidades entre ubicaciones y empresas permitidas.
+                        <br/>
+                        Este wizard es de <b>solo lectura</b>: no modifica ningún dato.
+                        Para corregir incompatibilidades use el
+                        <em>Wizard de Inicialización</em> o edite las ubicaciones manualmente.
+                    </div>
+
+                    <!-- Resumen -->
+                    <group string="Resumen del diagnóstico">
+                        <field name="summary"
+                               readonly="1"
+                               nolabel="1"
+                               widget="text"
+                               style="font-family: monospace; font-size: 12px; min-height: 120px;"/>
+                    </group>
+
+                    <!-- Sección 1 -->
+                    <group string="1. Ubicaciones sin Empresas Permitidas"
+                           invisible="loc_no_allowed_count == 0">
+                        <field name="loc_no_allowed_count"
+                               string="Cantidad"
+                               readonly="1"/>
+                        <field name="loc_no_allowed_text"
+                               string=""
+                               nolabel="1"
+                               readonly="1"
+                               widget="text"
+                               style="font-family: monospace; font-size: 11px;"/>
+                    </group>
+
+                    <!-- Sección 2 -->
+                    <group string="2. Tipos de Operación con Ubicaciones Compartidas"
+                           invisible="picking_type_issue_count == 0">
+                        <field name="picking_type_issue_count"
+                               string="Cantidad"
+                               readonly="1"/>
+                        <field name="picking_type_issue_text"
+                               string=""
+                               nolabel="1"
+                               readonly="1"
+                               widget="text"
+                               style="font-family: monospace; font-size: 11px;"/>
+                    </group>
+
+                    <!-- Sección 3 -->
+                    <group string="3. Reglas con Ubicaciones Compartidas"
+                           invisible="rule_issue_count == 0">
+                        <field name="rule_issue_count"
+                               string="Cantidad"
+                               readonly="1"/>
+                        <field name="rule_issue_text"
+                               string=""
+                               nolabel="1"
+                               readonly="1"
+                               widget="text"
+                               style="font-family: monospace; font-size: 11px;"/>
+                    </group>
+
+                    <!-- Sección 4 -->
+                    <group string="4. Quants en Ubicaciones Incompatibles"
+                           invisible="quant_issue_count == 0">
+                        <field name="quant_issue_count"
+                               string="Cantidad"
+                               readonly="1"/>
+                        <field name="quant_issue_text"
+                               string=""
+                               nolabel="1"
+                               readonly="1"
+                               widget="text"
+                               style="font-family: monospace; font-size: 11px;"/>
+                    </group>
+
+                    <!-- Sección 5 -->
+                    <group string="5. Transferencias Abiertas con Ubicaciones Incompatibles"
+                           invisible="picking_issue_count == 0">
+                        <field name="picking_issue_count"
+                               string="Cantidad"
+                               readonly="1"/>
+                        <field name="picking_issue_text"
+                               string=""
+                               nolabel="1"
+                               readonly="1"
+                               widget="text"
+                               style="font-family: monospace; font-size: 11px;"/>
+                    </group>
+
+                    <!-- Campos ocultos para control de visibilidad -->
+                    <field name="loc_no_allowed_count" invisible="1"/>
+                    <field name="picking_type_issue_count" invisible="1"/>
+                    <field name="rule_issue_count" invisible="1"/>
+                    <field name="quant_issue_count" invisible="1"/>
+                    <field name="picking_issue_count" invisible="1"/>
+
+                </sheet>
+
+                <footer>
+                    <button name="action_run_diagnostic"
+                            type="object"
+                            string="Ejecutar diagnóstico"
+                            class="btn-primary"/>
+                    <button name="action_open_init_wizard"
+                            type="object"
+                            string="Abrir Wizard de Inicialización"
+                            class="btn-secondary"/>
+                    <button string="Cerrar"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

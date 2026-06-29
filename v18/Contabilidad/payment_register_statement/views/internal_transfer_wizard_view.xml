@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_prs_internal_transfer_wizard_form" model="ir.ui.view">
+        <field name="name">prs.internal.transfer.wizard.form</field>
+        <field name="model">prs.internal.transfer.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Transferencia interna" create="false" edit="false">
+                <group>
+                    <group>
+                        <field name="source_journal_id" invisible="1" force_save="1"/>
+                        <field name="destination_journal_id" options="{'no_create': True}"/>
+                        <field name="transfer_account_id" options="{'no_create': True}"/>
+                        <field name="include_in_last_statement"/>
+</group>
+                    <group>
+                        <field name="date"/>
+                        <field name="amount"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="memo" placeholder="Ej: Depósito / Traspaso"/>
+                    </group>
+                </group>
+                <footer>
+                    <button string="Confirmar" type="object" name="action_confirm" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_prs_internal_transfer_wizard" model="ir.actions.act_window">
+        <field name="name">Transferencia interna</field>
+        <field name="res_model">prs.internal.transfer.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_prs_internal_transfer_wizard_form"/>
+        <field name="target">new</field>
+        <field name="context">{}</field>
+    </record>
+</odoo>

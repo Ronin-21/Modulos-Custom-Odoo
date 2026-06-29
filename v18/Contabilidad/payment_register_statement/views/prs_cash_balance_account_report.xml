@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- =========================================================
+         Balance de caja (por extractos conciliados) - Account Reports
+         ========================================================= -->
+
+    <record id="prs_cash_balance_account_report" model="account.report">
+        <field name="name">Balance de caja</field>
+
+        <!-- Native report topbar controls -->
+        <field name="search_bar" eval="True"/>
+        <field name="filter_date_range" eval="True"/>
+        <field name="filter_journals" eval="True"/>
+        <field name="filter_partner" eval="True"/>
+        <field name="filter_show_draft" eval="True"/>
+        <field name="filter_unfold_all" eval="True"/>
+
+        <!-- Custom handler -->
+        <field name="custom_handler_model_id" ref="payment_register_statement.model_prs_cash_balance_statement_report_handler"/>
+
+        <!-- Columns -->
+        <field name="column_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'name': 'Fecha', 'expression_label': 'date', 'sequence': 10}),
+            (0, 0, {'name': 'Diario', 'expression_label': 'journal', 'sequence': 20}),
+            (0, 0, {'name': 'Estado de cuenta', 'expression_label': 'statement', 'sequence': 30}),
+            (0, 0, {'name': 'Referencia', 'expression_label': 'ref', 'sequence': 40}),
+            (0, 0, {'name': 'Contacto', 'expression_label': 'partner', 'sequence': 50}),
+            (0, 0, {'name': 'Detalle', 'expression_label': 'detail', 'sequence': 60}),
+            (0, 0, {'name': 'Ingreso', 'expression_label': 'income', 'sequence': 70, 'figure_type': 'monetary'}),
+            (0, 0, {'name': 'Egreso', 'expression_label': 'expense', 'sequence': 80, 'figure_type': 'monetary'}),
+            (0, 0, {'name': 'Balance', 'expression_label': 'net', 'sequence': 90, 'figure_type': 'monetary'}),
+        ]"/>
+    </record>
+
+    <!-- Action -->
+    <record id="action_prs_cash_balance_account_report" model="ir.actions.client">
+        <field name="name">Balance de caja</field>
+        <field name="tag">account_report</field>
+        <field name="context" eval="{'report_id': ref('payment_register_statement.prs_cash_balance_account_report')}"/>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_prs_cash_balance_account_report"
+              name="Balance de caja"
+              parent="payment_register_statement.menu_prs_reports_management"
+              action="action_prs_cash_balance_account_report"
+              sequence="262"/>
+</odoo>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_res_partner_form_prs_expense_concept" model="ir.ui.view">
+        <field name="name">res.partner.form.prs.expense.concept</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <!-- Ubicar el concepto predeterminado dentro de "Ventas y compras" → sección Compras -->
+            <xpath expr="//page[@name='sales_purchases']//field[@name='property_supplier_payment_term_id']" position="after">
+                <field name="prs_expense_concept_id" string="Concepto de gasto predeterminado" options="{'no_create': True}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

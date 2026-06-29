@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Flag prs_check_journal en la pestaña Advanced Settings del diario.
+         Solo visible para diarios de tipo caja (cash). -->
+    <record id="view_account_journal_form_prs_check" model="ir.ui.view">
+        <field name="name">account.journal.form.prs_check_journal</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.view_account_journal_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='advanced_settings']" position="inside">
+                <group string="Cheques de Terceros (PRS)"
+                       invisible="type != 'cash'"
+                       col="2">
+                    <field name="prs_check_journal"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

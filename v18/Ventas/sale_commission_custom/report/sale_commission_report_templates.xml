@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="report_commission_settlement" name="Liquidación de Comisiones">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Liquidación de Comisiones</h2>
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <strong>Referencia:</strong>
+                            <span t-field="o.name"/><br/>
+                            <strong>Vendedor:</strong>
+                            <span t-field="o.salesperson_id"/><br/>
+                            <strong>Período:</strong>
+                            <span t-field="o.date_from"/> —
+                            <span t-field="o.date_to"/><br/>
+                            <strong>Fecha de liquidación:</strong>
+                            <span t-field="o.settlement_date"/>
+                        </div>
+                        <div class="col-6 text-right">
+                            <strong>Estado:</strong>
+                            <span t-field="o.state"/><br/>
+                            <strong>Compañía:</strong>
+                            <span t-field="o.company_id"/>
+                        </div>
+                    </div>
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Referencia</th>
+                                <th>Cliente</th>
+                                <th>Orden venta</th>
+                                <th>Factura</th>
+                                <th>Fecha pago</th>
+                                <th class="text-right">Base</th>
+                                <th class="text-right">% Com.</th>
+                                <th class="text-right">Comisión</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="o.line_ids" t-as="line">
+                                <tr>
+                                    <td><span t-field="line.name"/></td>
+                                    <td><span t-field="line.partner_id"/></td>
+                                    <td><span t-field="line.sale_order_id"/></td>
+                                    <td><span t-field="line.move_id"/></td>
+                                    <td><span t-field="line.payment_date"/></td>
+                                    <td class="text-right">
+                                        <span t-field="line.commission_base_amount"
+                                              t-options='{"widget": "monetary",
+                                              "display_currency": o.currency_id}'/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-field="line.commission_percent"/>%
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-field="line.commission_amount"
+                                              t-options='{"widget": "monetary",
+                                              "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="5">Total</th>
+                                <th class="text-right">
+                                    <span t-field="o.total_base_amount"
+                                          t-options='{"widget": "monetary",
+                                          "display_currency": o.currency_id}'/>
+                                </th>
+                                <th/>
+                                <th class="text-right">
+                                    <span t-field="o.total_commission_amount"
+                                          t-options='{"widget": "monetary",
+                                          "display_currency": o.currency_id}'/>
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <t t-if="o.notes">
+                        <p><strong>Notas:</strong>
+                           <span t-field="o.notes"/></p>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </t>
+</template>
+</odoo>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Lista de Cambios / Devoluciones -->
+    <record id="view_sale_exchange_list" model="ir.ui.view">
+        <field name="name">sale.exchange.list</field>
+        <field name="model">sale.exchange</field>
+        <field name="arch" type="xml">
+            <list string="Cambios / Devoluciones" decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <field name="date"/>
+                <field name="user_id"/>
+                <field name="reason"/>
+                <field name="amount_return" sum="Total devuelto"/>
+                <field name="amount_new" sum="Total nuevo"/>
+                <field name="amount_difference" sum="Diferencia neta"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-warning="state == 'draft'"
+                       decoration-danger="state == 'cancelled'"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Formulario de Cambio / Devolución -->
+    <record id="view_sale_exchange_form" model="ir.ui.view">
+        <field name="name">sale.exchange.form</field>
+        <field name="model">sale.exchange</field>
+        <field name="arch" type="xml">
+            <form string="Cambio / Devolución" create="false" edit="false">
+                <header>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,done,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_credit_note" type="object"
+                                class="oe_stat_button" icon="fa-file-text-o"
+                                invisible="not credit_note_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Nota de Crédito</span>
+                            </div>
+                        </button>
+                        <button name="action_view_new_invoice" type="object"
+                                class="oe_stat_button" icon="fa-file-text"
+                                invisible="not new_invoice_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Factura reemplazo</span>
+                            </div>
+                        </button>
+                        <button type="object" name="action_view_return_picking"
+                                class="oe_stat_button" icon="fa-arrow-left"
+                                invisible="not return_picking_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Devolución stock</span>
+                            </div>
+                        </button>
+                        <button type="object" name="action_view_new_picking"
+                                class="oe_stat_button" icon="fa-truck"
+                                invisible="not new_picking_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Entrega reemplazo</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="order_id" readonly="1"/>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="session_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="date" readonly="1"/>
+                            <field name="user_id" readonly="1"/>
+                            <field name="reason" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Artículos devueltos" name="returns">
+                            <field name="return_line_ids" nolabel="1" readonly="1">
+                                <list>
+                                    <field name="product_id"/>
+                                    <field name="product_uom_id"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit"/>
+                                    <field name="subtotal"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Artículos de reemplazo" name="new_items">
+                            <field name="new_line_ids" nolabel="1" readonly="1">
+                                <list>
+                                    <field name="product_id"/>
+                                    <field name="product_uom_id"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit"/>
+                                    <field name="subtotal"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                    <group col="2" class="oe_subtotal_footer">
+                        <field name="amount_return" readonly="1" string="Total devuelto"/>
+                        <field name="amount_new" readonly="1" string="Total reemplazo"/>
+                        <field name="amount_difference" readonly="1" string="Diferencia neta"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción principal -->
+    <record id="action_sale_exchange" model="ir.actions.act_window">
+        <field name="name">Cambios / Devoluciones</field>
+        <field name="res_model">sale.exchange</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_commission_config_form" model="ir.ui.view">
+        <field name="name">sale.commission.config.form</field>
+        <field name="model">sale.commission.config</field>
+        <field name="arch" type="xml">
+            <form string="Configuración de comisiones">
+                <sheet>
+                    <group>
+                        <group string="General">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active" widget="boolean_toggle"/>
+                            <field name="default_commission_percent"/>
+                            <field name="commission_start_date"/>
+                        </group>
+                        <group string="Contabilidad">
+                            <field name="expense_account_id"/>
+                            <field name="payment_journal_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Cálculo">
+                            <field name="commission_base"/>
+                            <field name="partial_payment_mode"/>
+                            <field name="credit_note_behavior"/>
+                            <field name="rounding"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_commission_config_list" model="ir.ui.view">
+        <field name="name">sale.commission.config.list</field>
+        <field name="model">sale.commission.config</field>
+        <field name="arch" type="xml">
+            <list string="Configuración de comisiones">
+                <field name="company_id"/>
+                <field name="active"/>
+                <field name="default_commission_percent"/>
+                <field name="commission_start_date"/>
+                <field name="expense_account_id"/>
+                <field name="payment_journal_id"/>
+                <field name="commission_base"/>
+                <field name="partial_payment_mode"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_commission_config" model="ir.actions.act_window">
+        <field name="name">Configuración de comisiones</field>
+        <field name="res_model">sale.commission.config</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Agrega el flag de validación manual al diario, dentro de la sección
+         "Extractos automáticos" que ya existe en payment_register_statement. -->
+    <record id="view_journal_prs_pos_inherit" model="ir.ui.view">
+        <field name="name">account.journal.form.prs.pos</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="payment_register_statement.view_account_journal_form_inherit_auto_extract"/>
+        <field name="arch" type="xml">
+
+            <field name="prs_warn_missing_memo" position="after">
+                <field name="prs_pos_deposit_require_validation"
+                       invisible="type not in ['cash', 'bank']"/>
+            </field>
+
+        </field>
+    </record>
+</odoo>

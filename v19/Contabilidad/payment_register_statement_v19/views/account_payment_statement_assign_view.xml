@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_account_payment_form_prs_statement_assign" model="ir.ui.view">
+        <field name="name">account.payment.form.prs.statement.assign</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='journal_id']" position="after">
+                <field name="prs_statement_id"
+                       groups="payment_register_statement_v19.group_prs_assign_payments_to_statements"
+                       domain="[('journal_id','=',journal_id),('prs_state','=','open')]"
+                       options="{'no_create': True}"
+                       invisible="not journal_id or journal_id.type not in ('cash','bank','credit_card') or not journal_id.auto_extract_enabled"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

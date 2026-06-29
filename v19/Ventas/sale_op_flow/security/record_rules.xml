@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- VENDEDOR: solo sus propios pedidos -->
+        <record id="rule_sale_order_vendor" model="ir.rule">
+            <field name="name">SOF - Vendedor: solo sus pedidos</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('sale_op_flow.group_sale_vendor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!--
+            SUPERVISOR: ve TODOS los pedidos.
+            Las record rules por grupo se combinan con OR para el mismo usuario.
+            Como supervisor hereda el grupo vendedor (implied_ids), también
+            hereda su rule restrictiva. Esta rule con dominio (1=1) hace que
+            el OR resulte siempre verdadero → el supervisor ve todo.
+        -->
+        <record id="rule_sale_order_supervisor" model="ir.rule">
+            <field name="name">SOF - Supervisor: ve todos los pedidos</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('sale_op_flow.group_sale_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- CAJERO: pedidos confirmados y pagados -->
+        <record id="rule_sale_order_cashier" model="ir.rule">
+            <field name="name">SOF - Cajero: pedidos en caja</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="domain_force">[('company_id', 'in', company_ids), ('operational_state', 'in', ['confirmed', 'prepared', 'paid', 'dispatched'])]</field>
+            <field name="groups" eval="[(4, ref('sale_op_flow.group_sale_cashier'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- DESPACHO: pedidos confirmados y pagados -->
+        <record id="rule_sale_order_dispatch" model="ir.rule">
+            <field name="name">SOF - Despacho: cola de entrega</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="domain_force">[('company_id', 'in', company_ids), ('operational_state', 'in', ['confirmed', 'prepared', 'paid', 'dispatched'])]</field>
+            <field name="groups" eval="[(4, ref('sale_op_flow.group_sale_dispatch'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!--
+            Sesiones de caja: aislamiento por empresa.
+            company_ids = empresas habilitadas para el usuario en su sesión web.
+            Un cajero de una sola sucursal solo ve las sesiones de esa empresa.
+            El admin/supervisor con múltiples empresas activas ve todas.
+        -->
+        <record id="rule_cashier_session_vendor" model="ir.rule">
+            <field name="name">SOF - Vendedor: sesiones de su empresa</field>
+            <field name="model_id" ref="sale_op_flow.model_sale_cashier_session"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('sale_op_flow.group_sale_vendor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_cashier_session_cashier" model="ir.rule">
+            <field name="name">SOF - Cajero: sesiones de su empresa</field>
+            <field name="model_id" ref="sale_op_flow.model_sale_cashier_session"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('sale_op_flow.group_sale_cashier'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_cashier_session_dispatch" model="ir.rule">
+            <field name="name">SOF - Despacho: sesiones de su empresa</field>
+            <field name="model_id" ref="sale_op_flow.model_sale_cashier_session"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('sale_op_flow.group_sale_dispatch'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- SUPERVISOR: ve todas las sesiones de todas las empresas -->
+        <record id="rule_cashier_session_supervisor" model="ir.rule">
+            <field name="name">SOF - Supervisor: ve todas las sesiones</field>
+            <field name="model_id" ref="sale_op_flow.model_sale_cashier_session"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('sale_op_flow.group_sale_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

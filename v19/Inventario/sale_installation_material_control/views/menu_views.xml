@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Menú bajo Inventario -->
+    <menuitem id="menu_installation_root_stock"
+              name="Instalaciones"
+              parent="stock.menu_stock_root"
+              groups="sale_installation_material_control.group_installation_user"
+              sequence="90"/>
+
+    <menuitem id="menu_installation_material_stock"
+              name="Control de Materiales"
+              parent="menu_installation_root_stock"
+              action="action_installation_material"
+              groups="sale_installation_material_control.group_installation_user"
+              sequence="10"/>
+
+    <!-- Menú bajo Ventas -->
+    <menuitem id="menu_installation_root_sale"
+              name="Instalaciones"
+              parent="sale.sale_menu_root"
+              groups="sale_installation_material_control.group_installation_user"
+              sequence="90"/>
+
+    <menuitem id="menu_installation_material_sale"
+              name="Control de Materiales"
+              parent="menu_installation_root_sale"
+              action="action_installation_material"
+              groups="sale_installation_material_control.group_installation_user"
+              sequence="10"/>
+
+</odoo>

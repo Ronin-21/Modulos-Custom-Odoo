@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sale_cashier_stage_kanban" model="ir.ui.view">
+        <field name="name">sale.cashier.stage.kanban</field>
+        <field name="model">sale.cashier.stage</field>
+        <field name="arch" type="xml">
+            <kanban highlight_color="color"
+                    class="o_sale_dispatch_board"
+                    records_draggable="false"
+                    create="false"
+                    group_create="false"
+                    can_open="false"
+                    sample="0">
+                <field name="color"/>
+                <field name="code"/>
+                <field name="count_orders"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <strong class="fs-5">
+                                    <field name="name"/>
+                                </strong>
+                            </div>
+                            <div class="row text-center border-top border-bottom py-3 my-2">
+                                <div class="col-12">
+                                    <div class="fw-bold text-primary sof-dispatch-count">
+                                        <field name="count_orders"/>
+                                    </div>
+                                    <div class="text-muted small mt-1">Pedidos</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-success w-100 py-2"
+                                    name="action_open_orders"
+                                    type="object">
+                                <t t-if="record.count_orders.raw_value > 0">
+                                    Ver <field name="count_orders"/> Pedidos
+                                </t>
+                                <t t-else="">Abrir</t>
+                            </button>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="action_sale_cashier_board" model="ir.actions.act_window">
+        <field name="name">Tablero de Caja</field>
+        <field name="res_model">sale.cashier.stage</field>
+        <field name="view_mode">kanban</field>
+        <field name="context">{'create': False}</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_sale_cashier_stage_kanban')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No hay etapas configuradas</p>
+        </field>
+    </record>
+
+</odoo>

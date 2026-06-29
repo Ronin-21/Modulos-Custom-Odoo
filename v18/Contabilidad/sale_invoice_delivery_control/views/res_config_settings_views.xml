@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!--
+            Sección de configuración en Ajustes → Ventas
+            Agrega los dos parámetros del módulo debajo de la sección de facturación.
+        -->
+        <!--
+            Odoo 18 SH: mismo patrón que base_setup y sale.
+            Ambos heredan de base.res_config_settings_view_form
+            con xpath expr="//form" position="inside".
+        -->
+        <record id="res_config_settings_view_form_sidc" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.sale.invoice.delivery.control</field>
+            <field name="model">res.config.settings</field>
+            <field name="priority" eval="20"/>
+            <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form" position="inside">
+                    <app string="Control Factura-Entrega"
+                         name="sale_invoice_delivery_control"
+                         groups="base.group_system">
+                        <block title="Control de Entrega y Facturación">
+                            <setting
+                                id="setting_require_posted_invoice_before_delivery"
+                                string="Exigir factura confirmada antes de entregar"
+                                help="Bloquea la validación de entregas de salida de productos almacenables cuando la orden de venta no tiene ninguna factura confirmada (publicada).">
+                                <field name="require_posted_invoice_before_delivery"/>
+                            </setting>
+                            <setting
+                                id="setting_warn_refund_on_delivered_goods"
+                                string="Controlar notas de crédito sobre mercadería entregada"
+                                help="Bloquea la creación de notas de crédito cuando no hay devolución de mercadería registrada. Si hay devolución parcial, la NC se genera automáticamente por las cantidades devueltas netas (descontando NCs anteriores).">
+                                <field name="warn_refund_on_delivered_goods"/>
+                            </setting>
+                        </block>
+                    </app>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

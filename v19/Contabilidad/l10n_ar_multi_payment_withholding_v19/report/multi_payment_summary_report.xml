@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_multi_payment_summary_receipt" model="ir.actions.report">
+        <field name="name">Recibo resumido</field>
+        <field name="model">account.payment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ar_multi_payment_withholding.report_multi_payment_summary_receipt</field>
+        <field name="report_file">l10n_ar_multi_payment_withholding.report_multi_payment_summary_receipt</field>
+        <field name="print_report_name">'Recibo Resumido - %s' % ((object.partner_id.display_name or '').replace('/', '-'))</field>
+        <field name="binding_model_id" ref="account.model_account_payment"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_multi_payment_summary_receipt">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="data" t-value="o._x_ar_get_multi_receipt_data()"/>
+                <t t-set="currency" t-value="o.currency_id or o.company_id.currency_id"/>
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 style="margin-bottom: 4px;">Recibo resumido</h2>
+                        <div style="font-size: 12px; margin-bottom: 12px;">
+                            <strong>Cliente / Proveedor:</strong>
+                            <span t-esc="o.partner_id.display_name"/>
+                            <span style="margin: 0 10px;">|</span>
+                            <strong>Fecha:</strong>
+                            <span t-esc="o.date"/>
+                            <span style="margin: 0 10px;">|</span>
+                            <strong>Comprobantes de pago:</strong>
+                            <span t-esc="data.get('payment_names', o.name or '/')"/>
+                        </div>
+
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 12px;">
+                            <tr>
+                                <td style="border: 1px solid #999; padding: 6px;"><strong>Total facturas / documentos</strong></td>
+                                <td style="border: 1px solid #999; padding: 6px; text-align: right;">
+                                    <span t-out="data.get('document_total', 0.0)" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                </td>
+                                <td style="border: 1px solid #999; padding: 6px;"><strong>Total medios de pago</strong></td>
+                                <td style="border: 1px solid #999; padding: 6px; text-align: right;">
+                                    <span t-out="data.get('payment_total', 0.0)" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #999; padding: 6px;"><strong>Total retenciones</strong></td>
+                                <td style="border: 1px solid #999; padding: 6px; text-align: right;">
+                                    <span t-out="data.get('withholding_total', 0.0)" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                </td>
+                                <td style="border: 1px solid #999; padding: 6px;"><strong>Cantidad de facturas</strong></td>
+                                <td style="border: 1px solid #999; padding: 6px; text-align: right;">
+                                    <span t-esc="data.get('invoice_count', 0)"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <h3 style="margin-top: 14px; margin-bottom: 6px;">FACTURAS</h3>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 14px;">
+                            <thead>
+                                <tr>
+                                    <th style="border: 1px solid #666; padding: 6px; text-align: left;">Comprobante</th>
+                                    <th style="border: 1px solid #666; padding: 6px; text-align: left;">Fecha</th>
+                                    <th style="border: 1px solid #666; padding: 6px; text-align: left;">Vencimiento</th>
+                                    <th style="border: 1px solid #666; padding: 6px; text-align: left;">Referencia</th>
+                                    <th style="border: 1px solid #666; padding: 6px; text-align: right;">Importe aplicado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="data.get('invoices', [])" t-as="inv">
+                                    <td style="border: 1px solid #999; padding: 6px;"><span t-esc="inv.get('name')"/></td>
+                                    <td style="border: 1px solid #999; padding: 6px;"><span t-esc="inv.get('date') or ''"/></td>
+                                    <td style="border: 1px solid #999; padding: 6px;"><span t-esc="inv.get('due_date') or ''"/></td>
+                                    <td style="border: 1px solid #999; padding: 6px;"><span t-esc="inv.get('ref') or ''"/></td>
+                                    <td style="border: 1px solid #999; padding: 6px; text-align: right;">
+                                        <span t-out="inv.get('applied_amount', 0.0)" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                    </td>
+                                </tr>
+                                <tr t-if="not data.get('invoices')">
+                                    <td colspan="5" style="border: 1px solid #999; padding: 6px; text-align: center;">No hay facturas asociadas en el resumen.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h3 style="margin-top: 14px; margin-bottom: 6px;">MÉTODO DE PAGO</h3>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 14px;">
+                            <thead>
+                                <tr>
+                                    <th style="border: 1px solid #666; padding: 6px; text-align: left;">Recibo / Pago</th>
+                                    <th style="border: 1px solid #666; padding: 6px; text-align: left;">Diario</th>
+                                    <th style="border: 1px solid #666; padding: 6px; text-align: left;">Método</th>
+                                    <th style="border: 1px solid #666; padding: 6px; text-align: left;">Referencia</th>
+                                    <th style="border: 1px solid #666; padding: 6px; text-align: right;">Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="data.get('payments', [])" t-as="pay">
+                                    <td style="border: 1px solid #999; padding: 6px;"><span t-esc="pay.get('payment_name') or ''"/></td>
+                                    <td style="border: 1px solid #999; padding: 6px;"><span t-esc="pay.get('journal') or ''"/></td>
+                                    <td style="border: 1px solid #999; padding: 6px;"><span t-esc="pay.get('method') or ''"/></td>
+                                    <td style="border: 1px solid #999; padding: 6px;"><span t-esc="pay.get('communication') or ''"/></td>
+                                    <td style="border: 1px solid #999; padding: 6px; text-align: right;">
+                                        <span t-out="pay.get('amount', 0.0)" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <t t-if="data.get('checks')">
+                            <h3 style="margin-top: 14px; margin-bottom: 6px;">DETALLE DE CHEQUES</h3>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 14px;">
+                                <thead>
+                                    <tr>
+                                        <th style="border: 1px solid #666; padding: 6px; text-align: left;">Tipo</th>
+                                        <th style="border: 1px solid #666; padding: 6px; text-align: left;">Número</th>
+                                        <th style="border: 1px solid #666; padding: 6px; text-align: left;">Banco</th>
+                                        <th style="border: 1px solid #666; padding: 6px; text-align: left;">CUIT emisor</th>
+                                        <th style="border: 1px solid #666; padding: 6px; text-align: left;">Fecha pago</th>
+                                        <th style="border: 1px solid #666; padding: 6px; text-align: right;">Importe</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="data.get('checks', [])" t-as="check">
+                                        <td style="border: 1px solid #999; padding: 6px;"><span t-esc="check.get('type') or ''"/></td>
+                                        <td style="border: 1px solid #999; padding: 6px;"><span t-esc="check.get('number') or ''"/></td>
+                                        <td style="border: 1px solid #999; padding: 6px;"><span t-esc="check.get('bank') or ''"/></td>
+                                        <td style="border: 1px solid #999; padding: 6px;"><span t-esc="check.get('issuer_vat') or ''"/></td>
+                                        <td style="border: 1px solid #999; padding: 6px;"><span t-esc="check.get('payment_date') or ''"/></td>
+                                        <td style="border: 1px solid #999; padding: 6px; text-align: right;">
+                                            <span t-out="check.get('amount', 0.0)" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <t t-if="data.get('withholdings')">
+                            <h3 style="margin-top: 14px; margin-bottom: 6px;">RETENCIONES APLICADAS</h3>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 14px;">
+                                <thead>
+                                    <tr>
+                                        <th style="border: 1px solid #666; padding: 6px; text-align: left;">Retención</th>
+                                        <th style="border: 1px solid #666; padding: 6px; text-align: right;">Base</th>
+                                        <th style="border: 1px solid #666; padding: 6px; text-align: right;">Importe</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="data.get('withholdings', [])" t-as="wth">
+                                        <td style="border: 1px solid #999; padding: 6px;"><span t-esc="wth.get('name') or ''"/></td>
+                                        <td style="border: 1px solid #999; padding: 6px; text-align: right;">
+                                            <span t-out="wth.get('base_amount', 0.0)" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                        <td style="border: 1px solid #999; padding: 6px; text-align: right;">
+                                            <span t-out="wth.get('amount', 0.0)" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

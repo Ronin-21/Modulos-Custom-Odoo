@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_prs_money_flow_search" model="ir.ui.view">
+        <field name="name">prs.money.flow.search</field>
+        <field name="model">prs.money.flow</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="label" string="Etiqueta"/>
+                <field name="journal_id"/>
+                <field name="partner_id"/>
+                <field name="payment_method_label"/>
+                <field name="card_label"/>
+                <field name="plan_label"/>
+                <field name="pos_config_label"/>
+                <filter name="planned" string="Proyectados" domain="[('state','=','planned')]"/>
+                <filter name="due" string="Vencidos" domain="[('state','=','due')]"/>
+                <filter name="waiting_accreditation" string="Esperando acreditacion" domain="[('state','=','waiting_accreditation')]"/>
+                <filter name="statement_created" string="Con extracto" domain="[('state','=','statement_created')]"/>
+                <filter name="inbound" string="Entradas" domain="[('direction','=','inbound')]"/>
+                <filter name="outbound" string="Salidas" domain="[('direction','=','outbound')]"/>
+                <separator/>
+                <filter name="expected_today" string="Hoy" domain="[('expected_date','=',context_today())]"/>
+                <filter name="expected_past" string="Hasta hoy" domain="[('expected_date','&lt;=',context_today())]"/>
+                <filter name="expected_future" string="Futuro" domain="[('expected_date','&gt;',context_today())]"/>
+                <group>
+                    <filter name="group_expected_date" string="Fecha esperada" context="{'group_by':'expected_date:day'}"/>
+                    <filter name="group_journal" string="Diario" context="{'group_by':'journal_id'}"/>
+                    <filter name="group_company" string="Empresa" context="{'group_by':'company_id'}"/>
+                    <filter name="group_type" string="Tipo" context="{'group_by':'flow_type'}"/>
+                    <filter name="group_state" string="Estado" context="{'group_by':'state'}"/>
+                    <filter name="group_partner" string="Contacto" context="{'group_by':'partner_id'}"/>
+                    <filter name="group_label" string="Etiqueta" context="{'group_by':'label'}"/>
+                    <filter name="group_flow_group" string="Ingresos/Egresos" context="{'group_by':'flow_group'}"/>
+                    <filter name="group_source_tag" string="Agrupador" context="{'group_by':'source_tag'}"/>
+                    <filter name="group_payment_method_label" string="Medio de pago" context="{'group_by':'payment_method_label'}"/>
+                    <filter name="group_card_label" string="Tarjeta / Marca" context="{'group_by':'card_label'}"/>
+                    <filter name="group_plan_label" string="Plan" context="{'group_by':'plan_label'}"/>
+                    <filter name="group_pos_config_label" string="Punto de venta" context="{'group_by':'pos_config_label'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_prs_money_flow_list" model="ir.ui.view">
+        <field name="name">prs.money.flow.list</field>
+        <field name="model">prs.money.flow</field>
+        <field name="arch" type="xml">
+            <list string="Flujos de Pago" decoration-muted="state in ('cancelled','rejected')" decoration-info="state == 'planned'" decoration-warning="state in ('due','waiting_accreditation')" decoration-success="state in ('statement_created','reconciled')">
+                <field name="expected_date"/>
+                <field name="journal_id"/>
+                <field name="flow_type"/>
+                <field name="direction"/>
+                <field name="flow_group" optional="hide"/>
+                <field name="source_tag" optional="hide"/>
+                <field name="payment_method_label" optional="show"/>
+                <field name="card_label" optional="show"/>
+                <field name="plan_label" optional="show"/>
+                <field name="pos_config_label" optional="hide"/>
+                <field name="label" string="Etiqueta"/>
+                <field name="partner_id" optional="show"/>
+                <field name="amount_gross" sum="Bruto"/>
+                <field name="fee_amount" sum="Comision" optional="hide"/>
+                <field name="fee_tax_amount" sum="IVA" optional="hide"/>
+                <field name="withholding_amount" sum="Retenciones" optional="hide"/>
+                <field name="amount_net" sum="Neto"/>
+                <field name="amount_signed" sum="Saldo"/>
+                <field name="state" widget="badge"/>
+                <field name="statement_line_id" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_prs_money_flow_form" model="ir.ui.view">
+        <field name="name">prs.money.flow.form</field>
+        <field name="model">prs.money.flow</field>
+        <field name="arch" type="xml">
+            <form string="Flujo de Pago">
+                <header>
+                    <button name="action_create_statement_line" type="object" string="Crear extracto" class="btn-primary" invisible="state in ('statement_created','reconciled','cancelled','rejected') or projection_only"/>
+                    <button name="action_mark_due" type="object" string="Marcar vencido" invisible="state != 'planned'"/>
+                    <button name="action_cancel" type="object" string="Cancelar" invisible="state in ('cancelled','rejected','reconciled')"/>
+                    <button name="action_reset_to_planned" type="object" string="Volver a proyectado" invisible="state not in ('due','manual_review','waiting_accreditation') or statement_line_id"/>
+                    <field name="state" widget="statusbar" statusbar_visible="planned,due,waiting_accreditation,statement_created,reconciled"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_source" type="object" class="oe_stat_button" icon="fa-external-link" invisible="not source_model or not source_res_id">
+                            <div class="o_stat_info"><span class="o_stat_text">Origen</span></div>
+                        </button>
+                        <button name="action_open_statement_line" type="object" class="oe_stat_button" icon="fa-university" invisible="not statement_line_id">
+                            <div class="o_stat_info"><span class="o_stat_text">Extracto</span></div>
+                        </button>
+                    </div>
+                    <group>
+                        <group string="Identificacion">
+                            <field name="name" readonly="1"/>
+                            <field name="label" string="Etiqueta"/>
+                            <field name="flow_type"/>
+                            <field name="direction"/>
+                            <field name="partner_id"/>
+                            <field name="flow_group" readonly="1"/>
+                            <field name="source_tag"/>
+                            <field name="payment_method_label"/>
+                            <field name="card_label"/>
+                            <field name="plan_label"/>
+                            <field name="pos_config_label"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Fechas y diario">
+                            <field name="origin_date"/>
+                            <field name="expected_date"/>
+                            <field name="actual_date" readonly="state in ('statement_created','reconciled')"/>
+                            <field name="journal_id"/>
+                            <field name="currency_id" groups="base.group_multi_currency"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Importes">
+                            <field name="amount_gross"/>
+                            <field name="fee_amount"/>
+                            <field name="fee_tax_amount"/>
+                            <field name="withholding_amount"/>
+                            <field name="amount_net" readonly="1"/>
+                            <field name="amount_signed" readonly="1"/>
+                        </group>
+                        <group string="Automatizacion">
+                            <field name="auto_create_statement"/>
+                            <field name="projection_only"/>
+                            <field name="payment_id" readonly="1"/>
+                            <field name="statement_line_id" readonly="1"/>
+                            <field name="source_display_name" readonly="1"/>
+                            <field name="unique_key" readonly="1" groups="base.group_no_one"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notas">
+                            <field name="note" placeholder="Detalle, observaciones o diferencia contra liquidacion real."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_prs_money_flow_calendar" model="ir.ui.view">
+        <field name="name">prs.money.flow.calendar</field>
+        <field name="model">prs.money.flow</field>
+        <field name="arch" type="xml">
+            <calendar string="Calendario de Flujos de Pago" date_start="expected_date" color="journal_id" mode="month" event_open_popup="true" all_day="calendar_all_day">
+                <field name="label" string="Etiqueta"/>
+                <field name="journal_id"/>
+                <field name="payment_method_label"/>
+                <field name="card_label"/>
+                <field name="plan_label"/>
+                <field name="amount_signed"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_prs_money_flow_pivot" model="ir.ui.view">
+        <field name="name">prs.money.flow.pivot</field>
+        <field name="model">prs.money.flow</field>
+        <field name="arch" type="xml">
+            <pivot string="Flujos de Pago - Tabla dinamica" display_quantity="true">
+                <field name="flow_group" type="row"/>
+                <field name="journal_id" type="row"/>
+                <field name="payment_method_label" type="row"/>
+                <field name="card_label" type="row"/>
+                <field name="plan_label" type="row"/>
+                <field name="label" type="row"/>
+                <field name="expected_date" type="col" interval="day"/>
+                <field name="amount_signed" type="measure"/>
+                <field name="amount_net" type="measure"/>
+                <field name="amount_gross" type="measure"/>
+                <field name="fee_amount" type="measure"/>
+                <field name="fee_tax_amount" type="measure"/>
+                <field name="withholding_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_prs_money_flow_graph" model="ir.ui.view">
+        <field name="name">prs.money.flow.graph</field>
+        <field name="model">prs.money.flow</field>
+        <field name="arch" type="xml">
+            <graph string="Flujos de Pago" type="bar">
+                <field name="expected_date" interval="day"/>
+                <field name="amount_signed" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_prs_money_flow" model="ir.actions.act_window">
+        <field name="name">Flujo de Pagos</field>
+        <field name="res_model">prs.money.flow</field>
+        <field name="view_mode">list,pivot,calendar,graph,form</field>
+        <field name="views" eval="[(ref('view_prs_money_flow_list'), 'list'), (ref('view_prs_money_flow_pivot'), 'pivot'), (ref('view_prs_money_flow_calendar'), 'calendar'), (ref('view_prs_money_flow_graph'), 'graph'), (ref('view_prs_money_flow_form'), 'form')]"/>
+        <field name="search_view_id" ref="view_prs_money_flow_search"/>
+        <field name="context">{'pivot_measures': ['amount_signed']}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Todavia no hay flujos de pago.</p>
+            <p>Los pagos, cheques y acreditaciones POS proyectadas apareceran aca.</p>
+        </field>
+    </record>
+
+    <record id="action_prs_money_flow_grid" model="ir.actions.act_window">
+        <field name="name">Tabla dinamica</field>
+        <field name="res_model">prs.money.flow</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="views" eval="[(ref('view_prs_money_flow_pivot'), 'pivot'), (ref('view_prs_money_flow_graph'), 'graph'), (ref('view_prs_money_flow_list'), 'list'), (ref('view_prs_money_flow_form'), 'form')]"/>
+        <field name="search_view_id" ref="view_prs_money_flow_search"/>
+        <field name="context">{'pivot_measures': ['amount_signed']}</field>
+    </record>
+
+    <menuitem id="menu_prs_money_flow_root"
+              name="Flujo de Pagos"
+              parent="account.menu_finance"
+              action="action_prs_money_flow"
+              sequence="14"/>
+
+    <!-- Compatibility/update fix: earlier builds restricted this menu with
+         group_prs_money_flow_enabled.  Keeping the menu itself ungrouped
+         prevents it from disappearing for accounting users after upgrades.
+         The functional generation of flows is still controlled by
+         Ajustes > Contabilidad > Flujo de Pagos. -->
+    <record id="menu_prs_money_flow_root" model="ir.ui.menu">
+        <field name="group_ids" eval="[(5, 0, 0)]"/>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="menu_prs_money_flow" model="ir.ui.menu">
+        <field name="name">Detalle</field>
+        <field name="parent_id" ref="menu_prs_money_flow_root"/>
+        <field name="action" eval="'ir.actions.act_window,%d' % ref('action_prs_money_flow')"/>
+        <field name="active" eval="False"/>
+    </record>
+    <record id="menu_prs_money_flow_calendar_grouped" model="ir.ui.menu">
+        <field name="name">Calendario agrupado</field>
+        <field name="parent_id" ref="menu_prs_money_flow_root"/>
+        <field name="active" eval="False"/>
+    </record>
+    <record id="menu_prs_money_flow_grid" model="ir.ui.menu">
+        <field name="name">Tabla dinamica</field>
+        <field name="parent_id" ref="menu_prs_money_flow_root"/>
+        <field name="action" eval="'ir.actions.act_window,%d' % ref('action_prs_money_flow_grid')"/>
+        <field name="active" eval="False"/>
+    </record>
+
+</odoo>

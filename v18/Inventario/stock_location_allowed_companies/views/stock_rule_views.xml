@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         FORMULARIO: agregar aviso de compatibilidad en reglas push/pull
+         ============================================================ -->
+    <record id="view_stock_rule_form_allowed_companies" model="ir.ui.view">
+        <field name="name">stock.rule.form.allowed.companies</field>
+        <field name="model">stock.rule</field>
+        <field name="inherit_id" ref="stock.view_stock_rule_form"/>
+        <field name="arch" type="xml">
+
+            <!--
+                Agregamos aviso + botón justo debajo de location_dest_id,
+                que es el último campo de ubicación en el formulario de regla.
+            -->
+            <xpath expr="//field[@name='location_dest_id']" position="after">
+                <field name="location_compatibility_warning"
+                       invisible="not location_compatibility_warning"
+                       readonly="1"
+                       class="text-danger fw-bold"
+                       string="⚠ Compatibilidad de ubicaciones"/>
+                <div class="mt-2" invisible="not company_id">
+                    <button name="action_check_location_compatibility"
+                            type="object"
+                            string="Verificar compatibilidad de ubicaciones"
+                            icon="fa-check-circle"
+                            class="btn-secondary btn-sm"
+                            title="Verifica si las ubicaciones de la regla son compatibles con la empresa según allowed_company_ids."/>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- ============================================================
+         LISTA: agregar columna de aviso
+         ============================================================ -->
+    <record id="view_stock_rule_tree_allowed_companies" model="ir.ui.view">
+        <field name="name">stock.rule.tree.allowed.companies</field>
+        <field name="model">stock.rule</field>
+        <field name="inherit_id" ref="stock.view_stock_rule_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="location_compatibility_warning"
+                       string="⚠ Compat."
+                       optional="show"
+                       readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

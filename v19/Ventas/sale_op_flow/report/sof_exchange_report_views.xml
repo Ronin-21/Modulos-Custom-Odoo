@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- PIVOT -->
+    <record id="view_sof_exchange_report_pivot" model="ir.ui.view">
+        <field name="name">sale.exchange.report.pivot</field>
+        <field name="model">sale.exchange</field>
+        <field name="arch" type="xml">
+            <pivot string="Devoluciones / Cambios" sample="1">
+                <field name="company_id" type="row"/>
+                <field name="amount_return" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- GRAPH -->
+    <record id="view_sof_exchange_report_graph" model="ir.ui.view">
+        <field name="name">sale.exchange.report.graph</field>
+        <field name="model">sale.exchange</field>
+        <field name="arch" type="xml">
+            <graph string="Devoluciones / Cambios" type="bar" sample="1">
+                <field name="date" interval="month"/>
+                <field name="amount_return" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="view_sof_exchange_report_search" model="ir.ui.view">
+        <field name="name">sale.exchange.report.search</field>
+        <field name="model">sale.exchange</field>
+        <field name="arch" type="xml">
+            <search string="Devoluciones / Cambios">
+                <field name="name"/>
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <field name="user_id"/>
+                <field name="reason"/>
+                <separator/>
+                <filter string="Confirmadas" name="f_done" domain="[('state', '=', 'done')]"/>
+                <filter string="Canceladas" name="f_cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter string="Hoy" name="f_today"
+                        domain="[('date', '&gt;=', context_today().strftime('%Y-%m-%d')), ('date', '&lt;', (context_today() + relativedelta(days=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Este mes" name="f_month"
+                        domain="[('date', '&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <group>
+                    <filter string="Sucursal" name="g_company" context="{'group_by': 'company_id'}"
+                            groups="base.group_multi_company"/>
+                    <filter string="Cliente" name="g_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Registrado por" name="g_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Motivo" name="g_reason" context="{'group_by': 'reason'}"/>
+                    <filter string="Estado" name="g_state" context="{'group_by': 'state'}"/>
+                    <filter string="Fecha" name="g_date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_sof_exchange_report" model="ir.actions.act_window">
+        <field name="name">Devoluciones / Cambios (análisis)</field>
+        <field name="res_model">sale.exchange</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="search_view_id" ref="view_sof_exchange_report_search"/>
+        <field name="context">{'search_default_f_done': 1, 'search_default_g_company': 1, 'search_default_f_month': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin devoluciones en el período</p>
+            <p>Análisis de cambios y devoluciones por sucursal, cliente y motivo.</p>
+        </field>
+    </record>
+
+</odoo>

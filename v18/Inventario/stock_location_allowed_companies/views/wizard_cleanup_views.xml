@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_stock_location_cleanup_wizard_form" model="ir.ui.view">
+        <field name="name">stock.location.cleanup.wizard.form</field>
+        <field name="model">stock.location.cleanup.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Limpieza de Quants en Ubicaciones Bloqueadas">
+                <sheet>
+
+                    <div class="alert alert-danger" role="alert">
+                        <strong>⚠ Atención:</strong> Este wizard <b>elimina quants</b> de
+                        ubicaciones donde la empresa no está en <em>allowed_company_ids</em>.
+                        <br/>
+                        Siempre ejecute <b>Vista previa</b> y revise el impacto antes de
+                        hacer clic en <b>Ejecutar limpieza</b>.
+                        Se crean backups automáticos en tablas <code>_backup_*</code>.
+                    </div>
+
+                    <!-- CONFIGURACIÓN (solo en draft/preview) -->
+                    <group string="Configuración" invisible="state == 'done'">
+                        <group>
+                            <field name="company_id" options="{'no_create': True}"/>
+                            <field name="skip_reserved"/>
+                        </group>
+                        <group>
+                            <field name="location_ids"
+                                   widget="many2many_tags"
+                                   options="{'no_create': True}"
+                                   string="Ubicaciones (opcional)"
+                                   help="Dejar vacío para auto-detectar todas las bloqueadas."/>
+                        </group>
+                        <field name="state" invisible="1"/>
+                    </group>
+
+                    <!-- RESUMEN DE IMPACTO (post-preview) -->
+                    <group string="Resumen de impacto"
+                           invisible="state == 'draft'">
+                        <group>
+                            <field name="quants_count" string="Quants a eliminar" readonly="1"/>
+                            <field name="orphans_count" string="Move lines → quant=NULL" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="moves_count" string="Movimientos a desreservar" readonly="1"/>
+                            <field name="pickings_count" string="Transferencias afectadas" readonly="1"/>
+                        </group>
+                        <field name="preview_summary" string="" nolabel="1" readonly="1" widget="text"
+                               style="font-family: monospace; font-size: 12px;"/>
+                    </group>
+
+                    <!-- DETALLE PREVIEW: quants -->
+                    <group string="Quants a eliminar"
+                           invisible="state == 'draft' or quants_count == 0">
+                        <field name="preview_quants_text" string="" nolabel="1" readonly="1" widget="text"
+                               style="font-family: monospace; font-size: 11px;"/>
+                    </group>
+
+                    <!-- DETALLE PREVIEW: orphans -->
+                    <group string="Move lines que quedarán con quant_id=NULL"
+                           invisible="state == 'draft' or orphans_count == 0">
+                        <div class="alert alert-warning" role="alert">
+                            Estas move lines apuntan a quants que serán eliminados.
+                            Se pondrá <code>quant_id = NULL</code> antes del DELETE.
+                        </div>
+                        <field name="preview_orphans_text" string="" nolabel="1" readonly="1" widget="text"
+                               style="font-family: monospace; font-size: 11px;"/>
+                    </group>
+
+                    <!-- DETALLE PREVIEW: moves -->
+                    <group string="Movimientos a desreservar"
+                           invisible="state == 'draft' or moves_count == 0">
+                        <field name="preview_moves_text" string="" nolabel="1" readonly="1" widget="text"
+                               style="font-family: monospace; font-size: 11px;"/>
+                    </group>
+
+                    <!-- DETALLE PREVIEW: pickings -->
+                    <group string="Transferencias afectadas"
+                           invisible="state == 'draft' or pickings_count == 0">
+                        <field name="preview_pickings_text" string="" nolabel="1" readonly="1" widget="text"
+                               style="font-family: monospace; font-size: 11px;"/>
+                    </group>
+
+                    <!-- LOG DE EJECUCIÓN -->
+                    <group string="✓ Log de ejecución" invisible="state != 'done'">
+                        <field name="backup_tag" string="Tag de backup" readonly="1"/>
+                        <field name="execution_log" string="" nolabel="1" readonly="1" widget="text"
+                               style="font-family: monospace; font-size: 11px; color: green;"/>
+                    </group>
+
+                    <div class="alert alert-success" role="alert"
+                         invisible="state != 'preview' or quants_count != 0">
+                        ✓ No hay quants a limpiar para esta configuración.
+                    </div>
+
+                </sheet>
+                <footer>
+                    <!-- Estado: draft -->
+                    <button name="action_preview" type="object"
+                            string="Vista previa" class="btn-primary"
+                            invisible="state == 'done'"/>
+
+                    <!-- Estado: preview con quants -->
+                    <button name="action_execute" type="object"
+                            string="Ejecutar limpieza" class="btn-danger"
+                            invisible="state != 'preview' or quants_count == 0"
+                            confirm="¿Confirma la eliminación de los quants indicados? Se crearán backups automáticos antes de proceder."/>
+
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_stock_location_cleanup_wizard" model="ir.actions.act_window">
+        <field name="name">Limpieza de Quants</field>
+        <field name="res_model">stock.location.cleanup.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem
+        id="menu_stock_location_cleanup"
+        name="Limpieza de Quants"
+        parent="stock_location_allowed_companies.menu_stock_allowed_companies_root"
+        action="action_stock_location_cleanup_wizard"
+        sequence="40"
+        groups="stock_location_allowed_companies.group_allowed_companies_admin"/>
+
+</odoo>

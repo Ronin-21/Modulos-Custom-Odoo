@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         Menú: Inventario → Configuración → Ubicaciones por Producto/Sucursal
+    ════════════════════════════════════════════════════════════════════ -->
+    <menuitem
+        id="menu_stock_product_branch_location"
+        name="Ubicaciones por Producto/Sucursal"
+        parent="stock.menu_warehouse_config"
+        action="action_stock_product_branch_location"
+        sequence="50"
+        groups="stock.group_stock_manager"/>
+
+    <menuitem
+        id="menu_stock_inventory_import_wizard"
+        name="Importar Inventario desde CSV/Excel"
+        parent="stock.menu_warehouse_config"
+        action="action_stock_inventory_import_wizard"
+        sequence="51"
+        groups="stock.group_stock_manager"/>
+
+</odoo>

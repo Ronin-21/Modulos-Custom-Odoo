@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Agrega el campo amount_due_pos a la pestaña "Cuenta corriente" definida en el módulo base -->
+  <record id="view_res_partner_form_pos_credit" model="ir.ui.view">
+    <field name="name">res.partner.form.pos.credit</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="customer_credit_limit_approval.view_res_partner_form_inherit"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='amount_due_sale']" position="after">
+        <field name="amount_due_pos"
+               string="POS Cuenta Corriente pendiente"
+               readonly="1"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

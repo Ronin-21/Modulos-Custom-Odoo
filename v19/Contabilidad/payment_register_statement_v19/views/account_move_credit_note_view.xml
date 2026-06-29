@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--
+        Habilita el botón "Nota de crédito" (reversión) en comprobantes de venta
+        y compra (out_receipt / in_receipt), no solo en facturas.
+
+        Odoo nativo oculta el botón action_reverse cuando el move_type no es
+        out_invoice / in_invoice (ver account.view_move_form). Pero el motor de
+        reversión SÍ soporta los comprobantes: TYPE_REVERSE_MAP mapea
+        out_receipt -> out_refund e in_receipt -> in_refund. Por eso alcanza con
+        mostrar el botón; la reversión genera la NC correcta.
+
+        Permite emitir notas de crédito desde cualquier comprobante, sea fiscal
+        o no, de forma independiente de otros módulos (op_flow, etc.).
+    -->
+    <record id="view_account_move_form_prs_nc_on_receipts" model="ir.ui.view">
+        <field name="name">account.move.form.prs.nc.comprobantes</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_reverse']" position="attributes">
+                <attribute name="invisible">move_type not in ('out_invoice', 'in_invoice', 'out_receipt', 'in_receipt') or state != 'posted'</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

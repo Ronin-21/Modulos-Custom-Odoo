@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <record id="pos_config_form_inherit_enhanced_orders" model="ir.ui.view">
+    <field name="name">pos.config.form.inherit.enhanced.orders</field>
+    <field name="model">pos.config</field>
+    <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//sheet" position="inside">
+        <group string="Tickets (Columnas y Botones)" col="2">
+          <group string="Columnas base">
+            <field name="show_ticket_col_date"/>
+            <field name="show_ticket_col_receipt"/>
+            <field name="show_ticket_col_order"/>
+            <field name="show_ticket_col_client"/>
+            <field name="show_ticket_col_cashier"/>
+            <field name="show_ticket_col_total"/>
+            <field name="show_ticket_col_state"/>
+            <field name="show_ticket_col_table"/>
+          </group>
+          <group string="Extras y botones">
+            <field name="show_ticket_col_payments"/>
+            <field name="show_ticket_col_invoice_state"/>
+            <field name="show_ticket_btn_confirm_invoice"/>
+          </group>
+        </group>
+        <group string="Facturación al cierre" col="2">
+          <group>
+            <field name="confirm_draft_invoices_on_closing"/>
+          </group>
+          <group>
+            <field name="auto_reconcile_pos_invoices_on_closing"/>
+          </group>
+        </group>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

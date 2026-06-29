@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- =========================================================
+         PRS - Mostrar toggles de filtros custom en la configuración del reporte
+         (Accounting > Configuration > Reports)
+         ========================================================= -->
+
+    <record id="view_account_report_form_inherit_prs_expense_filters" model="ir.ui.view">
+        <field name="name">account.report.form.inherit.prs.expense.filters</field>
+        <field name="model">account.report</field>
+        <!-- En Odoo 18 (account_reports) la vista base de configuración del reporte -->
+        <field name="inherit_id" ref="account_reports.account_report_form"/>
+        <field name="arch" type="xml">
+            <!-- Insertamos debajo de 'Contactos' (filter_partner) en el bloque de Filtros -->
+            <xpath expr="//field[@name='filter_partner']" position="after">
+                <field name="filter_prs_payment_method_line"/>
+                <field name="filter_prs_expense_type"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

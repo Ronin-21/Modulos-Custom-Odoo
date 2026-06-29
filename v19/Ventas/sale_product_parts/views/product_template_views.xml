@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Extensión del formulario de product.template.
+        Agrega la pestaña "Despiece / Repuestos" con el listado editable
+        de piezas asociadas al producto.
+
+        Nota: no se usa context="{'default_product_tmpl_id': active_id}" porque
+        en Odoo 19 la validación de vistas rechaza variables de contexto que no
+        sean campos del modelo. El campo product_tmpl_id se asigna automáticamente
+        por el mecanismo de One2many / inverse_name de Odoo.
+    -->
+    <record id="product_template_form_view_parts" model="ir.ui.view">
+        <field name="name">product.template.form.despiece</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+
+            <notebook position="inside">
+                <page string="Despiece / Repuestos"
+                      name="product_parts_tab"
+                      id="product_parts_tab">
+
+                    <field name="part_ids" nolabel="1">
+                        <list editable="bottom"
+                              string="Piezas y Repuestos">
+
+                            <field name="sequence" widget="handle"/>
+
+                            <field name="part_product_id"
+                                   options="{'no_create_edit': True}"
+                                   domain="[('active', '=', True)]"
+                                   string="Pieza / Repuesto"
+                            />
+
+                            <field name="quantity" string="Cantidad sugerida"/>
+
+                            <field name="uom_id"
+                                   optional="show"
+                                   readonly="1"
+                            />
+
+                            <field name="auto_load"
+                                   optional="show"
+                                   widget="boolean_toggle"
+                                   string="Pre-seleccionar"
+                            />
+
+                            <field name="note"
+                                   string="Nota / Observación"
+                            />
+
+                            <field name="company_id"
+                                   optional="hide"
+                                   groups="base.group_multi_company"
+                            />
+
+                        </list>
+                    </field>
+
+                    <p class="text-muted mt-2">
+                        <i class="fa fa-info-circle"/> Las piezas marcadas como
+                        <strong>Pre-seleccionar</strong> aparecerán seleccionadas
+                        por defecto en el asistente de inserción del pedido de venta.
+                        La cantidad se multiplica automáticamente por la cantidad
+                        del producto padre en el pedido.
+                    </p>
+
+                </page>
+            </notebook>
+
+        </field>
+    </record>
+
+</odoo>

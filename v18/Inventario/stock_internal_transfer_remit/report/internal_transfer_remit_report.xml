@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_internal_transfer_remit" model="ir.actions.report">
+        <field name="name">Remito de traslado interno</field>
+        <field name="model">stock.picking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">stock_internal_transfer_remit.itr_remit</field>
+        <field name="report_file">stock_internal_transfer_remit.itr_remit</field>
+        <field name="print_report_name">'Remito de traslado interno - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="itr_remit">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+
+                        <div class="row mb-3">
+                            <div class="col-8">
+                                <h2 class="mb-1">REMITO DE TRASLADO INTERNO</h2>
+                                <h3 class="mb-0">
+                                    <span t-field="o.name">WH/INT/00001</span>
+                                </h3>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div t-field="o.name" t-options="{'widget': 'barcode', 'width': 600, 'height': 120, 'img_style': 'width:260px;height:52px;'}">
+                                    <div class="bg-light border-1 rounded d-flex flex-column align-items-center justify-content-center p-2 opacity-75 text-muted text-center">
+                                        Código de barras
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <style>
+                            .itr-info-table td {
+                                padding: 1px 4px;
+                                vertical-align: top;
+                                font-size: 13px;
+                            }
+                            .itr-info-label {
+                                font-weight: bold;
+                                white-space: nowrap;
+                                width: 42%;
+                            }
+                            .itr-info-value {
+                                width: 58%;
+                                overflow-wrap: anywhere;
+                            }
+                        </style>
+
+                        <div id="internal_transfer_info" class="row mb-4">
+                            <div class="col-6">
+                                <table class="table table-sm table-borderless mb-0 itr-info-table">
+                                    <tbody>
+                                        <tr>
+                                            <td class="itr-info-label">Tipo de operación</td>
+                                            <td class="itr-info-value"><span t-field="o.picking_type_id">Traslado interno</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="itr-info-label">Ubicación de origen</td>
+                                            <td class="itr-info-value"><span t-field="o.location_id">WH/Stock</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="itr-info-label">Ubicación de destino</td>
+                                            <td class="itr-info-value"><span t-field="o.location_dest_id">WH/Stock</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-sm table-borderless mb-0 itr-info-table">
+                                    <tbody>
+                                        <tr t-if="o.company_id">
+                                            <td class="itr-info-label">Empresa</td>
+                                            <td class="itr-info-value"><span t-field="o.company_id">Mi empresa</span></td>
+                                        </tr>
+                                        <tr t-if="o.user_id">
+                                            <td class="itr-info-label">Responsable</td>
+                                            <td class="itr-info-value"><span t-field="o.user_id">Responsable</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="itr-info-label">Estado</td>
+                                            <td class="itr-info-value"><span t-field="o.state">Hecho</span></td>
+                                        </tr>
+                                        <tr t-if="o.scheduled_date">
+                                            <td class="itr-info-label">Fecha programada</td>
+                                            <td class="itr-info-value"><span t-field="o.scheduled_date">2026-04-01 00:00:00</span></td>
+                                        </tr>
+                                        <tr t-if="o.date_done">
+                                            <td class="itr-info-label">Fecha efectiva</td>
+                                            <td class="itr-info-value"><span t-field="o.date_done">2026-04-14 15:04:23</span></td>
+                                        </tr>
+                                        <tr t-if="o.origin">
+                                            <td class="itr-info-label">Documento origen</td>
+                                            <td class="itr-info-value"><span t-field="o.origin">S0001</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <t t-set="lines" t-value="o.move_ids_without_package or o.move_ids"/>
+                        <table class="table table-sm table-borderless" name="internal_transfer_move_table">
+                            <thead style="border-bottom: 1px solid #000;">
+                                <tr>
+                                    <th name="th_product" class="text-start">Producto</th>
+                                    <th name="th_ordered" class="text-end">Ordenado</th>
+                                    <th name="th_done" class="text-end">Entregado</th>
+                                    <th name="th_uom" class="text-start">Unidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="lines" t-as="move">
+                                    <td>
+                                        <span t-field="move.product_id.display_name">Producto</span>
+                                        <p t-if="move.description_picking and move.description_picking != move.product_id.name and move.description_picking != move.product_id.display_name" class="mb-0 text-muted">
+                                            <span t-field="move.description_picking">Descripción</span>
+                                        </p>
+                                    </td>
+                                    <td class="text-end text-nowrap">
+                                        <span t-field="move.product_uom_qty">0.00</span>
+                                    </td>
+                                    <td class="text-end text-nowrap">
+                                        <span t-field="move.quantity">0.00</span>
+                                    </td>
+                                    <td class="text-start text-nowrap">
+                                        <span t-field="move.product_uom" groups="uom.group_uom">Unidades</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div t-if="o.note" class="mt-4">
+                            <strong>Nota:</strong>
+                            <p t-field="o.note" class="mb-0"/>
+                        </div>
+
+                        <div class="row mt-5 pt-4">
+                            <div class="col-6 text-center">
+                                <div style="border-top: 1px solid #000; padding-top: 6px;">Entregó</div>
+                            </div>
+                            <div class="col-6 text-center">
+                                <div style="border-top: 1px solid #000; padding-top: 6px;">Recibió</div>
+                            </div>
+                        </div>
+
+                        <div class="oe_structure"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================ FORM ============================ -->
+    <record id="view_installation_material_form" model="ir.ui.view">
+        <field name="name">sale.installation.material.form</field>
+        <field name="model">sale.installation.material</field>
+        <field name="arch" type="xml">
+            <form string="Control de Materiales de Instalación">
+                <header>
+                    <field name="can_reserve" invisible="1"/>
+                    <button name="action_reserve" type="object" string="Reservar stock"
+                            class="btn-primary" invisible="not can_reserve"
+                            groups="sale_installation_material_control.group_installation_responsible"/>
+                    <button name="action_open_withdrawal_wizard" type="object" string="Crear retiro"
+                            class="btn-primary" invisible="state not in ('reserved', 'in_progress')"
+                            groups="sale_installation_material_control.group_installation_responsible"/>
+                    <button name="action_open_return_wizard" type="object"
+                            string="Registrar devolución"
+                            invisible="state not in ('reserved', 'in_progress')"
+                            groups="sale_installation_material_control.group_installation_responsible"/>
+                    <button name="action_open_close_wizard" type="object"
+                            string="Cerrar consumo de materiales" class="btn-primary"
+                            invisible="state not in ('reserved', 'in_progress')"
+                            groups="sale_installation_material_control.group_installation_admin"/>
+                    <button name="action_reopen" type="object" string="Reabrir"
+                            invisible="state != 'done'"
+                            groups="sale_installation_material_control.group_installation_admin"/>
+                    <button name="action_cancel" type="object" string="Cancelar"
+                            invisible="state not in ('draft', 'reserved', 'in_progress')"
+                            groups="sale_installation_material_control.group_installation_admin"/>
+                    <button name="action_draft" type="object" string="Volver a borrador"
+                            invisible="state != 'cancel'"
+                            groups="sale_installation_material_control.group_installation_admin"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,reserved,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_pickings" type="object" class="oe_stat_button"
+                                icon="fa-truck">
+                            <field name="picking_count" widget="statinfo" string="Movimientos"/>
+                        </button>
+                        <button name="action_view_sale_order" type="object" class="oe_stat_button"
+                                icon="fa-dollar">
+                            <span class="o_stat_text">Venta</span>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="sale_order_id"/>
+                            <field name="partner_id"/>
+                            <field name="project_id"/>
+                            <field name="task_id"/>
+                        </group>
+                        <group>
+                            <field name="warehouse_id"/>
+                            <field name="responsible_user_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="date_start"/>
+                            <field name="date_done"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Materiales" name="materials">
+                            <field name="line_ids">
+                                <list create="false" delete="false" edit="false">
+                                    <field name="product_id"/>
+                                    <field name="original_qty" sum="Presupuestado"/>
+                                    <field name="reserved_qty" optional="hide"/>
+                                    <field name="withdrawn_qty" sum="Retirado"/>
+                                    <field name="returned_qty" sum="Devuelto"/>
+                                    <field name="in_installer_qty" sum="En poder" optional="show"/>
+                                    <field name="used_qty" sum="Usado"/>
+                                    <field name="pending_qty" sum="Pendiente"/>
+                                    <field name="released_qty" sum="Liberado" optional="hide"/>
+                                    <field name="product_uom_id" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Observaciones" name="notes">
+                            <field name="notes" placeholder="Notas internas del control..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================ LIST ============================ -->
+    <record id="view_installation_material_list" model="ir.ui.view">
+        <field name="name">sale.installation.material.list</field>
+        <field name="model">sale.installation.material</field>
+        <field name="arch" type="xml">
+            <list string="Controles de Materiales"
+                  decoration-muted="state == 'cancel'"
+                  decoration-success="state == 'done'"
+                  decoration-info="state == 'in_progress'">
+                <field name="name"/>
+                <field name="sale_order_id"/>
+                <field name="partner_id"/>
+                <field name="project_id" optional="show"/>
+                <field name="warehouse_id" optional="hide"/>
+                <field name="responsible_user_id" optional="show"/>
+                <field name="original_qty_total" optional="show"/>
+                <field name="used_qty_total" optional="show"/>
+                <field name="pending_qty_total" optional="show"/>
+                <field name="in_installer_qty_total" optional="hide"/>
+                <field name="date_start" optional="hide"/>
+                <field name="date_done" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-info="state == 'in_progress'"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================ KANBAN ============================ -->
+    <record id="view_installation_material_kanban" model="ir.ui.view">
+        <field name="name">sale.installation.material.kanban</field>
+        <field name="model">sale.installation.material</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state">
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_title">
+                                <strong><field name="name"/></strong>
+                            </div>
+                            <div><field name="partner_id"/></div>
+                            <div class="text-muted"><field name="sale_order_id"/></div>
+                            <div>
+                                Usado <field name="used_qty_total"/> /
+                                <field name="original_qty_total"/>
+                            </div>
+                            <div>
+                                <field name="responsible_user_id" widget="many2one_avatar_user"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ============================ PIVOT ============================ -->
+    <record id="view_installation_material_pivot" model="ir.ui.view">
+        <field name="name">sale.installation.material.pivot</field>
+        <field name="model">sale.installation.material</field>
+        <field name="arch" type="xml">
+            <pivot string="Materiales de Instalación">
+                <field name="responsible_user_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="original_qty_total" type="measure"/>
+                <field name="used_qty_total" type="measure"/>
+                <field name="pending_qty_total" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ============================ SEARCH ============================ -->
+    <record id="view_installation_material_search" model="ir.ui.view">
+        <field name="name">sale.installation.material.search</field>
+        <field name="model">sale.installation.material</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="sale_order_id"/>
+                <field name="partner_id"/>
+                <field name="project_id"/>
+                <field name="responsible_user_id"/>
+                <filter name="filter_open" string="Abiertos"
+                        domain="[('state', 'in', ('draft', 'reserved', 'in_progress'))]"/>
+                <filter name="filter_in_progress" string="En progreso"
+                        domain="[('state', '=', 'in_progress')]"/>
+                <filter name="filter_done" string="Cerrados"
+                        domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter name="filter_with_installer" string="Con material en poder del instalador"
+                        domain="[('in_installer_qty_total', '>', 0)]"/>
+                <filter name="filter_pending_return" string="Pendientes de devolución"
+                        domain="[('in_installer_qty_total', '>', 0),
+                                 ('state', 'in', ('reserved', 'in_progress'))]"/>
+                <separator/>
+                <filter name="group_state" string="Estado" context="{'group_by': 'state'}"/>
+                <filter name="group_responsible" string="Responsable"
+                        context="{'group_by': 'responsible_user_id'}"/>
+                <filter name="group_partner" string="Cliente"
+                        context="{'group_by': 'partner_id'}"/>
+                <filter name="group_project" string="Proyecto"
+                        context="{'group_by': 'project_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============================ ACTION ============================ -->
+    <record id="action_installation_material" model="ir.actions.act_window">
+        <field name="name">Control de Materiales</field>
+        <field name="res_model">sale.installation.material</field>
+        <field name="view_mode">list,kanban,form,pivot</field>
+        <field name="search_view_id" ref="view_installation_material_search"/>
+        <field name="context">{'search_default_filter_open': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay controles de materiales de instalación todavía.
+            </p>
+            <p>Se crean automáticamente al confirmar una venta marcada como instalación.</p>
+        </field>
+    </record>
+
+</odoo>

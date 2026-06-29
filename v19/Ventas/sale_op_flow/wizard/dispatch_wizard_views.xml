@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_dispatch_wizard_form" model="ir.ui.view">
+        <field name="name">sale.dispatch.wizard.form</field>
+        <field name="model">sale.dispatch.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Confirmar despacho">
+                <sheet>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h4>
+                                <field name="sale_order_id" readonly="1"/> —
+                                <field name="partner_id" readonly="1"/>
+                            </h4>
+                        </div>
+                    </div>
+
+                    <!-- Sin pickings: orden de servicio -->
+                    <div class="alert alert-info py-2 mb-3" role="alert" invisible="has_lines">
+                        <strong>Orden de servicio.</strong>
+                        No requiere entrega física. Se marcará como despachado al confirmar.
+                    </div>
+
+                    <!-- Tabla de líneas -->
+                    <field name="line_ids" nolabel="1" invisible="not has_lines">
+                        <list editable="bottom" string="Productos a despachar">
+                            <field name="product_id" readonly="1"/>
+                            <field name="product_uom_id" readonly="1" string="Unidad"/>
+                            <field name="qty_ordered" readonly="1" string="Pendiente"/>
+                            <field name="qty_to_dispatch" string="A despachar ahora"/>
+                            <field name="move_id" column_invisible="1"/>
+                        </list>
+                    </field>
+
+                    <!-- Advertencia despacho parcial -->
+                    <div class="alert alert-warning py-2 mt-2" role="alert" invisible="not has_lines">
+                        Podés despachar una cantidad menor a la demanda.
+                        El sistema creará una entrega pendiente para el resto.
+                    </div>
+
+                    <!-- Modalidad de entrega -->
+                    <group string="Modalidad de entrega" col="1">
+                        <field name="delivery_mode" widget="radio" nolabel="1"/>
+                    </group>
+
+                    <!-- Campos de reparto -->
+                    <group string="Datos del reparto" invisible="delivery_mode != 'delivery'">
+                        <group>
+                            <field name="delivery_date" required="delivery_mode == 'delivery'"/>
+                            <field name="delivery_shift"/>
+                        </group>
+                    </group>
+
+                    <!-- Aviso reparto -->
+                    <div class="alert alert-info py-2" role="alert"
+                         invisible="delivery_mode != 'delivery'">
+                        El pedido quedará en estado <strong>En reparto</strong> hasta que
+                        confirmes la recepción del cliente con el botón
+                        <strong>Confirmar entrega</strong>.
+                    </div>
+
+                    <group string="Notas" col="1">
+                        <field name="notes" nolabel="1" placeholder="Observaciones de despacho (opcional)..."/>
+                    </group>
+
+                    <field name="has_lines" invisible="1"/>
+                </sheet>
+                <footer>
+                    <button name="action_confirm"
+                            string="Confirmar despacho"
+                            type="object"
+                            class="btn-success"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

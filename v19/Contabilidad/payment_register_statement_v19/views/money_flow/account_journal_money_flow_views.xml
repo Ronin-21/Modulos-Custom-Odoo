@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Compatibility view kept only to avoid orphan XML IDs from earlier releases. The active layout is in views/account_journal_view.xml. -->
+    <record id="view_account_journal_form_prs_money_flow" model="ir.ui.view">
+        <field name="name">account.journal.form.prs.money.flow.compat</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="view_account_journal_form_inherit_auto_extract"/>
+        <field name="active" eval="False"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='prs_payment_register_enabled']" position="attributes"><attribute name="help">Activa Payment Register.</attribute></xpath>
+        </field>
+    </record>
+</odoo>

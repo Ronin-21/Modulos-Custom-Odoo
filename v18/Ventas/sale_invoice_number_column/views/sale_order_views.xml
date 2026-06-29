@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!--
+        Herencia del listado principal de Órdenes de Venta (sale.view_order_tree).
+        Se agrega la columna "Facturación" antes de la columna estándar "invoice_status".
+        Ambas columnas son opcionales (optional="show" / optional="hide") para que el
+        usuario pueda mostrarlas u ocultarlas desde el selector de columnas de la vista lista.
+    -->
+    <record id="view_order_tree_invoice_number_column" model="ir.ui.view">
+        <field name="name">sale.order.list.invoice.number.column</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_status']" position="before">
+                <field name="invoice_number_display"
+                       string="Numeración"
+                       optional="show"/>
+                <field name="invoice_afip_auth_display"
+                       string="CAE / ARCA"
+                       optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--
+        Herencia de la vista de Cotizaciones (sale.view_quotation_tree) en Odoo 18.
+        Esta vista es la que se muestra en Ventas → Cotizaciones.
+        Se aplica la misma extensión para mantener consistencia.
+    -->
+    <record id="view_quotation_tree_invoice_number_column" model="ir.ui.view">
+        <field name="name">sale.quotation.list.invoice.number.column</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_status']" position="before">
+                <field name="invoice_number_display"
+                       string="Numeración"
+                       optional="show"/>
+                <field name="invoice_afip_auth_display"
+                       string="CAE / ARCA"
+                       optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

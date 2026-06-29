@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_prs_expense_payment_report_wizard_form" model="ir.ui.view">
+        <field name="name">prs.expense.payment.report.wizard.form</field>
+        <field name="model">prs.expense.payment.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reporte de Gastos / Compras">
+                <sheet>
+                    <group>
+                        <group string="Período">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group string="Opciones">
+                            <field name="group_by"/>
+                            <field name="prs_is_misc_expense"/>
+                            <field name="include_unposted"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Filtros">
+                            <field name="journal_ids" widget="many2many_tags"/>
+                            <field name="payment_method_line_ids" widget="many2many_tags"/>
+                            <field name="partner_ids" widget="many2many_tags"/>
+                            <field name="expense_concept_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+
+                    <footer>
+                        <button name="action_open_list" type="object" class="btn-primary" string="Ver listado (Excel)"/>
+                        <button name="action_print_pdf" type="object" class="btn-secondary" string="Imprimir PDF"/>
+                        <button string="Cancelar" class="btn-link" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_prs_expense_payment_report_wizard" model="ir.actions.act_window">
+        <field name="name">Reporte de Gastos / Compras</field>
+        <field name="res_model">prs.expense.payment.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

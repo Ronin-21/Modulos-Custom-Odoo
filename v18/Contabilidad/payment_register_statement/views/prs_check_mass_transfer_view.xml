@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_prs_check_mass_transfer_form_inherit" model="ir.ui.view">
+        <field name="name">l10n_latam.payment.mass.transfer.form.prs</field>
+        <field name="model">l10n_latam.payment.mass.transfer</field>
+        <field name="inherit_id" ref="l10n_latam_check.view_l10n_latam_payment_mass_transfer_form"/>
+        <field name="arch" type="xml">
+
+            <field name="company_id" position="after">
+                <field name="prs_is_cross_company" invisible="1"/>
+            </field>
+
+            <field name="destination_journal_id" position="replace">
+                <field name="destination_journal_id"
+                       options="{'no_open': True, 'no_create': True}"
+                       domain="[('type', 'in', ('bank', 'cash'))]"
+                       required="1"/>
+            </field>
+
+            <field name="destination_journal_id" position="after">
+                <div class="alert alert-warning mb-0 mt-2"
+                     invisible="not prs_is_cross_company">
+                    <i class="fa fa-exclamation-triangle me-1"/>
+                    <field name="prs_cross_company_warning" readonly="1"/>
+                </div>
+            </field>
+
+        </field>
+    </record>
+</odoo>

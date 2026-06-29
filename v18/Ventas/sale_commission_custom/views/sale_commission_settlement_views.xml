@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_commission_settlement_list" model="ir.ui.view">
+        <field name="name">sale.commission.settlement.list</field>
+        <field name="model">sale.commission.settlement</field>
+        <field name="arch" type="xml">
+            <list string="Liquidaciones"
+                  decoration-info="state == 'confirmed'"
+                  decoration-success="state == 'paid'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="salesperson_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="settlement_date"/>
+                <field name="payment_date"/>
+                <field name="line_count"/>
+                <field name="total_commission_amount"/>
+                <field name="state"/>
+                <field name="currency_id" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_commission_settlement_form" model="ir.ui.view">
+        <field name="name">sale.commission.settlement.form</field>
+        <field name="model">sale.commission.settlement</field>
+        <field name="arch" type="xml">
+            <form string="Liquidación de comisiones">
+                <header>
+                    <button name="action_load_commissions"
+                            string="Cargar comisiones"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_confirm"
+                            string="Confirmar"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_register_payment"
+                            string="Registrar pago"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'confirmed'"/>
+                    <button name="action_view_payment_move"
+                            string="Ver pago"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="not payment_move_id"/>
+                    <button name="action_reverse_payment"
+                            string="Revertir pago"
+                            type="object"
+                            class="btn-warning"
+                            invisible="state != 'paid'"/>
+                    <button name="action_cancel"
+                            string="Cancelar"
+                            type="object"
+                            class="btn-danger"
+                            invisible="state != 'draft'"
+                            confirm="¿Cancelar? Las comisiones volverán a estado Ganada."/>
+                    <button name="action_print_settlement"
+                            string="Imprimir liquidación"
+                            type="object"
+                            class="btn-secondary"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,paid"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <group>
+                        <group string="Datos principales">
+                            <field name="salesperson_id" readonly="state != 'draft'"/>
+                            <field name="date_from" readonly="state != 'draft'"/>
+                            <field name="date_to" readonly="state != 'draft'"/>
+                            <field name="settlement_date" readonly="state == 'paid'"/>
+                            <field name="payment_date" readonly="state != 'confirmed'"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
+                            <field name="start_date_applied" readonly="1"/>
+                        </group>
+
+                        <group string="Totales">
+                            <field name="line_count" readonly="1"/>
+                            <field name="total_base_amount" readonly="1"/>
+                            <field name="total_commission_amount" readonly="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Contabilidad">
+                            <field name="expense_account_id" readonly="state != 'draft'"/>
+                            <field name="payment_journal_id" readonly="state == 'paid'"/>
+                        </group>
+                        <group string="Trazabilidad contable">
+                            <field name="payment_move_id" readonly="1" invisible="not payment_move_id"/>
+                            <field name="payment_move_state" readonly="1" invisible="not payment_move_id"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Comisiones incluidas">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="sale_order_id"/>
+                                    <field name="move_id"/>
+                                    <field name="payment_date"/>
+                                    <field name="commission_base_amount" sum="Total base"/>
+                                    <field name="commission_percent"/>
+                                    <field name="commission_amount" sum="Total comisión"/>
+                                    <field name="state"/>
+                                    <field name="currency_id" column_invisible="True"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notas">
+                            <field name="notes" placeholder="Notas internas..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_commission_settlement_search" model="ir.ui.view">
+        <field name="name">sale.commission.settlement.search</field>
+        <field name="model">sale.commission.settlement</field>
+        <field name="arch" type="xml">
+            <search string="Buscar liquidaciones">
+                <field name="name"/>
+                <field name="salesperson_id"/>
+                <filter name="filter_draft" string="Borrador" domain="[('state', '=', 'draft')]"/>
+                <filter name="filter_confirmed" string="Confirmadas" domain="[('state', '=', 'confirmed')]"/>
+                <filter name="filter_paid" string="Pagadas" domain="[('state', '=', 'paid')]"/>
+                <filter name="filter_cancelled" string="Canceladas" domain="[('state', '=', 'cancelled')]"/>
+                <group expand="1" string="Agrupar por">
+                    <filter name="group_salesperson" string="Vendedor" context="{'group_by': 'salesperson_id'}"/>
+                    <filter name="group_state" string="Estado" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_commission_settlement" model="ir.actions.act_window">
+        <field name="name">Liquidaciones</field>
+        <field name="res_model">sale.commission.settlement</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

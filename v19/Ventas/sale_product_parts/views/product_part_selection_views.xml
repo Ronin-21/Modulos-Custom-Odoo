@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Vista lista de product.part para selección desde pedidos de venta.
+
+        COMPORTAMIENTO DE CHECKBOX EN ODOO 19:
+        - Con edit="0": clic en fila = abre formulario del modelo (incorrecto).
+          El checkbox solo funciona si el usuario hace clic exactamente en él.
+        - Sin edit="0" + todos los campos readonly="1": clic en fila = selecciona
+          la fila (marca el checkbox). El formulario no se abre porque no hay
+          nada editable que "activar". Este es el comportamiento correcto.
+
+        Por eso NO usamos edit="0". Todos los campos tienen readonly="1".
+        create="0" y delete="0" siguen evitando crear/borrar registros.
+    -->
+
+    <record id="product_part_list_view_selection" model="ir.ui.view">
+        <field name="name">product.part.list.selection</field>
+        <field name="model">product.part</field>
+        <field name="arch" type="xml">
+            <list string="Piezas / Repuestos"
+                  create="0"
+                  delete="0"
+                  default_order="sequence">
+
+                <!--
+                    Botón de cabecera: aparece al seleccionar al menos una fila.
+                    Llama a action_insert_in_order con los registros seleccionados.
+                -->
+                <header>
+                    <button name="action_insert_in_order"
+                            type="object"
+                            string="Insertar en pedido"
+                            class="btn-primary"/>
+                </header>
+
+                <field name="sequence" readonly="1" column_invisible="1"/>
+
+                <field name="part_product_id"
+                       string="Pieza / Repuesto"
+                       readonly="1"
+                       options="{'no_open': True}"/>
+
+                <field name="quantity"
+                       string="Cant. sugerida"
+                       readonly="1"/>
+
+                <field name="uom_id"
+                       string="Unidad"
+                       readonly="1"
+                       optional="show"/>
+
+                <field name="qty_available"
+                       string="En stock"
+                       readonly="1"
+                       optional="show"/>
+
+                <field name="note"
+                       string="Nota"
+                       readonly="1"
+                       optional="show"/>
+
+                <!--
+                    Pre-seleccionada: indicador visual de piezas "habituales".
+                    Verde = pieza que normalmente se vende con este producto.
+                    Sirve como guía rápida para el vendedor.
+                    Se puede filtrar por este campo con el filtro "Pre-seleccionadas".
+                -->
+                <field name="auto_load"
+                       string="Habitual"
+                       widget="boolean_toggle"
+                       readonly="1"
+                       optional="show"/>
+
+                <!--
+                    Botón ⓘ: abre el wizard informativo con stock y ubicaciones.
+                    No abre el formulario del producto (no tiene acceso de edición).
+                -->
+                <button name="action_view_part_info"
+                        type="object"
+                        icon="fa-info-circle"
+                        title="Ver stock, precios y ubicaciones de esta pieza"/>
+
+            </list>
+        </field>
+    </record>
+
+    <!-- BUSCADOR NATIVO -->
+    <record id="product_part_search_view_selection" model="ir.ui.view">
+        <field name="name">product.part.search.selection</field>
+        <field name="model">product.part</field>
+        <field name="arch" type="xml">
+            <search string="Buscar piezas y repuestos">
+
+                <field name="part_product_id" string="Pieza / Repuesto"/>
+                <field name="note" string="Nota"/>
+
+                <!--
+                    Filtro "Habituales": muestra solo las piezas con auto_load=True,
+                    es decir las que el vendedor marcó como "habituales" del producto.
+                    Útil para ver rápido las piezas más comunes sin scroll.
+                -->
+                <filter name="filter_auto_load"
+                        string="Habituales"
+                        domain="[('auto_load', '=', True)]"/>
+
+                <group>
+                    <filter name="group_uom"
+                            string="Unidad de medida"
+                            context="{'group_by': 'uom_id'}"/>
+                </group>
+
+            </search>
+        </field>
+    </record>
+
+</odoo>

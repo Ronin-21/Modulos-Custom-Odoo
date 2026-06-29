@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- PIVOT -->
+    <record id="view_sof_sale_report_pivot" model="ir.ui.view">
+        <field name="name">sof.sale.report.pivot</field>
+        <field name="model">sof.sale.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Análisis de Ventas" sample="1">
+                <field name="user_id" type="row"/>
+                <field name="price_subtotal" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- GRAPH -->
+    <record id="view_sof_sale_report_graph" model="ir.ui.view">
+        <field name="name">sof.sale.report.graph</field>
+        <field name="model">sof.sale.report</field>
+        <field name="arch" type="xml">
+            <graph string="Análisis de Ventas" type="bar" sample="1">
+                <field name="user_id"/>
+                <field name="price_subtotal" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- LIST -->
+    <record id="view_sof_sale_report_list" model="ir.ui.view">
+        <field name="name">sof.sale.report.list</field>
+        <field name="model">sof.sale.report</field>
+        <field name="arch" type="xml">
+            <list string="Ventas" create="0">
+                <field name="date"/>
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="categ_id" optional="hide"/>
+                <field name="user_id" optional="show"/>
+                <field name="financing_plan_id" optional="hide"/>
+                <field name="final_payment_journal_id" optional="hide"/>
+                <field name="operational_state" widget="badge" optional="show"/>
+                <field name="product_uom_qty" sum="Cantidad"/>
+                <field name="price_subtotal" sum="Total sin IVA"/>
+                <field name="price_total" sum="Total con IVA" optional="hide"/>
+                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="view_sof_sale_report_search" model="ir.ui.view">
+        <field name="name">sof.sale.report.search</field>
+        <field name="model">sof.sale.report</field>
+        <field name="arch" type="xml">
+            <search string="Análisis de Ventas">
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="user_id"/>
+                <field name="categ_id"/>
+                <separator/>
+                <filter string="Confirmadas en adelante" name="f_confirmed"
+                        domain="[('operational_state', '!=', 'quotation')]"/>
+                <filter string="Pagadas" name="f_paid"
+                        domain="[('operational_state', 'in', ['paid', 'in_delivery', 'dispatched'])]"/>
+                <filter string="Presupuestos" name="f_quotation"
+                        domain="[('operational_state', '=', 'quotation')]"/>
+                <separator/>
+                <filter string="Hoy" name="f_today"
+                        domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Este mes" name="f_month"
+                        domain="[('date', '&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <group>
+                    <filter string="Vendedor" name="g_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Sucursal" name="g_company" context="{'group_by': 'company_id'}"
+                            groups="base.group_multi_company"/>
+                    <filter string="Producto" name="g_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Categoría" name="g_categ" context="{'group_by': 'categ_id'}"/>
+                    <filter string="Cliente" name="g_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Plan de pago" name="g_plan" context="{'group_by': 'financing_plan_id'}"/>
+                    <filter string="Medio de cobro" name="g_journal" context="{'group_by': 'final_payment_journal_id'}"/>
+                    <filter string="Estado" name="g_state" context="{'group_by': 'operational_state'}"/>
+                    <filter string="Fecha" name="g_date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_sof_sale_report" model="ir.actions.act_window">
+        <field name="name">Ventas (por vendedor / sucursal / producto)</field>
+        <field name="res_model">sof.sale.report</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_sof_sale_report_search"/>
+        <field name="context">{'search_default_f_confirmed': 1, 'search_default_g_user': 1, 'search_default_f_month': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin ventas en el período</p>
+            <p>Análisis de ventas por vendedor, sucursal, producto, categoría y cliente.</p>
+        </field>
+    </record>
+
+</odoo>

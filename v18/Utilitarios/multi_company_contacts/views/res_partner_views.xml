@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- FORM: agregar Empresas permitidas, Uso comercial y ocultar company_id -->
+    <record id="view_res_partner_form_allowed_companies" model="ir.ui.view">
+        <field name="name">res.partner.form.allowed.companies</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="priority" eval="999990"/>
+        <field name="arch" type="xml">
+
+            <!-- Refuerzo visual: ocultar company_id aunque otro módulo lo inserte. -->
+            <xpath expr="//sheet" position="inside">
+                <style>
+                    label[for="company_id"],
+                    [name="company_id"],
+                    .o_field_widget[name="company_id"],
+                    [data-name="company_id"] {
+                        display: none !important;
+                    }
+                </style>
+            </xpath>
+
+
+            <!-- Insertar campo después de etiquetas/categorías -->
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="allowed_company_ids"
+                       widget="many2many_tags"
+                       options="{'no_create': True}"
+                       required="1"
+                       string="Empresas permitidas"/>
+                <field name="mcc_current_user_can_manage_usage" invisible="1"/>
+
+                <div class="alert alert-warning mt-2"
+                     invisible="allowed_company_ids">
+                    Este contacto no tiene "Empresas permitidas" asignadas.
+                    Al guardar se exigirá completar el campo.
+                </div>
+            </xpath>
+
+            <xpath expr="//sheet" position="inside">
+                <group string="Uso comercial" invisible="not mcc_current_user_can_manage_usage">
+                    <group>
+                        <field name="mcc_contact_usage_type"/>
+                        <field name="mcc_hide_business_operations"/>
+                        <field name="mcc_is_system_contact" readonly="1"/>
+                        <field name="mcc_effective_hide_business_operations" readonly="1"/>
+                    </group>
+                    <group string="Disponible para">
+                        <field name="mcc_available_pos" readonly="mcc_hide_business_operations"/>
+                        <field name="mcc_available_sale" readonly="mcc_hide_business_operations"/>
+                        <field name="mcc_available_purchase" readonly="mcc_hide_business_operations"/>
+                        <field name="mcc_available_accounting" readonly="mcc_hide_business_operations"/>
+                    </group>
+                    <div class="alert alert-warning" colspan="2" invisible="not mcc_hide_business_operations">
+                        Bloqueo general activo: este contacto no puede usarse en POS, Ventas, Compras ni Contabilidad.
+                        Los checks de disponibilidad quedan apagados y no son editables mientras el bloqueo esté activo.
+                    </div>
+                    <div class="alert alert-info" colspan="2" invisible="not mcc_effective_hide_business_operations or mcc_hide_business_operations">
+                        Este contacto no tiene disponibilidad comercial activa según sus checks.
+                        La restricción aplica para todos los usuarios, incluidos administradores.
+                    </div>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- LISTA: Odoo 18 usa <list>. -->
+    <record id="view_res_partner_tree_allowed_companies" model="ir.ui.view">
+        <field name="name">res.partner.tree.allowed.companies</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="priority" eval="999990"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <field name="allowed_company_ids" widget="many2many_tags" optional="show"/>
+                <field name="mcc_contact_usage_type" optional="hide" groups="base.group_system"/>
+                <field name="mcc_effective_hide_business_operations" optional="hide" groups="base.group_system"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- BUSQUEDA: filtros útiles para administración -->
+    <record id="view_res_partner_filter_mcc_business_usage" model="ir.ui.view">
+        <field name="name">res.partner.search.mcc.business.usage</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="priority" eval="999990"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator groups="base.group_system"/>
+                <filter string="Tipo: Comercial" name="mcc_filter_type_commercial" domain="[('mcc_contact_usage_type','=','commercial')]" groups="base.group_system"/>
+                <filter string="Tipo: Empresa/Sucursal" name="mcc_filter_type_company_branch" domain="[('mcc_contact_usage_type','=','company_branch')]" groups="base.group_system"/>
+                <filter string="Tipo: Usuario" name="mcc_filter_type_system_user" domain="[('mcc_contact_usage_type','=','system_user')]" groups="base.group_system"/>
+                <filter string="Tipo: Administrador" name="mcc_filter_type_system_admin" domain="[('mcc_contact_usage_type','=','system_admin')]" groups="base.group_system"/>
+                <separator groups="base.group_system"/>
+                <filter string="Contactos comerciales" name="mcc_filter_commercial_contacts" domain="[('mcc_effective_hide_business_operations','=',False)]" groups="base.group_system"/>
+                <filter string="Contactos internos/sistema" name="mcc_filter_system_contacts" domain="[('mcc_effective_hide_business_operations','=',True)]" groups="base.group_system"/>
+                <filter string="Disponibles POS" name="mcc_filter_pos_available" domain="[('mcc_effective_pos_available','=',True)]" groups="base.group_system"/>
+                <filter string="Disponibles Ventas" name="mcc_filter_sale_available" domain="[('mcc_effective_sale_available','=',True)]" groups="base.group_system"/>
+                <filter string="Disponibles Compras" name="mcc_filter_purchase_available" domain="[('mcc_effective_purchase_available','=',True)]" groups="base.group_system"/>
+                <filter string="Disponibles Contabilidad" name="mcc_filter_accounting_available" domain="[('mcc_effective_accounting_available','=',True)]" groups="base.group_system"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

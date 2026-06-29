@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="dispatch_stage_confirmed" model="sale.dispatch.stage">
+            <field name="name">Por Preparar</field>
+            <field name="sequence">10</field>
+            <field name="code">confirmed</field>
+            <field name="color">3</field>
+        </record>
+
+        <record id="dispatch_stage_prepared" model="sale.dispatch.stage">
+            <field name="name">Preparados</field>
+            <field name="sequence">20</field>
+            <field name="code">prepared</field>
+            <field name="color">4</field>
+        </record>
+
+        <record id="dispatch_stage_paid" model="sale.dispatch.stage">
+            <field name="name">Listos para Entregar</field>
+            <field name="sequence">30</field>
+            <field name="code">paid</field>
+            <field name="color">10</field>
+        </record>
+
+        <record id="dispatch_stage_dispatched" model="sale.dispatch.stage">
+            <field name="name">Entregas del Día</field>
+            <field name="sequence">40</field>
+            <field name="code">dispatched</field>
+            <field name="color">5</field>
+        </record>
+
+    </data>
+</odoo>

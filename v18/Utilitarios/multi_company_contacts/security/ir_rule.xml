@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="rule_res_partner_allowed_companies" model="ir.rule">
+        <field name="name">Contactos: Empresas permitidas</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="global" eval="True"/>
+        <!--
+            Los contactos internos/del sistema se mantienen legibles para todas las empresas
+            para no romper procesos técnicos de Odoo. Su uso comercial se bloquea por dominios
+            y validaciones en POS, Ventas, Compras y Contabilidad.
+        -->
+        <field name="domain_force">['|','|', ('mcc_is_system_contact','=',True), ('allowed_company_ids','=',False), ('allowed_company_ids','in', company_ids)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+</odoo>

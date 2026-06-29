@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_account_payment_search_prs_misc_expense_concept" model="ir.ui.view">
+        <field name="name">account.payment.search.prs.misc.expense.concept</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_search"/>
+        <field name="arch" type="xml">
+            <!-- Filter: Gastos Varios -->
+            <xpath expr="//search" position="inside">
+                <filter string="Gastos Varios" name="prs_misc_expense" domain="[('prs_is_misc_expense', '=', True)]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Conceptos de Gastos" name="group_prs_expense_concept" context="{'group_by': 'prs_expense_concept_id'}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

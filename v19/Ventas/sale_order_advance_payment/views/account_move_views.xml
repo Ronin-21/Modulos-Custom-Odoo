@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- =====================================================
+         HERENCIA: Formulario de Factura (account.move)
+         Agrega pestaña informativa del pago adelantado aplicado
+         ===================================================== -->
+
+    <record id="view_account_move_form_advance_payment_inherit" model="ir.ui.view">
+        <field name="name">account.move.form.advance.payment.inherit</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Campos ocultos necesarios para condiciones -->
+            <xpath expr="//notebook" position="before">
+                <field name="sale_advance_payment_id" invisible="1"/>
+                <field name="sale_advance_payment_amount" invisible="1"/>
+                <field name="sale_advance_payment_origin" invisible="1"/>
+                <field name="sale_advance_payment_note" invisible="1"/>
+            </xpath>
+
+            <!-- Pestaña "Pago Adelantado" en el notebook -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Pago Adelantado"
+                      name="advance_payment_tab"
+                      invisible="not sale_advance_payment_id">
+                    <group>
+                        <group string="Pago Adelantado Aplicado">
+                            <field name="sale_advance_payment_id"
+                                   string="Referencia"
+                                   readonly="1"
+                                   options="{'no_create': True, 'no_open': False}"/>
+                            <field name="sale_advance_payment_amount"
+                                   string="Importe aplicado"
+                                   readonly="1"
+                                   widget="monetary"/>
+                            <field name="amount_residual"
+                                   string="Saldo pendiente de la factura"
+                                   readonly="1"
+                                   widget="monetary"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_payment_form_ar_withholding_usability" model="ir.ui.view">
+        <field name="name">account.payment.form.ar.withholding.usability</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="l10n_ar_withholding.view_account_payment_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Botón de recibo resumido — visible en todos los pagos registrados -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_print_multi_payment_summary_receipt"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-print"
+                        invisible="state in ('draft', 'canceled', 'rejected')"
+                        string="Recibo resumido"/>
+            </xpath>
+
+            <!-- Resumen de retenciones en pago simple -->
+            <xpath expr="//sheet//group" position="inside">
+                <group string="Resumen de retenciones"
+                       invisible="country_code != 'AR' or not l10n_ar_withholding_ids">
+                    <field name="x_ar_document_total_amount" readonly="1"/>
+                    <field name="x_ar_withholding_total" readonly="1"/>
+                    <field name="x_ar_payment_instrument_amount" readonly="1"/>
+                </group>
+            </xpath>
+
+            <!-- Referencia al asiento de retención del multi-pago -->
+            <xpath expr="//sheet//group" position="inside">
+                <group string="Retención asociada"
+                       invisible="not x_ar_withholding_move_id">
+                    <field name="x_ar_withholding_move_id"
+                           readonly="1"
+                           string="Asiento de retención"
+                           help="Asiento misceláneo generado con las retenciones de esta operación. Solo referencial."/>
+                </group>
+            </xpath>
+
+            <!-- Ocultar pestaña original de retenciones cuando viene de multi-pago -->
+            <xpath expr="//page[@name='withholdings_page']" position="attributes">
+                <attribute name="invisible">x_ar_withholding_move_id != False</attribute>
+            </xpath>
+
+            <!-- Pestaña de retenciones del multi-pago: mismas columnas que el original -->
+            <xpath expr="//page[@name='withholdings_page']" position="after">
+                <page string="Retenciones"
+                      invisible="not x_ar_withholding_move_id">
+                    <field name="x_ar_withholding_line_ids" readonly="1" nolabel="1" colspan="2">
+                        <list>
+                            <field name="move_name" column_invisible="True"/>
+                            <field name="tax_line_id" string="Impuesto"/>
+                            <field name="name" string="Número de retención"/>
+                            <field name="tax_base_amount" string="Importe base"/>
+                            <field name="amount_currency" string="Cantidad" sum="Total"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

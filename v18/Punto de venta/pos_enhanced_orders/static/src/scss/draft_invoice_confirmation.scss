@@ -1,0 +1,171 @@
+.o_form_view .o_pos_draft_invoice_confirmation_wizard {
+    .o_pos_draft_invoice_summary {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(16rem, max-content));
+        gap: 0.25rem 3rem;
+        margin-bottom: 1rem;
+        align-items: start;
+        width: fit-content;
+        max-width: 100%;
+    }
+
+    .o_pos_draft_invoice_summary_col {
+        min-width: 0;
+    }
+
+    .o_pos_draft_invoice_summary_item {
+        display: grid;
+        grid-template-columns: 7rem auto;
+        align-items: center;
+        column-gap: 0.75rem;
+        margin-bottom: 0.45rem;
+        min-width: 0;
+    }
+
+    .o_pos_draft_invoice_summary_label {
+        min-width: 0;
+        font-weight: 500;
+        color: var(--o-gray-700, #5c5f66);
+    }
+
+    .o_pos_draft_invoice_summary_item .o_field_widget,
+    .o_pos_draft_invoice_summary_item .o_field_char,
+    .o_pos_draft_invoice_summary_item .o_field_integer {
+        margin: 0;
+    }
+}
+
+.o_pos_draft_invoice_confirmation_table_wrap {
+    width: 100%;
+    overflow-x: auto;
+
+    .o_list_renderer,
+    .o_list_table,
+    table {
+        width: 100% !important;
+        table-layout: fixed !important;
+    }
+
+    th,
+    td,
+    .o_data_cell {
+        vertical-align: middle !important;
+    }
+
+    th[data-name="emit_state"],
+    td[data-name="emit_state"] {
+        width: 10% !important;
+        white-space: nowrap;
+    }
+
+    th[data-name="order_name"],
+    td[data-name="order_name"] {
+        width: 11% !important;
+        white-space: nowrap;
+    }
+
+    th[data-name="invoice_name"],
+    td[data-name="invoice_name"] {
+        width: 31% !important;
+    }
+
+    th[data-name="amount_total"],
+    td[data-name="amount_total"] {
+        width: 10% !important;
+        white-space: nowrap;
+    }
+
+    th[data-name="invoice_state_label"],
+    td[data-name="invoice_state_label"] {
+        width: 10% !important;
+        white-space: nowrap;
+    }
+
+    th[data-name="cae_display"],
+    td[data-name="cae_display"] {
+        width: 10% !important;
+        white-space: nowrap;
+    }
+
+    th[data-name="message_display"],
+    td[data-name="message_display"] {
+        width: 11% !important;
+        white-space: nowrap;
+    }
+
+    th[data-name="action_display"],
+    td[data-name="action_display"] {
+        width: 17% !important;
+        white-space: nowrap;
+        padding-right: 0.5rem !important;
+        text-align: right;
+    }
+
+    td[data-name="order_name"] .o_field_widget,
+    td[data-name="invoice_name"] .o_field_widget,
+    .o_pos_draft_invoice_message_text {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    td[data-name="message_display"] .o_field_widget {
+        display: inline-flex;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .o_pos_draft_invoice_message_btn {
+        padding: 0 !important;
+        white-space: nowrap;
+    }
+
+    td[data-name="action_display"] .o_field_widget {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: flex-end;
+        width: 100%;
+        overflow: visible !important;
+    }
+
+    .o_pos_draft_invoice_actions {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: flex-end;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 0.3rem;
+        width: auto;
+        max-width: 100%;
+    }
+
+    .o_pos_draft_invoice_action_btn {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        margin: 0 !important;
+        white-space: nowrap;
+        line-height: 1.2 !important;
+        min-height: auto !important;
+        padding: 0.15rem 0.45rem !important;
+    }
+
+    .o_pos_draft_invoice_action_btn.btn-link {
+        padding: 0 !important;
+    }
+
+    .o_pos_draft_invoice_action_btn_delete {
+        min-width: 1.6rem;
+        padding-left: 0.35rem !important;
+        padding-right: 0.35rem !important;
+    }
+
+    .o_pos_draft_invoice_action_close {
+        display: inline-block;
+        line-height: 1;
+        font-weight: 700;
+    }
+}

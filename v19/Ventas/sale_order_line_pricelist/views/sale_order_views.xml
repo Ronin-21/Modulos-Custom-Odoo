@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Agrega el campo "Lista de Precio de Línea" en la grilla editable de líneas de venta.
+         Se ubica después del campo "name" (descripción) y antes de la cantidad,
+         con optional="hide" para no ocupar espacio salvo que el usuario lo active. -->
+    <record id="view_order_form_inherit_line_pricelist" model="ir.ui.view">
+        <field name="name">sale.order.form.line.pricelist</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='order_line']/list/field[@name='name']" position="after">
+                <field
+                    name="line_pricelist_id"
+                    string="LP Línea"
+                    optional="show"
+                    options="{'no_create': True, 'no_open': True}"
+                    invisible="display_type"
+                />
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

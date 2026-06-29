@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="prs_card_assign_wizard_form" model="ir.ui.view">
+        <field name="name">prs.card.assign.wizard.form</field>
+        <field name="model">prs.card.assign.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Asignar tarjetas al procesador">
+                <field name="provider_id" invisible="1"/>
+                <group>
+                    <field name="card_ids"
+                           nolabel="1"
+                           domain="[('provider_id', '=', False)]"
+                           options="{'no_create': True}"
+                           help="Solo se muestran tarjetas que aún no tienen procesador asignado.">
+                        <list>
+                            <field name="name"/>
+                            <field name="settlement_delay_days" string="Días acred."/>
+                            <field name="settlement_journal_id" string="Diario acred." optional="show"/>
+                            <field name="fee_percent" string="Comisión %"/>
+                        </list>
+                    </field>
+                </group>
+                <footer>
+                    <button name="action_assign" type="object" string="Asignar al procesador" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-default" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

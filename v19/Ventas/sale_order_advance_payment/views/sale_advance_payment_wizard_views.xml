@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- =====================================================
+         VISTA: Wizard de Registro de Pago Adelantado
+         ===================================================== -->
+
+    <record id="view_sale_advance_payment_wizard_form" model="ir.ui.view">
+        <field name="name">sale.advance.payment.wizard.form</field>
+        <field name="model">sale.advance.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Registrar Pago Adelantado">
+                <sheet>
+                    <!-- Campos técnicos ocultos -->
+                    <field name="checks_available" invisible="1"/>
+                    <field name="single_is_check" invisible="1"/>
+                    <field name="multi_has_check" invisible="1"/>
+                    <field name="show_checks_tab" invisible="1"/>
+                    <field name="allowed_journal_ids" invisible="1"/>
+                    <field name="require_reference" invisible="1"/>
+
+                    <!-- Información de la orden (solo lectura) -->
+                    <group string="Orden de Venta">
+                        <group>
+                            <field name="sale_order_id" readonly="1"/>
+                            <field name="partner_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="company_id" readonly="1"
+                                   groups="base.group_multi_company"/>
+                            <field name="currency_id" readonly="1"/>
+                            <field name="sale_order_amount_total" readonly="1"
+                                   string="Total de la Orden"/>
+                        </group>
+                    </group>
+
+                    <separator string="Datos del Pago"/>
+
+                    <group>
+                        <group>
+                            <field name="payment_mode" widget="radio" options="{'horizontal': True}"/>
+                            <field name="payment_date"/>
+                        </group>
+                    </group>
+
+                    <!-- ── Modo único ── -->
+                    <group invisible="payment_mode != 'single'">
+                        <group>
+                            <field name="amount"
+                                   readonly="single_is_check"
+                                   help="Importe recibido. No puede superar el total de la orden. Con cheque, lo determinan los cheques cargados."/>
+                        </group>
+                        <group>
+                            <field name="journal_id"
+                                   required="payment_mode == 'single'"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="payment_method_line_id"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+                    </group>
+
+                    <!-- ── Modo múltiple ── -->
+                    <div invisible="payment_mode != 'multi'">
+                        <field name="line_ids">
+                            <list editable="bottom">
+                                <field name="company_id" column_invisible="1"/>
+                                <field name="currency_id" column_invisible="1"/>
+                                <field name="allowed_journal_ids" column_invisible="1"/>
+                                <field name="journal_id"
+                                       options="{'no_create': True, 'no_open': True}"/>
+                                <field name="payment_method_line_id"
+                                       options="{'no_create': True, 'no_open': True}"/>
+                                <field name="is_check" column_invisible="1"/>
+                                <field name="amount" sum="Total"/>
+                                <field name="communication"/>
+                            </list>
+                        </field>
+                        <group class="oe_subtotal_footer">
+                            <field name="multi_total"/>
+                            <field name="multi_difference"/>
+                        </group>
+                    </div>
+
+                    <group>
+                        <field name="reference"
+                               required="require_reference"
+                               placeholder="Número de comprobante, transferencia, etc."/>
+                    </group>
+                    <group>
+                        <field name="note" placeholder="Notas internas opcionales..." nolabel="1"/>
+                    </group>
+
+                    <!-- ── Pestaña Cheques ── -->
+                    <notebook invisible="not show_checks_tab">
+                        <page string="Cheques" name="checks_page">
+                            <field name="check_ids">
+                                <list editable="bottom">
+                                    <field name="company_id" column_invisible="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="name" string="Número"/>
+                                    <field name="bank_id"/>
+                                    <field name="issuer_vat" string="CUIT Emisor"/>
+                                    <field name="payment_date"/>
+                                    <field name="amount" sum="Total"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer">
+                                <field name="check_total"/>
+                            </group>
+                        </page>
+                    </notebook>
+
+                    <!-- Aviso informativo -->
+                    <div class="alert alert-info" role="alert">
+                        <p class="mb-0">
+                            <strong>Nota:</strong>
+                            Al confirmar, se creará el/los pago(s) contable(s) y se publicará(n) automáticamente.
+                            El pago quedará pendiente de aplicar hasta que se emita la primera factura
+                            desde esta orden.
+                        </p>
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_confirm" type="object"
+                            string="Registrar Pago Adelantado"
+                            class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para abrir el wizard -->
+    <record id="action_sale_advance_payment_wizard" model="ir.actions.act_window">
+        <field name="name">Registrar Pago Adelantado</field>
+        <field name="res_model">sale.advance.payment.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

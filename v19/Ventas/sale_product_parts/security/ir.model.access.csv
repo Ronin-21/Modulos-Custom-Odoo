@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_product_part_salesman,product.part.salesman,model_product_part,sales_team.group_sale_salesman,1,0,0,0
+access_product_part_manager,product.part.manager,model_product_part,sales_team.group_sale_manager,1,1,1,1
+access_product_part_product_manager,product.part.product.manager,model_product_part,product.group_product_manager,1,1,1,1
+access_sale_product_part_wizard_user,sale.product.part.wizard.user,model_sale_product_part_wizard,base.group_user,1,1,1,1
+access_sale_product_part_wizard_line_user,sale.product.part.wizard.line.user,model_sale_product_part_wizard_line,base.group_user,1,1,1,1
+access_product_part_info_wizard_user,product.part.info.wizard.user,model_product_part_info_wizard,base.group_user,1,1,1,1

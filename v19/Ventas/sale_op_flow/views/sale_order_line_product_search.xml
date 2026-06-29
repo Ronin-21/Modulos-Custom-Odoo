@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Limitar búsqueda de productos en líneas de pedido a 3 resultados -->
+    <record id="view_sale_order_form_product_search_limit" model="ir.ui.view">
+        <field name="name">sale.order.form.product.search.limit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_id'][@widget='many2one_barcode']" position="attributes">
+                <attribute name="context">{'default_uom_id': product_uom_id, 'partner_id': parent.partner_id, 'sale_product_search_limit': 3}</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

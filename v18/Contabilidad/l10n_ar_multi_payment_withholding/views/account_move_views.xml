@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_move_form_ar_withholding_usability" model="ir.ui.view">
+        <field name="name">account.move.form.ar.withholding.usability</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Smart button: pagos relacionados (solo visible en asientos de retención) -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_withholding_payments"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-money"
+                        invisible="not x_ar_is_withholding_move">
+                    <field name="x_ar_withholding_payment_count"
+                           widget="statinfo"
+                           string="Pagos"/>
+                </button>
+            </xpath>
+
+            <!-- Banner informativo en asientos de retención -->
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-info d-flex align-items-center gap-2"
+                     invisible="not x_ar_is_withholding_move"
+                     role="status">
+                    <i class="fa fa-info-circle"/>
+                    <span>
+                        Este es un asiento de retención generado automáticamente.
+                        Revertirlo no afecta los pagos relacionados — hacelo solo si la retención fue emitida por error.
+                    </span>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

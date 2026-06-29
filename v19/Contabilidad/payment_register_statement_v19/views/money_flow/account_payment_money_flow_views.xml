@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_payment_form_prs_money_flow" model="ir.ui.view">
+        <field name="name">account.payment.form.prs.money.flow</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <field name="prs_money_flow_ids" invisible="1"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_open_prs_money_flows" type="object" class="oe_stat_button" icon="fa-calendar" invisible="prs_money_flow_count == 0">
+                    <field name="prs_money_flow_count" widget="statinfo" string="Flujos"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

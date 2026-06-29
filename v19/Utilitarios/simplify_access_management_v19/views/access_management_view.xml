@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="access_management_form_view_ah" model="ir.ui.view">
+            <field name="name">access_management_form_view_ah</field>
+            <field name="group_ids" eval="[(4, ref('group_access_management_bits'))]"/>
+            <field name="model">access.management</field>
+            <field name="arch" type="xml">
+                <form context="{'buypass_access':True}">
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <field name="active" invisible="1"/>
+                            <button invisible="active == False" class="oe_stat_button"
+                                    name="toggle_active_value" type="object" icon="fa-stop">
+                                <div class="o_stat_info o_form_field">
+                                    <span style="font-weight: bold;" class="text-danger">Desactivar regla</span>
+                                </div>
+                            </button>
+                            <button invisible="active == True" class="oe_stat_button"
+                                    name="toggle_active_value" type="object" icon="fa-play">
+                                <div class="o_stat_info o_form_field">
+                                    <span style="font-weight: bold;" class="text-success">Activar regla</span>
+                                </div>
+                            </button>
+                            <button name="action_show_rules" type="object" class="oe_stat_button" icon="fa-list-ul">
+                                <div class="o_stat_info">
+                                    <field name="total_rules" class="o_stat_value"/>
+                                    <span class="o_stat_text">Reglas de acceso</span>
+                                </div>
+                            </button>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="name" default_focus="1" required='1'/>
+                                <field name="readonly"/>
+                                <field name="is_apply_on_without_company"/>
+                                <field name="company_ids" options="{'no_create': True}" widget="many2many_tags"
+                                       groups="base.group_multi_company" invisible="is_apply_on_without_company != False"/>
+                                <field name="total_rules" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="user_ids" widget='many2many_tags' options="{'no_create': True}"/>
+                                <field name="disable_debug_mode"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="create_uid"/>
+                                <field name="write_uid"/>
+                            </group>
+                            <group>
+                                <field name="create_date"/>
+                                <field name="write_date"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string='Ocultar menú'>
+                                <field name="self_module_menu_ids" widget="many2many_tags" invisible="1"/>
+                                <field name='hide_menu_ids' domain="[('menu_id','not in',self_module_menu_ids)]"/>
+                                <p role="alert"
+                                   class="fa fa-info-circle  alert alert-info alert-dismissible rounded-0 fade show d-print-none css_editable_mode_hidden"
+                                   style="font-size: 15px;letter-spacing: 1px;">El menú o submenú agregado en la lista anterior
+                                    se ocultará para los usuarios definidos.
+                                    <br/>
+                                    <br/>
+                                    Más información:
+                                    <a href="https://www.terabits.xyz/simplify_access_management#bt-pills-menu"
+                                       target="_blank" alt="Permisos de menú">
+                                        https://www.terabits.xyz/simplify_access_management#bt-pills-menu
+                                    </a>
+                                </p>
+                            </page>
+                            <page string='Acceso al modelo'>
+                                <field name='remove_action_ids'>
+                                    <list editable='bottom'>
+                                        <field name="model_id" context="{'is_access_rights': True}"
+                                               options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"
+                                               width='13' required='1'
+                                               domain="[('model','not in',['access.management', 'access.domain.ah', 'action.data', 'hide.field', 'hide.view.nodes', 'store.model.nodes', 'remove.action', 'view.data'])]"/>
+                                        <field name="report_action_ids" width='13' widget="many2many_tags"
+                                               options="{'no_create': True}"/>
+                                        <field name="server_action_ids" width='13' widget="many2many_tags"
+                                               options="{'no_create': True}"/>
+                                        <field name="view_data_ids" width='8' widget="many2many_tags"
+                                               options="{'no_create': True}"/>
+                                        <field name="restrict_create" width='10'/>
+                                        <field name="restrict_edit" width='10'/>
+                                        <field name="restrict_delete" width='10'/>
+                                        <field name="restrict_archive_unarchive" width='10'/>
+                                        <field name="restrict_duplicate" width='10'/>
+                                        <field name="restrict_import" width='10' readonly="parent.hide_import == True"/>
+                                        <field name="restrict_export" width='10' readonly="parent.hide_export == True"/>
+                                        <field name="restrict_spreadsheet" width='10' readonly="parent.hide_spreadsheet == True"/>
+                                    </list>
+                                </field>
+                                <p role="alert"
+                                   class="fa fa-info-circle  alert alert-info alert-dismissible rounded-0 fade show d-print-none css_editable_mode_hidden"
+                                   style="font-size: 15px;letter-spacing: 1px;">
+                                    Puedes ocultar reportes, botones de acción como Crear, Editar y Exportar, y también ocultar vistas
+                                    (lista, kanban, reporte, etc.). Además, puedes ocultar acciones como Archivar, Eliminar y Duplicar
+                                    para los usuarios definidos.
+                                    <br/>
+                                    <br/>Nota: la restricción agregada aquí solo se ocultará para los usuarios definidos.
+                                    Aun así, podrá seguir siendo accesible por código Python o por API, por lo que no interrumpirá el proceso
+                                    en algunos casos, como POS o integraciones por API. Si quieres bloquear estrictamente las acciones Crear, Editar
+                                    y Eliminar para el usuario, puedes usar la pestaña 'Acceso por dominio' del formulario y definir allí la regla.
+                                    <br/>
+                                    <br/>
+                                    Más información:
+                                    <a href="https://www.terabits.xyz/simplify_access_management#bt-pills-model"
+                                       target="_blank" alt="Permisos de menú">
+                                        ttps://www.terabits.xyz/simplify_access_management#bt-pills-model
+                                    </a>
+                                </p>
+                            </page>
+                            <page string='Acceso a campos'>
+                                <field name='hide_field_ids'>
+                                    <list editable='bottom'>
+                                        <field name="model_id" context="{'is_access_rights': True}"
+                                               options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"
+                                               required='1' 
+                                               domain="[('model','not in',['access.management', 'access.domain.ah', 'action.data', 'hide.field', 'hide.view.nodes', 'store.model.nodes', 'remove.action', 'view.data'])]"
+                                               width='10'/>
+                                        <field name="field_id" context="{'is_access_rights': True}"
+                                               options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"
+                                               widget='many2many_tags' domain="[('model_id','=',model_id)]"
+                                               width='10'/>
+                                        <field name="invisible" width='10'/>
+                                        <field name="readonly" width='10' column_invisible="parent.readonly == True "/>
+                                        <field name="required" width='10'/>
+                                        <field name="external_link" width='10'/>
+                                        
+                                    </list>
+                                </field>
+                                <p role="alert"
+                                   class="fa fa-info-circle  alert alert-info alert-dismissible rounded-0 fade show d-print-none css_editable_mode_hidden"
+                                   style="font-size: 15px;letter-spacing: 1px;">
+                                    Desde aquí puedes ocultar cualquier campo de cualquier modelo, volver cualquier campo de solo lectura o marcarlo como
+                                    obligatorio para los usuarios definidos.
+                                    <br/>
+                                    <br/>
+                                    Más información:
+                                    <a href="https://www.terabits.xyz/simplify_access_management#bt-pills-fields"
+                                       target="_blank" alt="Permisos de menú">
+                                        https://www.terabits.xyz/simplify_access_management#bt-pills-fields
+                                    </a>
+                                </p>
+                            </page>
+                            <page string='Acceso por dominio'>
+                                <field name='access_domain_ah_ids'>
+                                    <form>
+                                        <sheet>
+                                            <group>
+                                                <group>
+                                                    <field name="model_id" context="{'is_access_rights': True}"
+                                                           options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"
+                                                           domain="[('model','not in',['access.management', 'access.domain.ah', 'action.data', 'hide.field', 'hide.view.nodes', 'store.model.nodes', 'remove.action', 'view.data']),('abstract','=',False)]"/>
+                                                </group>
+                                            </group>
+                                            <group>
+                                                <group>
+                                                    <field name="read_right"/>
+                                                    <field name="create_right"/>
+                                                </group>
+                                                <group>
+                                                    <field name="write_right" string="Actualizar"/>
+                                                    <field name="delete_right"/>
+                                                </group>
+                                            </group>
+                                            <group>
+                                                <field name="apply_domain" invisible="read_right == False"/>
+                                                <field name="model_name"
+                                                       invisible="apply_domain != True  or read_right == False"/>
+                                                <field name="domain" widget="terabits_domain"
+                                                       options="{'model': 'model_name'}"
+                                                       invisible="apply_domain != True  or read_right == False"/>
+                                            </group>
+                                            <p role="alert"
+                                            class="fa fa-info-circle  alert alert-info alert-dismissible rounded-0 fade show d-print-none css_editable_mode_hidden"
+                                            style="font-size: 15px;letter-spacing: 1px;width: 100%; margin-top: 10px;"
+                                            invisible="apply_domain != True">
+
+                                                    • Las reglas de acceso limitan qué registros puede ver un usuario.
+                                                    <br/>
+                                                    • Estos límites también se aplican a las listas desplegables de filtros por dominio.
+                                                    <br/>
+                                                    • Los usuarios solo verán en los desplegables los registros permitidos según las reglas.
+                                                    <br/>
+                                                    • Los usuarios administradores seguirán viendo todos los registros en los desplegables, sin importar las reglas.
+                                                    <br/>
+                                                    • Esto garantiza que los administradores mantengan siempre el control y acceso completos.
+                                            </p>
+                                        </sheet>
+                                    </form>
+                                    <list>
+                                        <field name="model_id" width='10'/>
+                                        <field name="domain" width='10'/>
+                                        <field name="read_right" width='10'/>
+                                        <field name="create_right" width='10'/>
+                                        <field name="write_right" width='10'/>
+                                        <field name="delete_right" width='10'/>
+                                    </list>
+                                </field>
+                                <p role="alert"
+                                   class="fa fa-info-circle  alert alert-info alert-dismissible rounded-0 fade show d-print-none css_editable_mode_hidden"
+                                   style="font-size: 15px;letter-spacing: 1px;">
+                                    Aquí puedes definir permisos estrictos del modelo (leer, crear, editar y eliminar) y configurar
+                                    un dominio para acceder a sus registros para cualquier usuario desde un solo lugar. El acceso
+                                    definido aquí permitirá o bloqueará el acceso completo del usuario especificado,
+                                    no solo desde el sistema sino también desde el código y la API. Por eso, define estos accesos con cuidado.
+                                    Si solo quieres ocultar los botones Crear, Editar y Eliminar en el backend de, por ejemplo, pedidos de venta,
+                                    pero permitir que el usuario siga operando desde POS, entonces no conviene definir el acceso aquí,
+                                    porque generará errores del lado de POS. Para ese caso, usa la pestaña 'Acceso al modelo' para ocultar
+                                    esos botones.
+                                    <br/>
+                                    <br/>Puedes permitir los permisos de Leer (ver), Crear, Eliminar y Actualizar (editar)
+                                    simplemente marcando las casillas correspondientes. Si quieres restringirlos, déjalas sin marcar.
+                                    Además, esta pestaña te ofrece una configuración avanzada para conceder esos permisos
+                                    bajo condiciones específicas; para ello, marca la opción 'Aplicar filtro'.
+                                    <br/>
+                                    <br/>Más información:
+                                    <a href="https://www.terabits.xyz/simplify_access_management#bt-pills-domain"
+                                       target="_blank" alt="Permisos de menú">
+                                        https://www.terabits.xyz/simplify_access_management#bt-pills-domain
+                                    </a>
+                                </p>
+                            </page>
+                            <page string='Acceso a botones/pestañas'>
+                                <field name='hide_view_nodes_ids'>
+                                    <list editable="bottom">
+                                        <field name="model_id" context="{'is_access_rights': True}"
+                                               options="{'no_open': True, 'nos_create': True, 'no_create_edit': True}"
+                                               domain="[('model','not in',['access.management', 'access.domain.ah', 'action.data', 'hide.field', 'hide.view.nodes', 'store.model.nodes', 'remove.action', 'view.data'])]"/>
+                                        <field name="btn_store_model_nodes_ids" widget="many2many_tags"
+                                               domain="[('model_id','=',model_id),('node_option','=','button')]"
+                                               options="{'no_create': True}"/>
+                                        <field name="page_store_model_nodes_ids" widget="many2many_tags"
+                                               domain="[('model_id','=',model_id),('node_option','=','page')]"
+                                               options="{'no_create': True}"/>
+                                        <field name="link_store_model_nodes_ids" widget="many2many_tags"
+                                               domain="[('model_id','=',model_id),('node_option','=','link')]"
+                                               options="{'no_create': True}"/>
+                                    </list>
+                                </field>
+                                <p role="alert"
+                                   class="fa fa-info-circle  alert alert-info alert-dismissible rounded-0 fade show d-print-none css_editable_mode_hidden"
+                                   style="font-size: 15px;letter-spacing: 1px;">
+                                    Desde esta pestaña puedes ocultar botones de acción, botones de objeto, pestañas y enlaces
+                                    (en tarjetas kanban) de cualquier modelo para los usuarios definidos.
+                                    <br/>
+                                    <br/>Aquí, Botón significa cualquier botón de acción visible en cualquier vista.
+                                    <br/>
+                                    <br/>Página significa cualquier pestaña visible en una vista formulario.
+                                    <br/>
+                                    <br/>Y Enlace significa cualquier enlace de acción visible en la vista kanban.
+                                    <br/>
+                                    <br/>Más información:
+                                    <a href="https://www.terabits.xyz/simplify_access_management#bt-pills-buttontab"
+                                       target="_blank" alt="Permisos de menú">
+                                        https://www.terabits.xyz/simplify_access_management#bt-pills-buttontab
+                                    </a>
+                                </p>
+                            </page>
+                            <page string='Acceso al panel de búsqueda'>
+                                <field name="hide_filters_groups_ids">
+                                    <list editable="bottom">
+                                        <field name="model_id" context="{'is_access_rights': True}"
+                                               options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"
+                                               domain="[('model','not in',['access.management', 'access.domain.ah', 'action.data', 'hide.field', 'hide.view.nodes', 'store.model.nodes', 'remove.action', 'view.data'])]" 
+                                               width="10"/>
+                                        <field name="model_name" column_invisible="1" />
+                                        <field name="filters_store_model_nodes_ids" widget="many2many_tags"
+                                               domain="[('model_id','=',model_id),('node_option','=','filter')]"
+                                               options="{'no_create': True}" 
+                                               width="10"/>
+                                        <field name="groups_store_model_nodes_ids" widget="many2many_tags"
+                                               domain="[('model_id','=',model_id),('node_option','=','group')]"
+                                               options="{'no_create': True}"
+                                               width="10" />
+                                    </list>
+                                </field>
+                                <p role="alert"
+                                   class="fa fa-info-circle  alert alert-info alert-dismissible rounded-0 fade show d-print-none css_editable_mode_hidden"
+                                   style="font-size: 15px;letter-spacing: 1px;">
+                                    Desde esta pestaña puedes ocultar filtros y agrupaciones de cualquier modelo para los usuarios definidos.
+                                    <br/>
+                                    <br/>Aquí, Filtros significa cualquier filtro visible en la vista lista/árbol.
+                                    <br/>
+                                    <br/>Agrupar por significa cualquier agrupación visible en la vista lista/árbol.
+                                </p>
+                            </page>
+                            <page string='Chatter'>
+                                <field name="hide_chatter_ids" readonly="hide_chatter == True">
+                                    <list editable="bottom">
+                                        <field name="model_id" context="{'is_access_rights': True}"
+                                               options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"
+                                               width="20" domain="[('model','not in',['access.management', 'access.domain.ah', 'action.data', 'hide.field', 'hide.view.nodes', 'store.model.nodes', 'remove.action', 'view.data'])]"
+                                               required="1"/>
+                                        <field name="hide_chatter" width="20"/>
+                                        <field name="hide_send_mail" width="20" readonly="hide_chatter == True or parent.hide_send_mail == True"/>
+                                        <field name="hide_log_notes" width="20" readonly="hide_chatter == True or parent.hide_log_notes == True"/>
+                                        <field name="hide_schedule_activity" width="20" readonly="hide_chatter == True or parent.hide_schedule_activity == True"/>
+
+                                    </list>
+                                </field>
+                                <p role="alert"
+                                   class="fa fa-info-circle  alert alert-info alert-dismissible rounded-0 fade show d-print-none css_editable_mode_hidden"
+                                   style="font-size: 15px;letter-spacing: 1px;">
+                                    Desde esta pestaña puedes ocultar el chatter y sus botones en cualquier modelo para los usuarios definidos.
+                                    <br/>
+                                    <br/>Aquí, los botones del chatter son 'Enviar mensaje', 'Registrar una nota' y 'Actividades'.
+                                </p>
+                            </page>
+                            <page string='Global'>
+                                <group>
+                                    <group string="Chatter">
+                                        <field name="hide_chatter"/>
+                                        <field name="hide_send_mail" readonly="hide_chatter == True"/>
+                                        <field name="hide_log_notes" readonly="hide_chatter == True"/>
+                                        <field name="hide_schedule_activity" readonly="hide_chatter == True"/>
+                                    </group>
+                                    <group string="Importación y exportación">
+                                        <field name="hide_import"/>
+                                        <field name="hide_export"/>
+                                        <field name="hide_spreadsheet"/>
+                                        <field name="hide_add_property"/>
+                                    </group>
+                                    <group string="Otros">
+                                        <field name="disable_login"/>
+                                    </group>
+                                </group>
+                                
+                                <p role="alert"
+                                   class="fa fa-info-circle  alert alert-info alert-dismissible rounded-0 fade show d-print-none css_editable_mode_hidden"
+                                   style="font-size: 15px;letter-spacing: 1px;">
+                                    En esta pestaña puedes aplicar la regla a todos los modelos.
+                                    <br/>
+                                    <br/>Puedes ocultar el chatter, enviar mensajes, notas internas, actividades, importación y
+                                    exportación desde cualquier lugar con una sola casilla.
+                                    <br/>
+                                    <br/>para el usuario definido.
+                                </p>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="access_management_search_view" model="ir.ui.view">
+            <field name="name">access.management.search.view</field>
+            <field name="model">access.management</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name" string="Nombre"/>
+                    <field name="user_ids"/>
+                    <field name="active"/>
+                    <field name="create_uid"/>
+                    <separator/>
+                    <filter string="Todos" name="all" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
+                    <separator/>
+                    <filter string="Archivados" name="inactive" domain="[('active', '=', False)]"/>
+                    <group>
+                        <filter string="Creado por" name="created_by" domain="[]" context="{'group_by': 'create_uid'}"/>
+                    </group>
+                    <searchpanel>
+                        <field name="user_ids" select="multi" string="Usuarios" enable_counters="1"/>
+                        <field name="company_ids" select="multi" string="Compañías" enable_counters="1"/>
+                    </searchpanel>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="access_management_tree_view_ah" model="ir.ui.view">
+            <field name="name">access_management_tree_view_ah</field>
+            <field name="group_ids" eval="[(4, ref('group_access_management_bits'))]"/>
+            <field name="model">access.management</field>
+            <field name="arch" type="xml">
+                <list decoration-muted="(not active)">
+                    <field name="name"/>
+                    <field name="create_uid"/>
+                    <field name="create_date"/>
+                    <field name="user_ids" widget="many2many_tags"/>
+                    <field name="total_rules"/>
+                    <field name="active" invisible="0" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="action_access_management_bits" model="ir.actions.act_window">
+            <field name="name">Gestión de accesos</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">access.management</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{'search_default_all': 1}</field>
+        </record>
+
+        <menuitem id="main_menu_simplify_access_management" name="Control de accesos" action="action_access_management_bits"
+                  groups="group_access_management_bits"
+                  web_icon="simplify_access_management_v19,static/description/icon.png"/>
+
+    </data>
+</odoo>

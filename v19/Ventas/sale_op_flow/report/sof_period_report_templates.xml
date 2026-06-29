@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════
+         PDF: COBROS POR PERÍODO
+    ══════════════════════════════════════════════════════════ -->
+    <template id="report_sof_payments_period">
+        <t t-call="web.html_container">
+            <div class="article">
+                <div class="page">
+                    <div class="text-center mb-4">
+                        <h3 t-out="company.name" class="mb-0"/>
+                        <h4 class="mb-1">Cobros por período</h4>
+                        <p class="text-muted">
+                            Del <span t-out="date_from" t-options='{"widget": "date"}'/>
+                            al <span t-out="date_to" t-options='{"widget": "date"}'/>
+                        </p>
+                    </div>
+
+                    <h5>Resumen por medio de pago</h5>
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Medio de pago</th>
+                                <th class="text-end">Operaciones</th>
+                                <th class="text-end">Importe neto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="by_tender" t-as="row">
+                                <td t-out="row['label']"/>
+                                <td class="text-end" t-out="row['count']"/>
+                                <td class="text-end">
+                                    <span t-out="row['amount']"
+                                          t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                </td>
+                            </tr>
+                            <tr t-if="not by_tender">
+                                <td colspan="3" class="text-center text-muted">Sin cobros en el período</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-bold border-top">
+                                <td>Total neto</td>
+                                <td/>
+                                <td class="text-end">
+                                    <span t-out="total_neto"
+                                          t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <h5 class="mt-4">Detalle por sesión</h5>
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Sesión</th>
+                                <th>Cajero</th>
+                                <th class="text-end">Operaciones</th>
+                                <th class="text-end">Importe neto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="by_session" t-as="s">
+                                <td t-out="s['session']"/>
+                                <td t-out="s['cashier']"/>
+                                <td class="text-end" t-out="s['count']"/>
+                                <td class="text-end">
+                                    <span t-out="s['amount']"
+                                          t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                </td>
+                            </tr>
+                            <tr t-if="not by_session">
+                                <td colspan="4" class="text-center text-muted">Sin sesiones en el período</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <record id="action_report_sof_payments_period" model="ir.actions.report">
+        <field name="name">Cobros por período</field>
+        <field name="model">sof.period.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sale_op_flow.report_sof_payments_period</field>
+        <field name="report_file">sale_op_flow.report_sof_payments_period</field>
+        <field name="print_report_name">'Cobros %s a %s' % (object.date_from, object.date_to)</field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════
+         PDF: SESIONES POR PERÍODO
+    ══════════════════════════════════════════════════════════ -->
+    <template id="report_sof_sessions_period">
+        <t t-call="web.html_container">
+            <div class="article">
+                <div class="page">
+                    <div class="text-center mb-4">
+                        <h3 t-out="company.name" class="mb-0"/>
+                        <h4 class="mb-1">Sesiones de caja por período</h4>
+                        <p class="text-muted">
+                            Del <span t-out="date_from" t-options='{"widget": "date"}'/>
+                            al <span t-out="date_to" t-options='{"widget": "date"}'/>
+                        </p>
+                    </div>
+
+                    <table class="table table-sm table-bordered" style="font-size: 9pt;">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Sesión</th>
+                                <th>Cajero</th>
+                                <th class="text-end">Pedidos</th>
+                                <th class="text-end">Cobrado</th>
+                                <th class="text-end">Ing.</th>
+                                <th class="text-end">Egr.</th>
+                                <th class="text-end">Esperado</th>
+                                <th class="text-end">Rendido</th>
+                                <th class="text-end">Dif.</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="sessions" t-as="ses">
+                                <td t-out="ses.date" t-options='{"widget": "date"}'/>
+                                <td t-out="ses.name"/>
+                                <td t-out="ses.cashier_id.name"/>
+                                <td class="text-end" t-out="ses.total_orders"/>
+                                <td class="text-end"><span t-out="ses.total_collected" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
+                                <td class="text-end"><span t-out="ses.total_cash_in" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
+                                <td class="text-end"><span t-out="ses.total_cash_out" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
+                                <td class="text-end"><span t-out="ses.total_expected_rendition" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
+                                <td class="text-end"><span t-out="ses.total_real" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
+                                <td class="text-end"><span t-out="ses.total_difference" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
+                                <td t-out="ses.state"/>
+                            </tr>
+                            <tr t-if="not sessions">
+                                <td colspan="11" class="text-center text-muted">Sin sesiones en el período</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-bold border-top">
+                                <td colspan="3">Totales</td>
+                                <td class="text-end" t-out="totals['orders']"/>
+                                <td class="text-end"><span t-out="totals['collected']" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
+                                <td class="text-end"><span t-out="totals['cash_in']" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
+                                <td class="text-end"><span t-out="totals['cash_out']" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
+                                <td class="text-end"><span t-out="totals['expected']" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
+                                <td class="text-end"><span t-out="totals['real']" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
+                                <td class="text-end"><span t-out="totals['difference']" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
+                                <td/>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <record id="action_report_sof_sessions_period" model="ir.actions.report">
+        <field name="name">Sesiones por período</field>
+        <field name="model">sof.period.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sale_op_flow.report_sof_sessions_period</field>
+        <field name="report_file">sale_op_flow.report_sof_sessions_period</field>
+        <field name="print_report_name">'Sesiones %s a %s' % (object.date_from, object.date_to)</field>
+    </record>
+
+</odoo>

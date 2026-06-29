@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- =====================================================
+         TEMPLATE QWEB: Comprobante de Pago Adelantado
+         Modelo: sale.order.advance.payment
+         ===================================================== -->
+
+    <template id="report_sale_advance_payment_document">
+        <t t-call="web.external_layout">
+            <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
+            <div class="page">
+
+                <!-- Encabezado del comprobante -->
+                <div class="row">
+                    <div class="col-12 text-center mb-3">
+                        <h2 class="fw-bold" style="text-transform:uppercase; letter-spacing:2px;">
+                            Comprobante de Pago Adelantado
+                        </h2>
+                        <p class="text-muted fst-italic mb-0">
+                            Este documento no reemplaza factura fiscal
+                        </p>
+                        <hr/>
+                    </div>
+                </div>
+
+                <!-- Datos principales -->
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold" style="width:160px;">Número:</td>
+                                    <td>
+                                        <span t-field="o.name" class="fw-bold text-primary"
+                                              style="font-size:1.1em;"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Orden de Venta:</td>
+                                    <td><span t-field="o.sale_order_id.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Fecha del Pago:</td>
+                                    <td><span t-field="o.payment_date"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Registrado por:</td>
+                                    <td><span t-field="o.create_uid.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Empresa:</td>
+                                    <td><span t-field="o.company_id.name"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="fw-bold mb-2">Cliente</h6>
+                            <div t-field="o.partner_id"
+                                 t-options='{"widget": "contact", "fields": ["name", "address", "vat"], "no_marker": True}'/>
+                            <t t-if="o.partner_id.vat">
+                                <div>
+                                    <strong>CUIT / Identificación: </strong>
+                                    <span t-field="o.partner_id.vat"/>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalle del pago -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <h6 class="fw-bold mb-2">Detalle del Pago</h6>
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Concepto</th>
+                                    <th class="text-end">Detalle</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Medios de pago (uno o varios) -->
+                                <t t-if="o.payment_ids">
+                                    <tr t-foreach="o.payment_ids" t-as="pay">
+                                        <td>
+                                            Medio de Pago
+                                            <t t-if="len(o.payment_ids) &gt; 1">
+                                                (<span t-esc="pay_index + 1"/>)
+                                            </t>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-field="pay.journal_id.name"/>
+                                            <t t-if="pay.payment_method_line_id">
+                                                — <span t-field="pay.payment_method_line_id.name"/>
+                                            </t>
+                                            <t t-if="len(o.payment_ids) &gt; 1">
+                                                <br/>
+                                                <span t-field="pay.amount"/>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <t t-else="">
+                                    <tr>
+                                        <td>Diario de Pago</td>
+                                        <td class="text-end">
+                                            <span t-field="o.journal_id.name"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Método de Pago</td>
+                                        <td class="text-end">
+                                            <t t-if="o.payment_method_line_id">
+                                                <span t-field="o.payment_method_line_id.name"/>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="text-muted">-</span>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <tr>
+                                    <td>Referencia Interna</td>
+                                    <td class="text-end">
+                                        <t t-if="o.reference">
+                                            <span t-field="o.reference"/>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="text-muted">-</span>
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Moneda</td>
+                                    <td class="text-end">
+                                        <span t-field="o.currency_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr class="table-success">
+                                    <td class="fw-bold" style="font-size:1.05em;">
+                                        IMPORTE RECIBIDO
+                                    </td>
+                                    <td class="text-end fw-bold" style="font-size:1.2em;">
+                                        <span t-field="o.amount"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Estado -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <table class="table table-sm table-borderless">
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold" style="width:160px;">Estado:</td>
+                                    <td>
+                                        <t t-if="o.state == 'posted'">
+                                            <span class="badge bg-info text-white">
+                                                Pendiente de Aplicar a Factura
+                                            </span>
+                                        </t>
+                                        <t t-elif="o.state == 'applied'">
+                                            <span class="badge bg-success text-white">
+                                                Aplicado a Factura
+                                            </span>
+                                        </t>
+                                        <t t-elif="o.state == 'cancelled'">
+                                            <span class="badge bg-danger text-white">
+                                                Cancelado
+                                            </span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="badge bg-secondary text-white">
+                                                Borrador
+                                            </span>
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr t-if="o.invoice_id">
+                                    <td class="fw-bold">Factura Aplicada:</td>
+                                    <td><span t-field="o.invoice_id.name"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Notas -->
+                <t t-if="o.note">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h6 class="fw-bold mb-1">Notas</h6>
+                            <p t-field="o.note" class="text-muted"/>
+                        </div>
+                    </div>
+                </t>
+
+                <!-- Leyenda legal -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div style="border: 1px solid #dee2e6; border-radius: 4px; padding: 12px; background-color: #f8f9fa;">
+                            <p class="mb-2 text-muted small">
+                                Este comprobante acredita la recepción de un pago adelantado vinculado a la
+                                Orden de Venta <strong t-esc="o.sale_order_id.name"/>.
+                                El importe será aplicado automáticamente a la primera factura emitida desde
+                                dicha orden.
+                            </p>
+                            <p class="mb-0 fw-bold text-danger small">
+                                Este documento no reemplaza factura fiscal.
+                                No tiene validez impositiva ni tributaria.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Firma (espacio) -->
+                <div class="row mt-5">
+                    <div class="col-6 text-center">
+                        <div style="border-top: 1px solid #333; padding-top: 4px; margin-top: 40px;">
+                            <small>Firma del Responsable</small>
+                        </div>
+                    </div>
+                    <div class="col-6 text-center">
+                        <div style="border-top: 1px solid #333; padding-top: 4px; margin-top: 40px;">
+                            <small>Aclaración / Cargo</small>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </t>
+    </template>
+
+    <!-- Template envoltorio para el reporte -->
+    <template id="report_sale_advance_payment">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="sale_order_advance_payment.report_sale_advance_payment_document"
+                   t-lang="o.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
+
+</odoo>

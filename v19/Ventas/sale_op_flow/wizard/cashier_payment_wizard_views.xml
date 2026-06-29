@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cashier_payment_wizard_form" model="ir.ui.view">
+        <field name="name">sale.cashier.payment.wizard.form</field>
+        <field name="model">sale.cashier.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Registrar Cobro" class="o_sof_payment_wizard">
+                <sheet>
+                    <!-- Warning: sin sesion de caja -->
+                    <div class="alert alert-warning mb-3" role="alert" invisible="cashier_session_id">
+                        <strong>Sin sesion de caja abierta.</strong>
+                        Abri una sesion desde <strong>Caja → Sesiones Abiertas → Nuevo</strong>
+                        o ingresa desde <strong>Sesion Activa</strong>.
+                    </div>
+
+                    <!-- Encabezado: pedido y cliente -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h4>
+                                <field name="sale_order_id" readonly="1"/> —
+                                <field name="partner_id" readonly="1"/>
+                            </h4>
+                        </div>
+                    </div>
+
+                    <!-- Resumen + Sesion -->
+                    <group>
+                        <group string="Resumen del pedido">
+                            <field name="order_amount_total" string="Total pedido"/>
+                            <field name="total_to_collect" string="Total a cobrar" readonly="1"/>
+                            <field name="proposed_payment_journal_id"
+                                   string="Medio sugerido por ventas"
+                                   readonly="1"
+                                   options="{'no_open': True}"/>
+                        </group>
+                        <group string="Sesion de caja">
+                            <field name="session_info" string="Sesion activa" readonly="1"/>
+                            <field name="cashier_session_id" readonly="1" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <!-- Facturacion + Modo de cobro -->
+                    <group>
+                        <group string="Facturacion">
+                            <field name="invoice_journal_id"
+                                   required="1"
+                                   options="{'no_open': True}"
+                                   placeholder="Selecciona el diario (Factura A, B, Ticket...)"/>
+                            <field name="show_invoice_document_type" invisible="1"/>
+                            <field name="invoice_document_type_name"
+                                   string="Tipo de comprobante"
+                                   readonly="1"
+                                   invisible="not show_invoice_document_type"/>
+                            <field name="sof_invoice_preference"
+                                   string="Solicitado por ventas"
+                                   readonly="1"
+                                   invisible="not sof_invoice_preference"/>
+                        </group>
+                        <group string="Modo de cobro">
+                            <field name="payment_mode" widget="radio" nolabel="1"/>
+                        </group>
+                    </group>
+
+                    <!-- Info modo pago unico -->
+                    <div class="alert alert-info py-2 mb-2" role="alert"
+                         invisible="payment_mode != 'single'">
+                        Pago unico: un solo medio de cobro. Permite descuentos y recargos sobre el total del pedido.
+                    </div>
+                    <!-- Info modo multiple -->
+                    <div class="alert alert-info py-2 mb-2" role="alert"
+                         invisible="payment_mode != 'multi'">
+                        Pagos multiples: cada seccion tiene su propio recargo sobre el monto ingresado.
+                        Los descuentos no estan disponibles en este modo.
+                    </div>
+
+                    <!-- Campos ocultos del wizard necesarios en contexto de listas -->
+                    <field name="has_pay_later" invisible="1"/>
+                    <field name="has_payment_line" invisible="1"/>
+
+                    <!-- ══════════════════════════════════════════════════════════ -->
+                    <!-- SECCION: EFECTIVO                                          -->
+                    <!-- ══════════════════════════════════════════════════════════ -->
+                    <separator string="Efectivo"/>
+                    <field name="cash_line_ids" nolabel="1"
+                           context="{'default_line_type': 'cash', 'default_wizard_id': id, 'default_amount': multi_remaining}">
+                        <list editable="bottom" string="Efectivo">
+                            <control>
+                                <create string="Agregar efectivo"
+                                        invisible="parent.payment_mode == 'single' and parent.has_payment_line"/>
+                            </control>
+                            <field name="sequence" widget="handle"/>
+                            <field name="financing_plan_id"
+                                   string="Plan / Descuento"
+                                   options="{'no_create': True, 'no_open': True}"
+                                   domain="[('active', '=', True),
+                                            ('is_pay_later', '=', False),
+                                            ('is_check_payment', '=', False),
+                                            ('payment_journal_id.type', '=', 'cash'),
+                                            '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"/>
+                            <field name="amount" string="A cobrar"/>
+                            <field name="cash_received" string="Recibido" placeholder="0,00"
+                                   column_invisible="parent.payment_mode == 'multi'"/>
+                            <field name="cash_change" string="Vuelto" readonly="1"
+                                   column_invisible="parent.payment_mode == 'multi'"/>
+                            <field name="payment_journal_id" column_invisible="1"/>
+                            <field name="line_type" column_invisible="1"/>
+                            <field name="is_cash_journal" column_invisible="1"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="company_id" column_invisible="1"/>
+                            <field name="payment_mode" column_invisible="1"/>
+                        </list>
+                    </field>
+
+                    <!-- ══════════════════════════════════════════════════════════ -->
+                    <!-- SECCION: BANCO / TRANSFERENCIA                             -->
+                    <!-- ══════════════════════════════════════════════════════════ -->
+                    <separator string="Tarjeta / Transferencia"/>
+                    <field name="bank_line_ids" nolabel="1"
+                           context="{'default_line_type': 'bank', 'default_wizard_id': id, 'default_amount': multi_remaining}">
+                        <list editable="bottom" string="Tarjeta / Transferencia">
+                            <control>
+                                <create string="Agregar transferencia"
+                                        invisible="parent.payment_mode == 'single' and parent.has_payment_line"/>
+                            </control>
+                            <field name="sequence" widget="handle"/>
+                            <field name="financing_plan_id"
+                                   required="1"
+                                   options="{'no_create': True, 'no_open': True}"
+                                   domain="[('active', '=', True), ('is_pay_later', '=', False), ('is_check_payment', '=', False), '|', ('payment_journal_id', '=', False), ('payment_journal_id.type', '=', 'bank'), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)] + ([('adjustment_type', '!=', 'discount')] if parent.payment_mode == 'multi' else [])"/>
+                            <field name="amount" string="A cobrar"/>
+                            <field name="voucher_number"
+                                   string="Nº Comprobante"
+                                   placeholder="Referencia de transferencia"
+                                   invisible="not requires_voucher"/>
+                            <field name="coupon_number"
+                                   string="Nº Cupón"
+                                   placeholder="000-0000"
+                                   invisible="not requires_coupon"/>
+                            <field name="requires_voucher" column_invisible="1"/>
+                            <field name="payment_journal_id" column_invisible="1"/>
+                            <field name="requires_coupon" column_invisible="1"/>
+                            <field name="line_type" column_invisible="1"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="company_id" column_invisible="1"/>
+                            <field name="payment_mode" column_invisible="1"/>
+                        </list>
+                    </field>
+
+                    <!-- ══════════════════════════════════════════════════════════ -->
+                    <!-- SECCION: CHEQUES                                           -->
+                    <!-- ══════════════════════════════════════════════════════════ -->
+                    <separator string="Cheques"/>
+                    <field name="check_line_ids" nolabel="1"
+                           context="{'default_line_type': 'check', 'default_wizard_id': id, 'default_amount': multi_remaining}">
+                        <list editable="bottom" string="Cheques">
+                            <control>
+                                <create string="Agregar cheque"
+                                        invisible="parent.payment_mode == 'single' and parent.has_payment_line"/>
+                            </control>
+                            <field name="sequence" widget="handle"/>
+                            <field name="financing_plan_id"
+                                   required="1"
+                                   options="{'no_create': True, 'no_open': True}"
+                                   domain="[('active', '=', True),
+                                            ('is_check_payment', '=', True),
+                                            '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"/>
+                            <field name="amount" string="A cobrar"/>
+                            <field name="check_number" string="Nº Cheque" placeholder="00000000"/>
+                            <field name="check_payment_date" string="Fecha cobro"/>
+                            <field name="check_bank_id" string="Banco"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="check_issuer_vat" string="CUIT emisor" placeholder="20-12345678-9"/>
+                            <field name="payment_journal_id" column_invisible="1"/>
+                            <field name="line_type" column_invisible="1"/>
+                            <field name="is_check_payment" column_invisible="1"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="company_id" column_invisible="1"/>
+                            <field name="payment_mode" column_invisible="1"/>
+                        </list>
+                    </field>
+
+                    <!-- ══════════════════════════════════════════════════════════ -->
+                    <!-- SECCION: CUENTA CORRIENTE                                  -->
+                    <!-- ══════════════════════════════════════════════════════════ -->
+                    <separator string="Cuenta Corriente"/>
+                    <!-- Aviso Cuenta Corriente -->
+                    <div class="alert alert-warning py-2 mb-2" role="alert" invisible="not has_pay_later">
+                        <strong>Venta en Cuenta Corriente.</strong>
+                        La factura quedará pendiente de cobro según el término de pago del plan.
+                        El pedido puede despacharse igualmente.
+                    </div>
+                    <field name="cc_line_ids" nolabel="1"
+                           context="{'default_line_type': 'cc', 'default_wizard_id': id, 'default_amount': multi_remaining}">
+                        <list editable="bottom" string="Cuenta Corriente">
+                            <control>
+                                <create string="Agregar cuenta corriente"
+                                        invisible="parent.payment_mode == 'single' and parent.has_payment_line"/>
+                            </control>
+                            <field name="sequence" widget="handle"/>
+                            <field name="financing_plan_id"
+                                   required="1"
+                                   options="{'no_create': True, 'no_open': True}"
+                                   domain="[('active', '=', True),
+                                            ('is_pay_later', '=', True),
+                                            '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"/>
+                            <field name="amount" string="A cobrar"/>
+                            <field name="line_type" column_invisible="1"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="company_id" column_invisible="1"/>
+                            <field name="payment_mode" column_invisible="1"/>
+                        </list>
+                    </field>
+
+                    <!-- ── Totales: PAGO UNICO ── -->
+                    <div invisible="payment_mode != 'single'">
+                        <div class="row mt-2" invisible="total_adjustment == 0">
+                            <div class="col-12 text-end text-muted small">
+                                Ajuste del plan:
+                                <strong><field name="total_adjustment" nolabel="1" readonly="1"/></strong>
+                            </div>
+                        </div>
+                        <div class="row mt-1">
+                            <div class="col-12 text-end">
+                                Total a cobrar:
+                                <strong><field name="total_to_collect" nolabel="1" readonly="1"/></strong>
+                            </div>
+                        </div>
+                        <div class="row mt-1" invisible="multi_is_balanced">
+                            <div class="col-12">
+                                <div class="alert alert-danger text-end mb-0 py-2" role="alert">
+                                    Diferencia:
+                                    <strong><field name="multi_remaining" nolabel="1" readonly="1"/></strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-1" invisible="not multi_is_balanced">
+                            <div class="col-12">
+                                <div class="alert alert-success text-end mb-0 py-2" role="alert">
+                                    Cobro completo — listo para confirmar
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-1" invisible="not has_cash_change">
+                            <div class="col-12">
+                                <div class="alert alert-warning text-end mb-0 py-2" role="alert">
+                                    Vuelto a entregar:
+                                    <strong><field name="total_cash_change" nolabel="1" readonly="1"/></strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Totales: PAGOS MULTIPLES ── -->
+                    <div invisible="payment_mode != 'multi'">
+                        <div class="row mt-2">
+                            <div class="col-12 text-end">
+                                Total ingresado:
+                                <strong><field name="multi_total" nolabel="1" readonly="1"/></strong>
+                            </div>
+                        </div>
+                        <div class="row mt-1" invisible="multi_is_balanced">
+                            <div class="col-12">
+                                <div class="alert alert-danger text-end mb-0 py-2" role="alert">
+                                    Falta asignar:
+                                    <strong><field name="multi_remaining" nolabel="1" readonly="1"/></strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-1" invisible="not has_check_excess">
+                            <div class="col-12">
+                                <div class="alert alert-secondary text-end mb-0 py-2" role="alert">
+                                    Crédito a favor del cliente:
+                                    <strong><field name="check_excess_amount" nolabel="1" readonly="1"/></strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-1" invisible="not multi_is_balanced">
+                            <div class="col-12">
+                                <div class="alert alert-success text-end mb-0 py-2" role="alert">
+                                    Cobro completo — listo para confirmar
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-1" invisible="not has_cash_change">
+                            <div class="col-12">
+                                <div class="alert alert-warning text-end mb-0 py-2" role="alert">
+                                    Vuelto a entregar:
+                                    <strong><field name="total_cash_change" nolabel="1" readonly="1"/></strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </sheet>
+                <footer>
+                    <button name="action_confirm_payment"
+                            string="Confirmar Cobro"
+                            type="object"
+                            class="btn-success"
+                            invisible="not cashier_session_id"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

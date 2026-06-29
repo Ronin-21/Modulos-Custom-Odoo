@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_saleorder_compact" inherit_id="sale.report_saleorder_document">
+        <!-- CSS compacto: reduce padding de filas y tamaño de fuente para más productos por página -->
+        <xpath expr="//div[@id='informations']" position="before">
+            <style type="text/css">
+                .o_main_table td,
+                .o_main_table th {
+                    padding-top: 2px !important;
+                    padding-bottom: 2px !important;
+                    padding-left: 5px !important;
+                    padding-right: 5px !important;
+                    font-size: 9.5pt !important;
+                    line-height: 1.3 !important;
+                }
+                #informations {
+                    margin-bottom: 6px !important;
+                    font-size: 9pt;
+                }
+                #informations strong {
+                    font-size: 9pt;
+                }
+                #informations div[t-field] {
+                    font-size: 9pt;
+                }
+                #total {
+                    margin-top: 1.2rem !important;
+                }
+            </style>
+        </xpath>
+
+        <!-- Nombre del comprador (consumidor final): solo si el vendedor lo cargó -->
+        <xpath expr="//div[@id='informations']" position="inside">
+            <div t-if="doc.sof_consumer_name" class="col" name="sof_consumer_name">
+                <strong>Comprador</strong>
+                <div t-field="doc.sof_consumer_name"/>
+            </div>
+        </xpath>
+
+        <!-- Ocultar columna de impuestos en presupuestos y ventas no fiscales -->
+        <xpath expr="//t[@t-set='hide_taxes_details']" position="replace">
+            <t t-set="hide_taxes_details" t-value="
+                doc.state in ('draft', 'sent') or
+                'no fiscal' in (doc.fiscal_position_id.name or '').lower()
+            "/>
+        </xpath>
+
+        <!-- Simplificar bloque de totales: ocultar Subtotal e IVA, mostrar solo Total -->
+        <xpath expr="//t[@t-call='sale.document_tax_totals']" position="replace">
+            <t t-if="hide_taxes_details">
+                <tr class="o_total">
+                    <td><strong>Total</strong></td>
+                    <td class="text-end">
+                        <strong t-out="doc.amount_total"
+                                t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                    </td>
+                </tr>
+            </t>
+            <t t-else="">
+                <t t-call="sale.document_tax_totals">
+                    <t t-set="tax_totals" t-value="doc.tax_totals"/>
+                    <t t-set="currency" t-value="doc.currency_id"/>
+                </t>
+            </t>
+        </xpath>
+
+        <!-- Simplificar celda de cantidad: quitar la línea secundaria con UOM alternativa -->
+        <xpath expr="//td[@name='td_product_quantity']" position="replace">
+            <td name="td_product_quantity" class="o_td_quantity text-end">
+                <span t-field="line.product_uom_qty" class="text-nowrap"/>
+                <span t-field="line.product_uom_id"/>
+            </td>
+        </xpath>
+    </template>
+</odoo>

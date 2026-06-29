@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_installation" model="ir.ui.view">
+        <field name="name">res.config.settings.form.installation</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="stock.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='stock']" position="inside">
+                <block title="Materiales de Instalación" name="installation_setting_container">
+                    <setting string="Ajustar cantidad de venta al cerrar"
+                             help="Al cerrar la instalación, ajusta la cantidad de la línea de venta al consumo real.">
+                        <field name="installation_adjust_so_qty_on_close"/>
+                    </setting>
+                    <setting string="Permitir cierre con material en poder del instalador"
+                             help="Si se desactiva, al cerrar con material en poder del instalador se exige una confirmación explícita.">
+                        <field name="installation_allow_close_with_installer_material"/>
+                    </setting>
+                    <setting string="Ubicaciones y operaciones por almacén"
+                             help="Elegí un almacén para ver/ajustar sus ubicaciones y tipos de operación de instalación. Se crean automáticamente la primera vez.">
+                        <field name="installation_warehouse_id" options="{'no_create': True}"/>
+                        <div invisible="not installation_warehouse_id" class="mt-2">
+                            <label for="installation_reserved_loc_id" class="o_light_label"/>
+                            <field name="installation_reserved_loc_id" options="{'no_create': True}"/>
+                            <br/>
+                            <label for="installation_installer_loc_id" class="o_light_label"/>
+                            <field name="installation_installer_loc_id" options="{'no_create': True}"/>
+                            <br/>
+                            <label for="installation_reserve_type_id" class="o_light_label"/>
+                            <field name="installation_reserve_type_id" options="{'no_create': True}"/>
+                            <br/>
+                            <label for="installation_withdraw_type_id" class="o_light_label"/>
+                            <field name="installation_withdraw_type_id" options="{'no_create': True}"/>
+                            <br/>
+                            <label for="installation_return_type_id" class="o_light_label"/>
+                            <field name="installation_return_type_id" options="{'no_create': True}"/>
+                            <br/>
+                            <label for="installation_consume_type_id" class="o_light_label"/>
+                            <field name="installation_consume_type_id" options="{'no_create': True}"/>
+                            <br/>
+                            <label for="installation_release_type_id" class="o_light_label"/>
+                            <field name="installation_release_type_id" options="{'no_create': True}"/>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

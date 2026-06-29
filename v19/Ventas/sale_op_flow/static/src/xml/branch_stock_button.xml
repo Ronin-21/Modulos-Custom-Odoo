@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="sale_op_flow.BranchStockButton">
+        <button t-if="productId" type="button"
+                class="btn btn-link p-0 text-info"
+                title="Ver stock en sucursales"
+                t-on-click="onClick">
+            <i class="fa fa-cubes"/>
+        </button>
+    </t>
+</templates>

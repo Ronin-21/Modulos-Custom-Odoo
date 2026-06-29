@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_users_form_installation" model="ir.ui.view">
+        <field name="name">res.users.form.installation</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='access_rights']" position="inside">
+                <group string="Materiales de Instalación">
+                    <field name="can_validate_installation_material"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

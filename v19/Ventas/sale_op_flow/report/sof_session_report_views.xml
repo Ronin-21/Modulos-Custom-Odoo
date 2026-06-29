@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- PIVOT -->
+    <record id="view_sof_session_report_pivot" model="ir.ui.view">
+        <field name="name">sale.cashier.session.report.pivot</field>
+        <field name="model">sale.cashier.session</field>
+        <field name="arch" type="xml">
+            <pivot string="Análisis de Sesiones" sample="1">
+                <field name="cashier_id" type="row"/>
+                <field name="total_collected" type="measure"/>
+                <field name="total_difference" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- GRAPH -->
+    <record id="view_sof_session_report_graph" model="ir.ui.view">
+        <field name="name">sale.cashier.session.report.graph</field>
+        <field name="model">sale.cashier.session</field>
+        <field name="arch" type="xml">
+            <graph string="Análisis de Sesiones" type="bar" sample="1">
+                <field name="date" interval="day"/>
+                <field name="total_collected" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="view_sof_session_report_search" model="ir.ui.view">
+        <field name="name">sale.cashier.session.report.search</field>
+        <field name="model">sale.cashier.session</field>
+        <field name="arch" type="xml">
+            <search string="Análisis de Sesiones">
+                <field name="name"/>
+                <field name="cashier_id"/>
+                <separator/>
+                <filter string="Validadas" name="f_validated" domain="[('state', '=', 'validated')]"/>
+                <filter string="Cerradas" name="f_closed" domain="[('state', 'in', ['closed', 'pending_validation'])]"/>
+                <filter string="Abiertas" name="f_open" domain="[('state', '=', 'open')]"/>
+                <filter string="Con diferencias" name="f_diff" domain="[('total_difference', '!=', 0)]"/>
+                <separator/>
+                <filter string="Hoy" name="f_today"
+                        domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Este mes" name="f_month"
+                        domain="[('date', '&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <group>
+                    <filter string="Cajero" name="g_cashier" context="{'group_by': 'cashier_id'}"/>
+                    <filter string="Sucursal" name="g_company" context="{'group_by': 'company_id'}"
+                            groups="base.group_multi_company"/>
+                    <filter string="Estado" name="g_state" context="{'group_by': 'state'}"/>
+                    <filter string="Fecha" name="g_date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_sof_session_report" model="ir.actions.act_window">
+        <field name="name">Sesiones (análisis)</field>
+        <field name="res_model">sale.cashier.session</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="search_view_id" ref="view_sof_session_report_search"/>
+        <field name="context">{'search_default_g_cashier': 1, 'search_default_f_month': 1, 'create': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin sesiones en el período</p>
+            <p>Análisis de sesiones de caja por cajero, sucursal y fecha: cobros, ingresos/egresos y diferencias.</p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         FORMULARIO: campo Empresas permitidas junto a Empresa,
+         con Empresa en modo solo-lectura.
+
+         NOTA TÉCNICA: En Odoo 18 el campo company_id aparece en el
+         header del formulario, por eso usamos //field[@name='usage']
+         (Tipo de ubicación) como anchor dentro de INFORMACIÓN ADICIONAL.
+         ============================================================ -->
+    <record id="view_location_form_allowed_companies" model="ir.ui.view">
+        <field name="name">stock.location.form.allowed.companies</field>
+        <field name="model">stock.location</field>
+        <field name="inherit_id" ref="stock.view_location_form"/>
+        <field name="arch" type="xml">
+
+            <!-- 1. Hacer company_id de solo lectura en todos los lugares
+                    donde aparece en la vista -->
+            <xpath expr="//field[@name='company_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+                <attribute name="help">El campo Empresa es de solo lectura. Use "Empresas permitidas" para controlar el acceso por empresa.</attribute>
+            </xpath>
+
+            <!-- 2. Agregar "Empresas permitidas" justo después de
+                    "Tipo de ubicación" (usage), dentro de INFORMACIÓN ADICIONAL.
+                    Resultado:
+                      · Tipo de ubicación
+                      · Empresas permitidas   (nuevo)
+                      · Empresa               (solo lectura)
+                      · Código de barras      -->
+            <xpath expr="//field[@name='usage']" position="after">
+                <field name="allowed_company_ids"
+                       widget="many2many_tags"
+                       options="{'no_create': True}"
+                       string="Empresas permitidas"
+                       help="Empresas que pueden usar esta ubicación. Si está vacío, no hay restricción adicional."/>
+                <field name="allowed_company_count" invisible="1"/>
+                <field name="is_shared_location" invisible="1"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- ============================================================
+         LISTA: columnas informativas opcionales
+         ============================================================ -->
+    <record id="view_location_tree_allowed_companies" model="ir.ui.view">
+        <field name="name">stock.location.tree.allowed.companies</field>
+        <field name="model">stock.location</field>
+        <field name="inherit_id" ref="stock.view_location_tree2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="allowed_company_count"
+                       string="# Emp. Perm."
+                       optional="show"/>
+                <field name="is_shared_location"
+                       string="Compartida"
+                       optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         BÚSQUEDA: filtros adicionales
+         ============================================================ -->
+    <record id="view_location_search_allowed_companies" model="ir.ui.view">
+        <field name="name">stock.location.search.allowed.companies</field>
+        <field name="model">stock.location</field>
+        <field name="inherit_id" ref="stock.view_location_search"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//filter[@name='inactive']" position="after">
+
+                <separator/>
+
+                <filter
+                    name="my_allowed_companies"
+                    string="Mis empresas permitidas"
+                    domain="[('allowed_company_ids', 'in', allowed_company_ids)]"
+                    help="Ubicaciones que incluyen al menos una de tus empresas activas."/>
+
+                <filter
+                    name="no_allowed_companies"
+                    string="Sin empresas permitidas"
+                    domain="[('allowed_company_ids', '=', False)]"
+                    help="Ubicaciones sin Empresas permitidas configuradas."/>
+
+                <filter
+                    name="shared_locations"
+                    string="Compartidas"
+                    domain="[('is_shared_location', '=', True)]"
+                    help="Sin empresa estándar y usadas por más de una empresa."/>
+
+                <separator/>
+
+                <filter
+                    name="transit_locations"
+                    string="Tránsito"
+                    domain="[('usage', '=', 'transit')]"/>
+
+                <filter
+                    name="internal_locations"
+                    string="Internas"
+                    domain="[('usage', '=', 'internal')]"/>
+
+                <filter
+                    name="virtual_locations"
+                    string="Virtuales"
+                    domain="[('usage', 'in', ['inventory', 'production', 'customer', 'supplier'])]"/>
+
+            </xpath>
+
+            <xpath expr="//group" position="inside">
+                <filter
+                    name="group_allowed_companies"
+                    string="Empresa permitida"
+                    context="{'group_by': 'allowed_company_ids'}"/>
+                <filter
+                    name="group_shared"
+                    string="Compartida"
+                    context="{'group_by': 'is_shared_location'}"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- ============================================================
+         MENÚ
+         ============================================================ -->
+
+    <record id="action_stock_location_init_wizard" model="ir.actions.act_window">
+        <field name="name">Inicializar Empresas Permitidas</field>
+        <field name="res_model">stock.location.init.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="action_stock_location_diagnostic_wizard" model="ir.actions.act_window">
+        <field name="name">Diagnóstico de Compatibilidad</field>
+        <field name="res_model">stock.location.diagnostic.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem
+        id="menu_stock_allowed_companies_root"
+        name="Empresas Permitidas"
+        parent="stock.menu_stock_config_settings"
+        sequence="50"
+        groups="stock_location_allowed_companies.group_allowed_companies_admin"/>
+
+    <menuitem
+        id="menu_stock_location_init"
+        name="Inicializar Empresas Permitidas"
+        parent="stock_location_allowed_companies.menu_stock_allowed_companies_root"
+        action="action_stock_location_init_wizard"
+        sequence="10"
+        groups="stock_location_allowed_companies.group_allowed_companies_admin"/>
+
+    <menuitem
+        id="menu_stock_location_diagnostic"
+        name="Diagnóstico de Compatibilidad"
+        parent="stock_location_allowed_companies.menu_stock_allowed_companies_root"
+        action="action_stock_location_diagnostic_wizard"
+        sequence="20"
+        groups="stock_location_allowed_companies.group_allowed_companies_admin"/>
+
+</odoo>

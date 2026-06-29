@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_prs_expense_payment_report"
+              name="Reporte de Gastos / Compras"
+              parent="account.account_reports_management_menu"
+              action="action_prs_expense_payment_report_wizard"
+              sequence="250"/>
+</odoo>

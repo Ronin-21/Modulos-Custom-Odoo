@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sale_order_advance_payment_salesman,sale.order.advance.payment salesman,model_sale_order_advance_payment,sales_team.group_sale_salesman,1,0,0,0
+access_sale_order_advance_payment_manager,sale.order.advance.payment manager,model_sale_order_advance_payment,sales_team.group_sale_salesman_all_leads,1,1,1,0
+access_sale_order_advance_payment_accountant,sale.order.advance.payment accountant,model_sale_order_advance_payment,account.group_account_user,1,1,1,0
+access_sale_order_advance_payment_admin,sale.order.advance.payment admin,model_sale_order_advance_payment,account.group_account_manager,1,1,1,1
+access_sale_advance_payment_wizard_user,sale.advance.payment.wizard user,model_sale_advance_payment_wizard,base.group_user,1,1,1,1
+access_sale_advance_payment_line_user,sale.advance.payment.line user,model_sale_advance_payment_line,base.group_user,1,1,1,1
+access_sale_advance_payment_check_user,sale.advance.payment.check user,model_sale_advance_payment_check,base.group_user,1,1,1,1

@@ -1,0 +1,31 @@
+<odoo>
+    <record id="view_account_journal_form_inherit_auto_extract" model="ir.ui.view">
+        <field name="name">account.journal.form.auto.extract.multi.company</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.view_account_journal_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//sheet" position="inside">
+
+                <group string="Extractos automáticos"
+                       invisible="type not in ['cash','bank','credit_card']">
+                    <field name="auto_extract_enabled"/>
+                    <field name="prs_auto_statement_balance" invisible="type not in ['cash','bank']"/>
+                    <field name="prs_only_reconciled_statements" invisible="type not in ['cash','bank']"/>
+                    <field name="prs_split_checks_per_statement" invisible="type not in ['cash','bank']"/>
+                    <field name="prs_warn_missing_memo"/>
+                    <field name="prs_allow_delete_statement_with_payments" invisible="type not in ['cash','bank']"/>
+                </group>
+
+                <group string="Empresas permitidas"
+                       invisible="type != 'cash'">
+                    <field name="allowed_company_ids"
+                           widget="many2many_tags"
+                           options="{'no_create': True}"/>
+                </group>
+
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

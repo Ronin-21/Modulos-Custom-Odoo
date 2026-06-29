@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LISTA: órdenes bloqueadas por crédito
+    ═══════════════════════════════════════════════════════════ -->
+    <record id="view_sale_order_credit_approval_list" model="ir.ui.view">
+        <field name="name">sale.order.credit.approval.list</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <list string="Órdenes Bloqueadas por Crédito"
+                  decoration-warning="state == 'sales_approval'"
+                  decoration-danger="state == 'reject'">
+                <header>
+                    <button name="approve_credit_limit_bulk"
+                            type="object"
+                            string="✅ Aprobar"
+                            groups="customer_credit_limit_approval_v19.group_credit_approver"/>
+                    <button name="reject_credit_limit_bulk"
+                            type="object"
+                            string="❌ Rechazar"
+                            groups="customer_credit_limit_approval_v19.group_credit_approver"/>
+                </header>
+                <field name="name" string="Orden"/>
+                <field name="date_order" string="Fecha"/>
+                <field name="partner_id" string="Cliente"/>
+                <field name="user_id" string="Vendedor"/>
+                <field name="amount_total" string="Total orden" sum="Total órdenes"/>
+                <field name="amount_due" string="Deuda actual" optional="show"/>
+                <field name="customer_blocking_limit" string="Límite de crédito" optional="show"/>
+                <field name="credit_excess" string="Exceso" decoration-danger="credit_excess > 0"/>
+                <field name="company_currency_id" column_invisible="1"/>
+                <field name="state" widget="badge"
+                       decoration-warning="state == 'sales_approval'"
+                       decoration-danger="state == 'reject'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BÚSQUEDA
+    ═══════════════════════════════════════════════════════════ -->
+    <record id="view_sale_order_credit_approval_search" model="ir.ui.view">
+        <field name="name">sale.order.credit.approval.search</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <search string="Buscar órdenes bloqueadas">
+                <field name="name" string="Orden"/>
+                <field name="partner_id" string="Cliente"/>
+                <field name="user_id" string="Vendedor"/>
+                <separator/>
+                <filter string="En aprobación"
+                        name="in_approval"
+                        domain="[('state', '=', 'sales_approval')]"/>
+                <filter string="Rechazadas"
+                        name="rejected"
+                        domain="[('state', '=', 'reject')]"/>
+                <separator/>
+                <filter string="Mis órdenes"
+                        name="my_orders"
+                        domain="[('user_id', '=', uid)]"/>
+                <separator/>
+                <filter string="Cliente"
+                        name="group_partner"
+                        context="{'group_by': 'partner_id'}"/>
+                <filter string="Vendedor"
+                        name="group_user"
+                        context="{'group_by': 'user_id'}"/>
+                <filter string="Estado"
+                        name="group_state"
+                        context="{'group_by': 'state'}"/>
+                <filter string="Fecha"
+                        name="group_date"
+                        context="{'group_by': 'date_order:month'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         ACCIÓN
+    ═══════════════════════════════════════════════════════════ -->
+    <record id="action_sale_order_credit_approval" model="ir.actions.act_window">
+        <field name="name">Órdenes Bloqueadas por Crédito</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', 'in', ['sales_approval', 'reject'])]</field>
+        <field name="view_id" ref="view_sale_order_credit_approval_list"/>
+        <field name="search_view_id" ref="view_sale_order_credit_approval_search"/>
+        <field name="context">{'search_default_in_approval': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay órdenes bloqueadas por crédito.
+            </p>
+            <p>
+                Las órdenes de venta que superen el límite de crédito del cliente
+                aparecerán aquí cuando estén en espera de aprobación o rechazadas.
+            </p>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MENÚ
+    ═══════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_sale_credit_management"
+              name="Crédito"
+              parent="sale.sale_menu_root"
+              sequence="15"/>
+
+    <menuitem id="menu_sale_credit_approval_orders"
+              name="Órdenes Bloqueadas"
+              parent="menu_sale_credit_management"
+              action="action_sale_order_credit_approval"
+              sequence="10"/>
+
+</odoo>

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="sale_product_part_wizard_form_view" model="ir.ui.view">
+        <field name="name">sale.product.part.wizard.form</field>
+        <field name="model">sale.product.part.wizard</field>
+        <field name="arch" type="xml">
+
+            <form string="Despiece / Piezas del Producto">
+                <sheet>
+
+                    <!-- Encabezado -->
+                    <group>
+                        <group string="Producto de referencia">
+                            <field name="product_id"
+                                   readonly="1"
+                                   nolabel="1"
+                                   options="{'no_open': True}"
+                                   style="font-weight: bold; font-size: 1.1em;"/>
+                        </group>
+                        <group string="Cantidad en el pedido">
+                            <field name="origin_qty" readonly="1"/>
+                            <field name="origin_uom_id" readonly="1" string="Unidad"/>
+                        </group>
+                    </group>
+
+                    <separator string="Piezas / Repuestos disponibles"/>
+
+                    <!-- Buscador reactivo -->
+                    <group>
+                        <field name="search_term"
+                               nolabel="1"
+                               placeholder="🔍  Buscar pieza o repuesto..."
+                               style="max-width: 400px;"/>
+                    </group>
+
+                    <!--
+                        Lista de piezas.
+
+                        create="0" → elimina "Agregar una línea"
+                        delete="0" → elimina el ícono de basura por fila
+                        sequence como column_invisible → elimina los handles de arrastre
+
+                        product_id con options="{'no_open': True}" → sin link azul.
+                        Al tocar esa celda (readonly) en Odoo 19 abre el <form> interno.
+
+                        <form> interno → popup 100% readonly con info de la pieza,
+                        incluyendo stock disponible y referencia interna.
+
+                        selected sin widget → checkbox estándar (no toggle switch).
+                    -->
+                    <field name="wizard_line_ids"
+                           nolabel="1"
+                           domain="[('product_id.display_name', 'ilike', search_term)]">
+
+                        <!-- Popup readonly: se abre al tocar una fila -->
+                        <form string="Información de la pieza">
+                            <sheet>
+                                <group>
+                                    <group string="Datos del producto">
+                                        <field name="product_id"
+                                               readonly="1"
+                                               options="{'no_open': True}"/>
+                                        <field name="product_ref"
+                                               readonly="1"
+                                               invisible="not product_ref"/>
+                                        <field name="uom_id"
+                                               readonly="1"
+                                               string="Unidad de medida"/>
+                                    </group>
+                                    <group string="Stock e inventario">
+                                        <field name="qty_available"
+                                               readonly="1"
+                                               string="Disponible en stock"/>
+                                    </group>
+                                </group>
+                                <group string="Despiece">
+                                    <field name="quantity"
+                                           readonly="1"
+                                           string="Cantidad sugerida (pedido actual)"/>
+                                    <field name="note"
+                                           readonly="1"
+                                           invisible="not note"/>
+                                    <field name="already_loaded"
+                                           readonly="1"
+                                           string="Ya insertada en el pedido"
+                                           widget="boolean_toggle"/>
+                                </group>
+                            </sheet>
+                            <footer>
+                                <button string="Cerrar"
+                                        special="cancel"
+                                        class="btn-primary"/>
+                            </footer>
+                        </form>
+
+                        <!-- Lista principal -->
+                        <list editable="bottom"
+                              create="0"
+                              delete="0"
+                              decoration-muted="already_loaded"
+                              default_order="sequence">
+
+                            <!--
+                                Sequence: column_invisible elimina el handle de arrastre
+                                (los cuadrados que aparecían en la columna izquierda).
+                            -->
+                            <field name="sequence" column_invisible="1"/>
+
+                            <!--
+                                product_id: readonly + no_open = texto plano sin link.
+                                Al tocar esta celda (readonly) se abre el popup del <form>.
+                            -->
+                            <field name="product_id"
+                                   readonly="1"
+                                   options="{'no_open': True}"
+                                   string="Pieza / Repuesto"/>
+
+                            <!-- Cantidad: editable para ajustar antes de insertar -->
+                            <field name="quantity" string="Cantidad"/>
+
+                            <field name="uom_id" readonly="1" optional="show"/>
+                            <field name="note" readonly="1" optional="show"/>
+
+                            <!-- Indicador estado: toggle como badge visual (readonly) -->
+                            <field name="already_loaded"
+                                   readonly="1"
+                                   string="Ya insertada"
+                                   widget="boolean_toggle"/>
+
+                            <!--
+                                Checkbox estándar de selección (sin widget="boolean_toggle").
+                                Oculto para piezas ya insertadas (usar "Actualizar cantidades").
+                            -->
+                            <field name="selected"
+                                   string="✓ Insertar"
+                                   invisible="already_loaded"/>
+
+                        </list>
+                    </field>
+
+                    <div class="alert alert-info mt-2" role="alert">
+                        <i class="fa fa-info-circle mr-1"/>
+                        <strong>Piezas ya insertadas</strong> (atenuadas): ya existen en el pedido.
+                        Tocá la fila para ver su detalle completo (stock, referencia, etc.).<br/>
+                        <i class="fa fa-tag mr-1"/>
+                        El <strong>precio</strong> de cada pieza se asigna automáticamente
+                        por la lista de precios del pedido.
+                    </div>
+
+                </sheet>
+
+                <footer>
+                    <button name="action_insert_parts"
+                            type="object"
+                            string="Insertar seleccionadas"
+                            class="btn-primary"/>
+                    <button name="action_update_quantities"
+                            type="object"
+                            string="Actualizar cantidades"
+                            class="btn-secondary"/>
+                    <button string="Cerrar"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+
+        </field>
+    </record>
+
+</odoo>

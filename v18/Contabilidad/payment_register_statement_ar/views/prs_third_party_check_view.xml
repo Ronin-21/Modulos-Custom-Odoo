@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Lista de Cheques de Terceros: agregar estado PRS y endoso -->
+    <record id="view_prs_third_party_check_tree" model="ir.ui.view">
+        <field name="name">l10n_latam.check.third_party.list.prs</field>
+        <field name="model">l10n_latam.check</field>
+        <field name="inherit_id" ref="l10n_latam_check.view_account_third_party_check_tree"/>
+        <field name="arch" type="xml">
+            <field name="current_journal_id" position="after">
+                <field name="prs_third_party_state"
+                       widget="badge"
+                       decoration-success="prs_third_party_state == 'holding'"
+                       decoration-primary="prs_third_party_state == 'cashed'"
+                       decoration-warning="prs_third_party_state == 'endorsed'"
+                       decoration-info="prs_third_party_state == 'deposited'"
+                       optional="show"
+                       string="Estado"/>
+                <field name="prs_endorsed_to_id"
+                       optional="show"
+                       string="Endosado a"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda: filtros por estado PRS -->
+    <record id="view_prs_third_party_check_search" model="ir.ui.view">
+        <field name="name">l10n_latam.check.search.prs</field>
+        <field name="model">l10n_latam.check</field>
+        <field name="inherit_id" ref="l10n_latam_check.view_account_payment_third_party_checks_search"/>
+        <field name="arch" type="xml">
+
+            <!-- Reemplazar filtro nativo "On hand" por cuatro filtros PRS con dominio directo -->
+            <filter name="checks_on_hand" position="replace">
+                <filter string="En cartera"
+                        name="prs_holding"
+                        domain="[('prs_third_party_state', '=', 'holding')]"/>
+                <filter string="Cobrado en efectivo"
+                        name="prs_cashed"
+                        domain="[('prs_third_party_state', '=', 'cashed')]"/>
+                <filter string="Entregado / Endosado"
+                        name="prs_endorsed"
+                        domain="[('prs_third_party_state', '=', 'endorsed')]"/>
+                <filter string="Depositado"
+                        name="prs_deposited"
+                        domain="[('prs_third_party_state', '=', 'deposited')]"/>
+            </filter>
+
+            <!-- Búsqueda por "Endosado a" -->
+            <field name="current_journal_id" position="before">
+                <field name="prs_endorsed_to_id" string="Endosado a"/>
+            </field>
+
+            <!-- Agrupadores por estado y endoso -->
+            <filter name="groupby_current_journal" position="after">
+                <filter name="groupby_prs_state"
+                        string="Estado"
+                        context="{'group_by': 'prs_third_party_state'}"/>
+                <filter name="groupby_endorsed_to"
+                        string="Endosado a"
+                        context="{'group_by': 'prs_endorsed_to_id'}"/>
+            </filter>
+
+        </field>
+    </record>
+
+    <!-- Acción: usar filtro PRS "En cartera" por defecto en lugar del nativo -->
+    <record id="l10n_latam_check.action_third_party_check" model="ir.actions.act_window">
+        <field name="context">{'search_default_prs_holding': 1}</field>
+    </record>
+
+</odoo>

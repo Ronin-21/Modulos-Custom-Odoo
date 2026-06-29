@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="login_layout_test" inherit_id="web.login" name="Prueba de inicio de sesión web" priority="50">
+        <xpath expr="//form/div[4]" position="inside">
+            <a t-attf-href="/web/request_otp" t-if="error == 'Not allowed to login from this IP'" name="add_ip" value="/web/add/ip" class="btn btn-link btn-sm btn-block">Agregar esta IP</a>
+        </xpath>
+    </template>
+
+    <!-- <template id="request_otp" name="Registro/inicio de sesión con OTP">
+        <t t-call="web.login_layout">
+            <form class="oe_signup_form loginbox" role="form" method="post" t-if="not message">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <div class="form-group field-name">
+                    <label>Correo electrónico</label>
+                    <input type="text" name="email" t-att-value="email" id="email" class="form-control form-control-sm" required="required"/>
+                </div>
+                <p class="alert alert-danger" t-if="error" role="alert">
+                    <t t-esc="error"/>
+                </p>
+                <button type="Enviar" class="btn btn-primary btn-block" >Enviar</button>
+                <span class="btn btn-sm btn-block">o</span>
+                <a class="btn btn-link btn-sm btn-block" t-attf-href="/web/login">Iniciar sesión</a>
+            </form>
+        </t>
+    </template>
+
+    <template id="verify_otp" name="Registro/inicio de sesión con OTP">
+        <t t-call="web.login_layout">
+            <form class="oe_signup_form loginbox" t-attf-action="/web/verify_otp" role="form" method="post" t-if="not message">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <div class="form-group field-name">
+                    <label>OTP</label>
+                    <input type="hidden" name="email" t-att-value="email" id="email" class="form-control form-control-sm" />
+                    <input type="text" name="otp" t-att-value="otp" id="otp" class="form-control form-control-sm" required="required"/>
+                </div>
+                <p class="alert alert-danger" t-if="error" role="alert">
+                    <t t-esc="error"/>
+                </p>
+                <button type="Enviar" class="btn btn-primary btn-block" >Enviar</button>
+                <span class="btn btn-sm btn-block">o</span>
+                <a class="btn btn-link btn-sm btn-block" t-attf-href="/web/login">Iniciar sesión</a>
+            </form>
+        </t>
+    </template> -->
+</odoo>

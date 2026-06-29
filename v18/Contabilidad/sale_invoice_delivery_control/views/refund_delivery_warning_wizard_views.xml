@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_refund_delivery_warning_wizard_form" model="ir.ui.view">
+            <field name="name">refund.delivery.warning.wizard.form</field>
+            <field name="model">refund.delivery.warning.wizard</field>
+            <field name="arch" type="xml">
+                <form string="No se puede crear la Nota de Crédito">
+                    <div style="padding: 16px;">
+
+                        <!-- Ícono + mensaje de bloqueo -->
+                        <div class="row">
+                            <div class="col-1 text-center">
+                                <i class="fa fa-ban fa-2x text-danger" title="Bloqueado"/>
+                            </div>
+                            <div class="col-11">
+                                <field name="message"
+                                       widget="text"
+                                       readonly="1"
+                                       style="white-space: pre-wrap; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; padding: 10px; display: block;"/>
+                            </div>
+                        </div>
+
+                        <!-- Detalle de entregas -->
+                        <div class="row mt-3" invisible="delivery_summary == ''">
+                            <div class="col-12">
+                                <div class="o_form_label">Entregas validadas pendientes de devolución:</div>
+                                <field name="delivery_summary"
+                                       widget="text"
+                                       readonly="1"
+                                       style="white-space: pre-wrap; font-size: 0.9em; color: #495057; margin-top: 4px;"/>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <footer>
+                        <button name="action_close"
+                                string="Cerrar"
+                                type="object"
+                                class="btn-secondary"
+                                data-hotkey="z"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_refund_delivery_warning_wizard" model="ir.actions.act_window">
+            <field name="name">Bloqueo NC - Sin devolución de mercadería</field>
+            <field name="res_model">refund.delivery.warning.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+    </data>
+</odoo>

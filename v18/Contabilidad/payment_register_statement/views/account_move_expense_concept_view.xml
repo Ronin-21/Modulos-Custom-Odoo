@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_account_move_form_prs_expense_concept" model="ir.ui.view">
+        <field name="name">account.move.form.prs.expense.concept</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <!--
+                Ubicar "Concepto de gasto" dentro del bloque izquierdo del encabezado
+                (donde está la Referencia de factura), al final del grupo para que
+                ocupe el espacio libre marcado.
+
+                Usamos un XPath robusto: toma el primer <group> que contenga el campo ref
+                como hijo directo (evita pegarlo en otros lugares del formulario).
+            -->
+            <xpath expr="(//group[field[@name='ref']])[1]" position="inside">
+                <field name="prs_expense_concept_id" options="{'no_create': True}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

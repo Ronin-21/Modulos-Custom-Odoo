@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_account_payment_register_form_prs_card" model="ir.ui.view">
+        <field name="name">account.payment.register.form.prs.card</field>
+        <field name="model">account.payment.register</field>
+        <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+        <field name="arch" type="xml">
+            <!-- Campo invisible para controlar visibilidad -->
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="prs_card_provider_id" invisible="1"/>
+            </xpath>
+            <!-- Tarjeta y plan después del journal, visibles solo cuando el diario tiene procesador -->
+            <xpath expr="//group[@name='group1']/field[@name='journal_id']" position="after">
+                <field name="prs_card_id"
+                       invisible="not prs_card_provider_id"
+                       options="{'no_create': True}"
+                       placeholder="Seleccionar tarjeta..."/>
+                <field name="prs_installment_id"
+                       invisible="not prs_card_provider_id or not prs_card_id"
+                       options="{'no_create': True}"
+                       placeholder="Sin plan (pago contado)"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

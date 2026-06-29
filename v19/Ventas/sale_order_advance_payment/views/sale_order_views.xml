@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- =====================================================
+         HERENCIA: Formulario de Orden de Venta
+         ===================================================== -->
+
+    <record id="view_sale_order_form_advance_payment_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.advance.payment.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- 1. Ribbon "Pendiente de Facturar" -->
+            <xpath expr="//sheet" position="inside">
+                <widget name="web_ribbon"
+                        title="Pendiente de Facturar"
+                        bg_color="text-bg-info"
+                        invisible="advance_payment_state != 'posted'"/>
+            </xpath>
+
+            <!-- 2. Botones en la cabecera -->
+            <xpath expr="//button[@id='create_invoice']" position="before">
+                <button name="action_register_advance_payment"
+                        type="object"
+                        string="Registrar Pago Adelantado"
+                        class="btn-primary"
+                        invisible="not advance_payment_visible or state != 'sale' or (not advance_payment_allow_multiple and advance_payment_count > 0)"
+                        icon="fa-money"/>
+                <button name="action_print_advance_payment_receipt"
+                        type="object"
+                        string="Imprimir Comprobante"
+                        class="btn-secondary"
+                        invisible="not advance_payment_visible or advance_payment_count == 0"
+                        icon="fa-print"/>
+            </xpath>
+
+            <!-- 3. Smart button de Pagos Adelantados -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_advance_payment"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-money"
+                        invisible="advance_payment_count == 0">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="advance_payment_count"/>
+                        </span>
+                        <span class="o_stat_text">Pago Adelantado</span>
+                    </div>
+                </button>
+            </xpath>
+
+            <!-- 4. Campos computed ocultos (necesarios para invisible y ribbon) -->
+            <xpath expr="//notebook" position="before">
+                <field name="advance_payment_state" invisible="1"/>
+                <field name="advance_payment_count" invisible="1"/>
+                <field name="advance_payment_visible" invisible="1"/>
+                <field name="advance_payment_allow_multiple" invisible="1"/>
+            </xpath>
+
+            <!-- 5. Pestaña "Pago Adelantado" en el notebook -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Pago Adelantado"
+                      name="advance_payment_tab"
+                      invisible="advance_payment_count == 0">
+
+                    <!-- Estado: activo (posted o applied) -->
+                    <group invisible="advance_payment_state not in ('posted', 'applied')">
+                        <group string="Resumen">
+                            <field name="advance_payment_amount"
+                                   string="Total recibido"
+                                   readonly="1"
+                                   widget="monetary"/>
+                            <field name="advance_payment_pending_amount"
+                                   string="Pendiente de aplicar"
+                                   readonly="1"
+                                   widget="monetary"
+                                   invisible="advance_payment_pending_amount == 0"/>
+                            <field name="advance_payment_estimated_balance"
+                                   string="Saldo estimado de la orden"
+                                   readonly="1"
+                                   widget="monetary"
+                                   invisible="advance_payment_pending_amount == 0"/>
+                        </group>
+                        <group string="Aplicación" invisible="advance_payment_applied_amount == 0">
+                            <field name="advance_payment_invoice_id"
+                                   string="Aplicado a factura"
+                                   readonly="1"
+                                   options="{'no_create': True}"/>
+                            <field name="advance_payment_applied_amount"
+                                   string="Importe aplicado"
+                                   readonly="1"
+                                   widget="monetary"/>
+                        </group>
+                        <field name="advance_payment_ids" colspan="2" nolabel="1" readonly="1">
+                            <list>
+                                <field name="name"/>
+                                <field name="payment_date"/>
+                                <field name="amount"/>
+                                <field name="state" widget="badge"
+                                       decoration-success="state == 'applied'"
+                                       decoration-info="state == 'posted'"
+                                       decoration-muted="state == 'cancelled'"/>
+                                <field name="invoice_id"/>
+                            </list>
+                        </field>
+                    </group>
+
+                    <!-- Estado: cancelado -->
+                    <div class="alert alert-warning"
+                         invisible="advance_payment_state != 'cancelled'">
+                        <p class="mb-0">
+                            <i class="fa fa-exclamation-triangle me-1"/>
+                            <strong>Pago adelantado cancelado.</strong>
+                            El pago fue cancelado desde Contabilidad.
+                            El saldo puede estar disponible como crédito del cliente.
+                        </p>
+                    </div>
+
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

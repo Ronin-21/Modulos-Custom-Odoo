@@ -1,0 +1,156 @@
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h1 class="oe_slogan" style="color:#1f6f54;">Control de Materiales de Instalación</h1>
+        <h3 class="oe_slogan" style="color:#5a6268;">
+            Retiros y devoluciones parciales · Consumo real · Facturación de lo efectivamente usado
+        </h3>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan">¿Qué problema resuelve?</h2>
+        <div class="oe_span12">
+            <p class="oe_mt32" style="font-size:16px;">
+                En las ventas de instalación se presupuesta un servicio (ej. <b>INSTALACIONES</b>) junto
+                con materiales (ej. <b>CAÑO COBRE</b>). El material no se consume de una sola vez: el
+                instalador <b>retira parcial</b>, <b>devuelve sobrante</b> y el <b>consumo real</b> recién
+                se conoce al cerrar la obra. Facturar las 100 unidades presupuestadas cuando se usaron 70
+                es incorrecto, y el sobrante no es una devolución del cliente.
+            </p>
+            <p style="font-size:18px; text-align:center; margin-top:20px;">
+                <b style="color:#1f6f54;">Consumo real = Total retirado − Total devuelto</b><br/>
+                <span style="color:#5a6268;">Se factura el consumo real · El sobrante vuelve a stock libre</span>
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan">El flujo en una imagen</h2>
+        <div class="oe_span12">
+            <pre style="background:#f6f8fa; border:1px solid #e1e4e8; border-radius:6px; padding:16px; font-size:14px;">
+Confirmar venta (100)    Stock libre          →  Reservado Instalaciones   (apartado)
+Retiro                   Reservado            →  En Poder del Instalador
+Devolución               En Poder Instalador  →  Reservado Instalaciones
+Cerrar  · usado (70)     En Poder Instalador  →  Cliente        ⇒ se factura 70
+        · sobrante (30)  Reservado            →  Stock libre    ⇒ liberado</pre>
+            <p style="text-align:center; color:#5a6268;">
+                Las líneas de material <b>no usan la entrega nativa</b>: el módulo controla todos los
+                movimientos. <b>No genera backorders.</b> Hasta cerrar, no hay nada para facturar.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan">Configuración (una sola vez)</h2>
+        <div class="oe_span12">
+            <table class="table table-striped" style="font-size:15px;">
+                <tr>
+                    <td style="width:30%;"><b>Permisos de usuario</b></td>
+                    <td>Ajustes → Usuarios → pestaña <i>Permisos de acceso</i> → <i>Control de Materiales
+                        de Instalación</i>: <b>Usuario</b> (ve), <b>Responsable</b> (retiros/devoluciones),
+                        <b>Administrador</b> (cierra/configura). También sirve el check
+                        <i>«Puede validar materiales de instalación»</i>.</td>
+                </tr>
+                <tr>
+                    <td><b>Producto servicio</b></td>
+                    <td>En el producto de instalación, marcar <b>«Es servicio de instalación»</b>. Toda
+                        venta que lo incluya se trata como instalación. <i>(Alternativa: marcar a mano
+                        «Es instalación» en la venta.)</i></td>
+                </tr>
+                <tr>
+                    <td><b>Productos material</b></td>
+                    <td>Deben ser <b>Bienes / almacenables</b> y tener <b>stock suficiente</b>: al
+                        confirmar se apartan a «Reservado Instalaciones».</td>
+                </tr>
+                <tr>
+                    <td><b>Ubicaciones y operaciones</b></td>
+                    <td>Se crean <b>automáticamente</b> por almacén al instalar. Revisables en
+                        Ajustes → <b>Inventario</b> → sección <i>Materiales de Instalación</i>.</td>
+                </tr>
+                <tr>
+                    <td><b>Opciones de cierre</b></td>
+                    <td><i>Ajustar cantidad de venta al cerrar</i> = <b>Sí</b> (por defecto) ·
+                        <i>Permitir cierre con material en poder del instalador</i> = <b>No</b> (por
+                        defecto: exige confirmación al cerrar).</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan">Cómo se usa</h2>
+        <div class="oe_span6">
+            <h3 style="color:#1f6f54;">1 · Confirmar la venta</h3>
+            <p>Se crea solo el <b>Control de Materiales</b> (botón inteligente «Materiales» en la venta).
+               El material queda apartado en «Reservado Instalaciones». Estado: <b>Reservado</b>.</p>
+            <h3 style="color:#1f6f54;">2 · Retiro</h3>
+            <p>En el control, <b>Crear retiro</b> → cantidad por producto → Confirmar. Genera el
+               movimiento interno y el <b>comprobante de retiro</b> en PDF.</p>
+            <h3 style="color:#1f6f54;">3 · Devolución</h3>
+            <p><b>Registrar devolución</b> → cantidad → Confirmar. El material vuelve a «Reservado»
+               (no a stock libre) y se emite el <b>comprobante de devolución</b>.</p>
+        </div>
+        <div class="oe_span6">
+            <h3 style="color:#1f6f54;">4 · Cerrar consumo</h3>
+            <p>(Administrador) <b>Cerrar consumo de materiales</b>. El sistema calcula
+               <b>usado = retirado − devuelto</b>, consume esa cantidad hacia el cliente, libera el
+               sobrante a stock libre y <b>ajusta la línea de venta</b> al consumo real
+               (la cantidad original se conserva en trazabilidad).</p>
+            <h3 style="color:#1f6f54;">5 · Facturar</h3>
+            <p>Se factura <b>solo lo usado</b>. Antes de cerrar, la línea muestra «A facturar = 0».</p>
+            <h3 style="color:#1f6f54;">Trazabilidad</h3>
+            <p>Desde la venta (pestaña <i>Instalación</i>) y el control: presupuestado, retirado,
+               devuelto, usado, liberado, pickings, comprobantes y responsable.</p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan">Ejemplo completo (100 / 70 / 30)</h2>
+        <div class="oe_span12">
+            <table class="table table-bordered" style="font-size:15px; text-align:center;">
+                <thead style="background:#1f6f54; color:#fff;">
+                    <tr><th>Paso</th><th>Acción</th><th>Retirado</th><th>Devuelto</th>
+                        <th>Usado</th><th>Pendiente</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>Confirmar venta x100</td><td>0</td><td>0</td><td>0</td><td>100</td></tr>
+                    <tr><td>2</td><td>Retiro 50</td><td>50</td><td>0</td><td>50</td><td>50</td></tr>
+                    <tr><td>3</td><td>Devolución 10</td><td>50</td><td>10</td><td>40</td><td>60</td></tr>
+                    <tr><td>4</td><td>Retiro 60</td><td>110</td><td>10</td><td>100</td><td>0</td></tr>
+                    <tr><td>5</td><td>Devolución 30</td><td>110</td><td>40</td><td>70</td><td>30</td></tr>
+                    <tr style="background:#e8f5ef; font-weight:bold;">
+                        <td>6</td><td>Cerrar</td><td>110</td><td>40</td><td>70</td><td>30 liberado</td></tr>
+                </tbody>
+            </table>
+            <p style="text-align:center;"><b>Resultado:</b> venta ajustada a 70 · original 100 conservado ·
+               factura por 70 · 30 vueltas a stock libre · sin backorders.</p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan">Reglas y validaciones</h2>
+        <div class="oe_span12">
+            <ul style="font-size:15px;">
+                <li>No se puede <b>devolver más de lo retirado</b>.</li>
+                <li>No se puede <b>retirar más que el pendiente</b> disponible.</li>
+                <li>No se puede <b>cerrar</b> con movimientos pendientes de validar.</li>
+                <li>Por defecto, cerrar con material en poder del instalador <b>exige confirmación</b>.</li>
+                <li>No se modifican cantidades de un material ya <b>cerrado</b> (salvo administrador).</li>
+                <li>No se puede <b>reabrir</b> si la venta ya tiene cantidades facturadas.</li>
+            </ul>
+            <p style="color:#5a6268;">Compatible con el flujo nativo de Odoo (venta, proyecto, entrega,
+               facturación). No modifica el núcleo. Odoo 19 · Alderete Informática.</p>
+        </div>
+    </div>
+</section>

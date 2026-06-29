@@ -1,0 +1,873 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════
+         HERENCIA DEL FORM ESTÁNDAR
+         Estados: quotation → confirmed → paid → dispatched
+    ═══════════════════════════════════════════════════════ -->
+    <record id="view_sale_order_form_sof" model="ir.ui.view">
+        <field name="name">sale.order.form.sof</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Ocultar statusbar nativo en pedidos SOF (reemplazado por el operativo) -->
+            <xpath expr="//header/field[@name='state']" position="attributes">
+                <attribute name="invisible">is_sof_order</attribute>
+            </xpath>
+
+            <!-- Statusbar operativo: solo visible en pedidos SOF -->
+            <xpath expr="//header/field[@name='state']" position="before">
+                <field name="operational_state"
+                       widget="statusbar"
+                       statusbar_visible="quotation,confirmed,prepared,paid,in_delivery,dispatched"
+                       readonly="1"
+                       invisible="not is_sof_order"/>
+                <field name="dispatch_prepared" invisible="1"/>
+                <field name="is_sof_order" invisible="1"/>
+                <field name="locked" invisible="1"/>
+                <field name="sof_show_invoice_button" invisible="1"/>
+                <field name="sof_show_delivery_button" invisible="1"/>
+                <field name="is_service_order" invisible="1"/>
+                <field name="sof_service_label" invisible="1"/>
+                <field name="sof_validity_status" invisible="1"/>
+                <field name="sof_can_do_exchange" invisible="1"/>
+                <field name="sof_fully_returned" invisible="1"/>
+            </xpath>
+
+            <!-- Datos del comprador (SOF): nombre opcional y comprobante solicitado (interno) -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="sof_consumer_name"
+                       invisible="not is_sof_order"
+                       placeholder="Nombre del comprador (opcional)"/>
+                <field name="sof_invoice_preference"
+                       invisible="not is_sof_order"/>
+            </xpath>
+
+            <!-- Ribbon "Servicio": visible en pedidos SOF de servicio puro -->
+            <xpath expr="//sheet" position="inside">
+                <widget name="web_ribbon"
+                        title="Servicio"
+                        bg_color="text-bg-info"
+                        invisible="not is_sof_order or not is_service_order"/>
+                <widget name="web_ribbon"
+                        title="Devolución total"
+                        bg_color="text-bg-danger"
+                        invisible="not is_sof_order or not sof_fully_returned"/>
+            </xpath>
+
+            <!-- Ocultar botón nativo Print para pedidos SOF (lo reemplazamos con el nuestro) -->
+            <xpath expr="//header/button[@name='sale.action_report_saleorder']" position="attributes">
+                <attribute name="invisible">is_sof_order</attribute>
+            </xpath>
+
+            <!-- Ocultar botón nativo Unlock para pedidos SOF (lo reemplazamos con el nuestro) -->
+            <xpath expr="//header/button[@name='action_unlock']" position="attributes">
+                <attribute name="invisible">is_sof_order or not locked</attribute>
+            </xpath>
+
+            <!-- Botones SOF: visibles solo en pedidos del flujo operativo -->
+            <xpath expr="//header/button[@name='action_confirm']" position="after">
+                <button name="action_print_sof_quotation"
+                        string="Imprimir presupuesto"
+                        type="object"
+                        icon="fa-print"
+                        invisible="not is_sof_order or operational_state != 'quotation'"
+                        groups="sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_supervisor"/>
+                <button name="action_sof_renew_validity"
+                        string="Renovar vigencia"
+                        type="object"
+                        invisible="not is_sof_order or operational_state != 'quotation' or sof_validity_status not in ('expiring', 'expired')"
+                        groups="sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_supervisor"/>
+                <field name="sof_validity_status"
+                       widget="badge"
+                       decoration-success="sof_validity_status == 'valid'"
+                       decoration-warning="sof_validity_status == 'expiring'"
+                       decoration-danger="sof_validity_status == 'expired'"
+                       invisible="not is_sof_order or operational_state != 'quotation' or not sof_validity_status"/>
+                <button name="action_sof_unlock"
+                        string="Desbloquear"
+                        type="object"
+                        class="btn-warning"
+                        invisible="not is_sof_order or not locked or operational_state in ('quotation', 'paid', 'in_delivery', 'dispatched', 'cancelled')"
+                        groups="sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"
+                        confirm="¿Desbloquear el pedido? Se cancelarán los movimientos de stock pendientes para que se recreen con los cambios."/>
+                <button name="action_sof_relock"
+                        string="Confirmar cambios"
+                        type="object"
+                        class="btn-primary"
+                        invisible="not is_sof_order or locked or operational_state in ('quotation', 'paid', 'in_delivery', 'dispatched', 'cancelled')"
+                        groups="sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+                <button name="action_open_cashier_payment_wizard"
+                        string="Registrar Cobro"
+                        type="object"
+                        class="btn-success"
+                        invisible="not is_sof_order or operational_state not in ('confirmed', 'prepared')"
+                        groups="sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+                <button name="action_prepare_dispatch"
+                        string="Preparar despacho"
+                        type="object"
+                        class="btn-primary"
+                        invisible="not is_sof_order or operational_state not in ('confirmed',) or dispatch_prepared"
+                        groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+                <button name="action_confirm_dispatch"
+                        string="Confirmar despacho"
+                        type="object"
+                        class="btn-success"
+                        invisible="not is_sof_order or operational_state != 'paid'"
+                        groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+                <button name="action_confirm_delivery"
+                        string="Confirmar entrega"
+                        type="object"
+                        class="btn-success"
+                        invisible="not is_sof_order or operational_state != 'in_delivery'"
+                        groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+                <button name="action_op_cancel"
+                        string="Cancelar operación"
+                        type="object"
+                        invisible="not is_sof_order or operational_state in ('cancelled', 'dispatched', 'quotation')"
+                        groups="sale_op_flow.group_sale_supervisor"/>
+                <button name="action_op_reopen"
+                        string="Reabrir"
+                        type="object"
+                        invisible="not is_sof_order or operational_state != 'cancelled'"
+                        groups="sale_op_flow.group_sale_supervisor"/>
+                <button name="action_print_invoice_sof"
+                        string="Imprimir factura"
+                        type="object"
+                        icon="fa-print"
+                        invisible="not is_sof_order or operational_state not in ('paid', 'in_delivery', 'dispatched') or invoice_count == 0"
+                        groups="sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+                <button name="action_print_remito_sof"
+                        string="Imprimir remito"
+                        type="object"
+                        icon="fa-truck"
+                        invisible="not is_sof_order or operational_state not in ('in_delivery', 'dispatched')"
+                        groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+                <button name="action_open_exchange_wizard"
+                        string="Cambio / Devolución"
+                        type="object"
+                        invisible="not is_sof_order or operational_state not in ('paid', 'in_delivery', 'dispatched') or invoice_count == 0 or not sof_can_do_exchange or sof_fully_returned"
+                        class="btn-warning"/>
+            </xpath>
+
+            <!-- Smart button Cambios/Devoluciones -->
+            <xpath expr="//button[@name='action_view_invoice']" position="before">
+                <button name="action_view_exchanges"
+                        type="object"
+                        icon="fa-exchange"
+                        invisible="not is_sof_order or exchange_count == 0 or not sof_can_do_exchange">
+                    <field name="exchange_count"/>
+                    <span>Cambios</span>
+                </button>
+            </xpath>
+
+            <!--
+                Smart button Facturas:
+                - Pedidos SOF: solo cajero y supervisor (flujo operativo).
+                - Pedidos nativos: visible a todos los usuarios autorizados por Odoo.
+            -->
+            <xpath expr="//button[@name='action_view_invoice']" position="attributes">
+                <attribute name="groups">base.group_user</attribute>
+                <attribute name="invisible">not sof_show_invoice_button or invoice_count == 0</attribute>
+            </xpath>
+
+            <!--
+                Smart button Entregas:
+                - Pedidos SOF: solo vendedor, despacho y supervisor.
+                - Pedidos nativos: visible a todos los usuarios autorizados por Odoo.
+            -->
+            <xpath expr="//button[@name='action_view_delivery']" position="attributes">
+                <attribute name="groups">base.group_user</attribute>
+                <attribute name="invisible">not sof_show_delivery_button or delivery_count == 0</attribute>
+            </xpath>
+
+            <!--
+                Botones "Crear factura":
+                - Pedidos SOF: siempre ocultos (el cajero factura desde "Registrar Cobro").
+                - Pedidos nativos: se preserva la condición nativa de Odoo 19.
+                  create_invoice        → visible cuando invoice_status='to invoice'
+                  create_invoice_percentage → visible cuando invoice_status='no' y state='sale'
+            -->
+            <xpath expr="//button[@id='create_invoice']"
+                   position="attributes" optional="1">
+                <attribute name="invisible">is_sof_order or invoice_status != 'to invoice'</attribute>
+            </xpath>
+            <xpath expr="//button[@id='create_invoice_percentage']"
+                   position="attributes" optional="1">
+                <attribute name="invisible">is_sof_order or invoice_status != 'no' or state != 'sale'</attribute>
+            </xpath>
+
+            <!-- Términos de pago: visible en flujo nativo, oculto en SOF (se usa Plan de pago) -->
+            <xpath expr="//field[@name='payment_term_id']" position="attributes">
+                <attribute name="invisible">is_sof_order</attribute>
+            </xpath>
+
+            <!-- Método de pago: campo principal para el vendedor en estados cotización/confirmado -->
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+                <field name="financing_plan_id"
+                       string="Método de pago"
+                       domain="[('active', '=', True), '|', ('company_id', '=', False), ('company_id', '=', company_id)]"
+                       options="{'no_create': True}"
+                       invisible="not is_sof_order or operational_state not in ('quotation', 'confirmed')"/>
+                <!-- Badges notorios: con qué se cobró y qué comprobante salió (al estar cobrado) -->
+                <field name="final_payment_journal_id"
+                       string="Cobrado con"
+                       widget="badge"
+                       decoration-success="1"
+                       readonly="1"
+                       invisible="not is_sof_order or not final_payment_journal_id"/>
+                <field name="sof_invoice_doc_type_name"
+                       string="Comprobante"
+                       widget="badge"
+                       decoration-info="1"
+                       invisible="not is_sof_order or not sof_invoice_doc_type_name"/>
+            </xpath>
+
+            <!-- Tab Flujo Operativo: solo visible en pedidos SOF -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Flujo Operativo" name="sof_operational" invisible="not is_sof_order">
+                    <group>
+                        <group string="Método de pago">
+                            <field name="financing_plan_id"
+                                   string="Método de pago sugerido"
+                                   domain="[('active', '=', True), '|', ('company_id', '=', False), ('company_id', '=', company_id)]"
+                                   options="{'no_create': True}"
+                                   readonly="operational_state not in ('quotation', 'confirmed')"
+                                   groups="sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_supervisor"/>
+                            <field name="proposed_payment_journal_id"
+                                   string="Diario derivado"
+                                   readonly="1"
+                                   invisible="not proposed_payment_journal_id"
+                                   options="{'no_open': True}"/>
+                            <field name="final_payment_journal_id" readonly="1"
+                                   invisible="not final_payment_journal_id"/>
+                        </group>
+                        <group string="Ajuste de precio" invisible="not financing_plan_id">
+                            <field name="adjustment_type" readonly="1"/>
+                            <field name="adjustment_rate" readonly="1"/>
+                            <field name="adjustment_amount" readonly="1"/>
+                            <field name="amount_with_adjustment" readonly="1"/>
+                            <field name="amount_per_installment" readonly="1"
+                                   invisible="not financing_plan_id"
+                                   string="Valor por cuota"/>
+                        </group>
+                    </group>
+                    <group string="Trazabilidad del flujo">
+                        <group>
+                            <field name="confirmed_by" readonly="1" invisible="not confirmed_by"/>
+                            <field name="confirmed_date" readonly="1" invisible="not confirmed_date"/>
+                            <field name="collected_by" readonly="1" invisible="not collected_by"/>
+                            <field name="collected_date" readonly="1" invisible="not collected_date"/>
+                        </group>
+                        <group>
+                            <field name="cashier_session_id" readonly="1" invisible="not cashier_session_id"/>
+                            <field name="dispatch_prepared" readonly="1"/>
+                            <field name="dispatch_prepared_by" readonly="1" invisible="not dispatch_prepared_by"/>
+                            <field name="dispatch_prepared_date" readonly="1" invisible="not dispatch_prepared_date"/>
+                            <field name="dispatched_by" readonly="1" invisible="not dispatched_by"/>
+                            <field name="dispatched_date" readonly="1" invisible="not dispatched_date"/>
+                        </group>
+                    </group>
+                    <group string="Reparto"
+                           invisible="operational_state not in ('in_delivery', 'dispatched')"
+                           groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor">
+                        <group>
+                            <field name="delivery_date" readonly="operational_state == 'dispatched'"/>
+                            <field name="delivery_shift" readonly="operational_state == 'dispatched'"/>
+                        </group>
+                    </group>
+                    <group string="Notas de despacho"
+                           groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor">
+                        <field name="dispatch_notes" nolabel="1"
+                               readonly="operational_state == 'dispatched'"/>
+                    </group>
+                </page>
+            </xpath>
+
+
+            <!-- Tabs nativos: visibles en flujo nativo, ocultos en SOF (no aplican al retail) -->
+            <xpath expr="//page[@name='other_information']" position="attributes" optional="1">
+                <attribute name="invisible">is_sof_order</attribute>
+            </xpath>
+
+            <xpath expr="//page[@name='customer_signature']" position="attributes" optional="1">
+                <attribute name="invisible">is_sof_order</attribute>
+            </xpath>
+
+            <!--
+                Botones "Enviar":
+                - Pedidos SOF: todos ocultos (flujo retail no usa envío por email).
+                - Pedidos nativos: se preserva la condición nativa de Odoo 19 por botón.
+                  quotation_send_primary → solo en draft
+                  quotation_send         → solo en sent/sale
+                  proforma: ocultos siempre (feature no utilizada en este cliente)
+            -->
+            <xpath expr="//button[@name='action_preview_sale_order']" position="attributes" optional="1">
+                <attribute name="invisible">is_sof_order</attribute>
+            </xpath>
+
+            <xpath expr="//button[@id='quotation_send_primary']" position="attributes" optional="1">
+                <attribute name="invisible">is_sof_order or state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//button[@id='send_proforma_primary']" position="attributes" optional="1">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//button[@id='send_proforma']" position="attributes" optional="1">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//button[@id='quotation_send']" position="attributes" optional="1">
+                <attribute name="invisible">is_sof_order or state not in ('sent', 'sale')</attribute>
+            </xpath>
+
+            <!--
+                Solo agrega default_customer_rank=1 al contexto existente.
+                Al crear un nuevo cliente desde este campo, queda marcado como cliente.
+                El resto del comportamiento nativo de Odoo se mantiene intacto.
+            -->
+            <xpath expr="//group[@name='partner_details']/field[@name='partner_id']"
+                   position="attributes">
+                <attribute name="context">{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True, 'default_customer_rank': 1}</attribute>
+                <!-- En pedidos SOF el cliente se puede cambiar hasta antes del cobro
+                     (cotización/confirmado/preparado). Una vez pagado, queda bloqueado.
+                     En ventas nativas se mantiene la regla estándar de Odoo. -->
+                <attribute name="readonly">(not is_sof_order and state in ['cancel', 'sale']) or (is_sof_order and operational_state in ['paid', 'in_delivery', 'dispatched', 'cancelled'])</attribute>
+            </xpath>
+
+            <!-- Botón por línea: ver stock del producto en todas las sucursales.
+                 Widget OWL (no <button>) para abrir el visor del lado del cliente
+                 SIN guardar el pedido (los botones type=object/action fuerzan guardado). -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_template_id']"
+                   position="after">
+                <widget name="sof_branch_stock"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Lista de precio por línea: feature solo para venta nativa.
+         Hereda la vista del módulo sale_order_line_pricelist (no la base) para garantizar
+         que el campo line_pricelist_id ya exista en el arch cuando se aplica este xpath.
+         En pedidos SOF la columna queda oculta (el pedido usa una única lista). -->
+    <record id="view_sof_hide_line_pricelist" model="ir.ui.view">
+        <field name="name">sale.order.form.sof.hide.line.pricelist</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_order_line_pricelist.view_order_form_inherit_line_pricelist"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/list/field[@name='line_pricelist_id']" position="attributes">
+                <attribute name="column_invisible">parent.is_sof_order</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LISTAS POR ROL
+    ═══════════════════════════════════════════════════════ -->
+
+    <!-- VENDEDOR: ve sus presupuestos y confirmados -->
+    <record id="view_sale_order_list_vendor" model="ir.ui.view">
+        <field name="name">sale.order.list.vendor.sof</field>
+        <field name="model">sale.order</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <list string="Mis pedidos"
+                  decoration-muted="operational_state == 'cancelled'"
+                  decoration-danger="sof_validity_status == 'expired'"
+                  decoration-warning="sof_validity_status == 'expiring' and operational_state == 'quotation'"
+                  decoration-info="operational_state == 'confirmed'"
+                  decoration-success="operational_state == 'paid'"
+                  decoration-primary="operational_state in ('in_delivery', 'dispatched')">
+                <field name="name" string="Pedido"/>
+                <field name="date_order" string="Fecha"/>
+                <field name="partner_id" string="Cliente"/>
+                <field name="sof_consumer_name" string="Nombre y Apellido" optional="show"/>
+                <field name="sof_service_label" widget="badge" decoration-info="sof_service_label" optional="show"/>
+                <field name="validity_date" string="Vencimiento" optional="show"/>
+                <field name="sof_validity_status" widget="badge"
+                       decoration-success="sof_validity_status == 'valid'"
+                       decoration-warning="sof_validity_status == 'expiring'"
+                       decoration-danger="sof_validity_status == 'expired'"
+                       optional="show"/>
+                <field name="amount_total"/>
+                <field name="financing_plan_id" string="Plan" optional="show"/>
+                <field name="amount_with_adjustment" string="Total c/ajuste" optional="show"/>
+                <field name="operational_state" widget="badge"
+                       decoration-muted="operational_state == 'quotation'"
+                       decoration-info="operational_state == 'confirmed'"
+                       decoration-warning="operational_state == 'prepared'"
+                       decoration-success="operational_state == 'paid'"
+                       decoration-primary="operational_state in ('in_delivery', 'dispatched')"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- CAJERO: cola de cobro (pedidos confirmados) -->
+    <record id="view_sale_order_list_cashier" model="ir.ui.view">
+        <field name="name">sale.order.list.cashier.sof</field>
+        <field name="model">sale.order</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <list string="Cola de caja" decoration-primary="operational_state == 'confirmed'">
+                <field name="name" string="Pedido"/>
+                <field name="partner_id" string="Cliente"/>
+                <field name="sof_consumer_name" string="Nombre y Apellido" optional="show"/>
+                <field name="sof_service_label" widget="badge" decoration-info="sof_service_label" optional="show"/>
+                <field name="amount_total"/>
+                <field name="financing_plan_id" string="Plan propuesto"/>
+                <field name="amount_with_adjustment" string="Total c/ajuste"/>
+                <field name="confirmed_by" string="Vendedor" optional="show"/>
+                <field name="confirmed_date" string="Confirmado el" optional="show"/>
+                <field name="operational_state" widget="badge"
+                       decoration-primary="operational_state == 'confirmed'"
+                       decoration-success="operational_state == 'paid'"/>
+                <button name="action_open_cashier_payment_wizard"
+                        string="Cobrar" type="object" class="btn-success btn-sm"
+                        invisible="operational_state != 'confirmed'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- DESPACHO: ve confirmados (preparar) y pagados (entregar) -->
+    <record id="view_sale_order_list_dispatch" model="ir.ui.view">
+        <field name="name">sale.order.list.dispatch.sof</field>
+        <field name="model">sale.order</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <list string="Cola de despacho"
+                  decoration-warning="operational_state == 'confirmed'"
+                  decoration-success="operational_state == 'paid'"
+                  decoration-info="operational_state == 'in_delivery'"
+                  decoration-primary="operational_state == 'dispatched'">
+                <field name="name" string="Pedido"/>
+                <field name="partner_id" string="Cliente"/>
+                <field name="sof_service_label" widget="badge" decoration-info="sof_service_label" optional="show"/>
+                <field name="amount_total"/>
+                <field name="operational_state" widget="badge"
+                       decoration-warning="operational_state == 'confirmed'"
+                       decoration-success="operational_state == 'paid'"
+                       decoration-info="operational_state == 'in_delivery'"
+                       decoration-primary="operational_state == 'dispatched'"/>
+                <field name="dispatch_prepared" string="Preparado" optional="show"/>
+                <field name="final_payment_journal_id" string="Cobrado con" optional="show"/>
+                <field name="collected_by" string="Cajero" optional="show"/>
+                <field name="collected_date" string="Cobrado el" optional="show"/>
+                <button name="action_prepare_dispatch"
+                        string="Preparar"
+                        type="object"
+                        class="btn-primary btn-sm"
+                        invisible="operational_state not in ('confirmed',) or dispatch_prepared"/>
+                <button name="action_confirm_dispatch"
+                        string="Confirmar"
+                        type="object"
+                        class="btn-success btn-sm"
+                        invisible="operational_state != 'paid'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- DESPACHO: lista En Reparto -->
+    <record id="view_sale_order_list_in_delivery" model="ir.ui.view">
+        <field name="name">sale.order.list.in.delivery.sof</field>
+        <field name="model">sale.order</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <list string="En Reparto"
+                  decoration-info="delivery_shift == 'morning'"
+                  decoration-warning="delivery_shift == 'afternoon'">
+                <field name="name" string="Pedido"/>
+                <field name="partner_id" string="Cliente"/>
+                <field name="partner_shipping_id" string="Dirección de entrega" optional="show"/>
+                <field name="delivery_date" string="Fecha entrega"/>
+                <field name="delivery_shift" string="Turno" widget="badge"
+                       decoration-info="delivery_shift == 'morning'"
+                       decoration-warning="delivery_shift == 'afternoon'"/>
+                <field name="amount_total"/>
+                <field name="dispatch_notes" string="Notas" optional="show"/>
+                <field name="dispatched_by" string="Despachado por" optional="show"/>
+                <button name="action_confirm_delivery"
+                        string="Confirmar entrega"
+                        type="object"
+                        class="btn-success btn-sm"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ DESPACHO: TABLERO KANBAN ════════════════════════════════════════════════ -->
+    <record id="view_sale_order_kanban_dispatch" model="ir.ui.view">
+        <field name="name">sale.order.kanban.dispatch</field>
+        <field name="model">sale.order</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="operational_state"
+                    group_create="false"
+                    group_delete="false"
+                    group_edit="false"
+                    records_draggable="false"
+                    quick_create="false"
+                    sample="0">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="amount_with_adjustment"/>
+                <field name="currency_id"/>
+                <field name="operational_state"/>
+                <field name="dispatch_prepared"/>
+                <field name="dispatch_prepared_by"/>
+                <field name="dispatch_prepared_date"/>
+                <field name="final_payment_journal_id"/>
+                <field name="collected_date"/>
+                <field name="collected_by"/>
+                <field name="dispatched_by"/>
+                <field name="dispatched_date"/>
+                <field name="financing_plan_id"/>
+                <field name="sof_service_label"/>
+                <templates>
+                    <t t-name="card">
+                        <!-- Cabecera: cliente + importe -->
+                        <div class="d-flex align-items-start mb-2">
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="fw-bold text-truncate">
+                                    <field name="partner_id"/>
+                                </div>
+                                <div class="text-muted small d-flex align-items-center gap-1">
+                                    <field name="name"/>
+                                    <t t-if="record.sof_service_label.value">
+                                        <span class="badge text-bg-info">
+                                            <t t-esc="record.sof_service_label.value"/>
+                                        </span>
+                                    </t>
+                                </div>
+                            </div>
+                            <div class="text-end flex-shrink-0 ms-2">
+                                <div class="fw-bold">
+                                    <field name="amount_with_adjustment" widget="monetary"/>
+                                </div>
+                                <t t-if="record.financing_plan_id.value">
+                                    <div class="text-muted small">
+                                        <field name="financing_plan_id"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                        <!-- Medio de pago (visible cuando paid/dispatched) -->
+                        <t t-if="record.final_payment_journal_id.value">
+                            <div class="small text-muted mb-1">
+                                <i class="fa fa-credit-card me-1"/>
+                                <field name="final_payment_journal_id"/>
+                                <t t-if="record.collected_by.value">
+                                    &#160;&#183;&#160;<field name="collected_by"/>
+                                </t>
+                            </div>
+                        </t>
+                        <!-- Preparado por (visible cuando preparado, no despachado aún) -->
+                        <t t-if="record.dispatch_prepared_date.value">
+                            <t t-if="!record.dispatched_date.value">
+                                <div class="small text-muted mb-1">
+                                    <i class="fa fa-check-circle me-1 text-info"/>
+                                    Preparado:&#160;<field name="dispatch_prepared_by"/>
+                                </div>
+                            </t>
+                        </t>
+                        <!-- Despachado por (visible cuando dispatched) -->
+                        <t t-if="record.dispatched_date.value">
+                            <div class="small text-muted mb-1">
+                                <i class="fa fa-truck me-1 text-success"/>
+                                <field name="dispatched_by"/>&#160;&#183;&#160;<field name="dispatched_date" widget="date"/>
+                            </div>
+                        </t>
+                        <footer>
+                            <div class="d-flex align-items-center gap-1 flex-wrap w-100">
+                                <t t-if="record.operational_state.raw_value == 'confirmed'">
+                                    <button type="object"
+                                            name="action_prepare_dispatch"
+                                            class="btn btn-sm btn-outline-primary">
+                                        <i class="fa fa-wrench me-1"/>Preparar
+                                    </button>
+                                </t>
+                                <t t-if="record.operational_state.raw_value == 'paid'">
+                                    <button type="object"
+                                            name="action_confirm_dispatch"
+                                            class="btn btn-sm btn-success">
+                                        <i class="fa fa-truck me-1"/>Despachar
+                                    </button>
+                                </t>
+                                <field name="operational_state" widget="label_selection"
+                                       options="{'classes': {'confirmed': 'warning', 'prepared': 'info', 'paid': 'success', 'dispatched': 'secondary'}}"
+                                       class="ms-auto"/>
+                            </div>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Mostrar el estado operativo (Presupuesto/Confirmado/Pagado/Despachado)
+         también en las listas estándar de ventas.
+         Esto hace visible "Pagado" en Todas las Operaciones, En Preparación
+         y Listos para Entregar, aunque Odoo use la lista nativa de sale/sale_stock. -->
+    <record id="view_sale_order_tree_operational_state_sof" model="ir.ui.view">
+        <field name="name">sale.order.list.operational.state.sof</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_tree"/>
+        <field name="arch" type="xml">
+            <!-- Columnas nativas: se muestran para pedidos del flujo nativo.
+                 Los usuarios SOF pueden ocultarlas con el selector de columnas opcional. -->
+            <field name="partner_id" position="after">
+                <field name="sof_consumer_name" string="Nombre y Apellido" optional="show"/>
+            </field>
+            <field name="state" position="attributes">
+                <attribute name="column_invisible">0</attribute>
+                <attribute name="optional">hide</attribute>
+            </field>
+            <field name="invoice_status" position="attributes">
+                <attribute name="column_invisible">0</attribute>
+                <attribute name="optional">hide</attribute>
+            </field>
+
+            <field name="state" position="after">
+                <!-- Columna PEDIDO: estado fiscal/administrativo -->
+                <field name="sof_pedido_estado" widget="badge" string="Pedido"
+                       decoration-muted="sof_pedido_estado == 'presupuesto'"
+                       decoration-info="sof_pedido_estado == 'confirmado'"
+                       decoration-warning="sof_pedido_estado == 'ordenado'"
+                       decoration-success="sof_pedido_estado == 'facturado'"
+                       decoration-danger="sof_pedido_estado == 'cancelado'"
+                       optional="show"/>
+                <!-- Columna FACTURA: estado del cobro -->
+                <field name="sof_cobro_estado" widget="badge" string="Factura"
+                       decoration-muted="sof_cobro_estado == 'na'"
+                       decoration-warning="sof_cobro_estado == 'por_cobrar'"
+                       decoration-success="sof_cobro_estado == 'pagado'"
+                       decoration-danger="sof_cobro_estado == 'cancelado'"
+                       decoration-primary="sof_cobro_estado == 'nota_credito'"
+                       optional="show"/>
+                <!-- Columna DESPACHO: estado físico de entrega -->
+                <field name="sof_entrega_estado" widget="badge" string="Despacho"
+                       decoration-muted="sof_entrega_estado == 'na'"
+                       decoration-info="sof_entrega_estado == 'pendiente'"
+                       decoration-warning="sof_entrega_estado == 'preparado'"
+                       decoration-success="sof_entrega_estado in ('listo', 'entregado')"
+                       decoration-primary="sof_entrega_estado == 'entregado'"
+                       decoration-danger="sof_entrega_estado == 'cancelado'"
+                       decoration-bf="sof_entrega_estado == 'devuelto'"
+                       optional="show"/>
+                <!-- operational_state oculto: solo para lógica interna y statusbar -->
+                <field name="operational_state" column_invisible="1"/>
+                <field name="dispatch_prepared" string="Despacho preparado" column_invisible="1"
+                       groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+                <button name="action_prepare_dispatch"
+                        string="Preparar"
+                        type="object"
+                        class="btn-primary btn-sm"
+                        invisible="operational_state not in ('confirmed',) or dispatch_prepared"
+                        groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+                <button name="action_confirm_dispatch"
+                        string="Confirmar despacho"
+                        type="object"
+                        class="btn-success btn-sm"
+                        invisible="operational_state != 'paid'"
+                        groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- SEARCH heredado -->
+    <record id="view_sale_order_search_sof" model="ir.ui.view">
+        <field name="name">sale.order.search.sof</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <!-- Búsqueda por nombre del comprador (consumidor final) -->
+                <field name="sof_consumer_name" string="Nombre y Apellido"
+                       filter_domain="[('sof_consumer_name', 'ilike', self)]"/>
+                <!-- Filtros de flujo: permiten separar pedidos nativos de SOF en la vista global -->
+                <separator/>
+                <filter string="Flujo Operativo (SOF)" name="filter_sof_orders"
+                        domain="[('is_sof_order', '=', True)]"/>
+                <filter string="Flujo Nativo" name="filter_native_orders"
+                        domain="[('is_sof_order', '=', False)]"/>
+                <separator/>
+                <!-- Filtros por estado operativo SOF -->
+                <filter string="Presupuesto (SOF)" name="sof_quotation"
+                        domain="[('is_sof_order', '=', True), ('operational_state', '=', 'quotation')]"/>
+                <filter string="Confirmados (SOF)" name="sof_confirmed"
+                        domain="[('is_sof_order', '=', True), ('operational_state', '=', 'confirmed')]"/>
+                <filter string="Pagados (SOF)" name="sof_paid"
+                        domain="[('is_sof_order', '=', True), ('operational_state', '=', 'paid')]"/>
+                <filter string="Despachados (SOF)" name="sof_dispatched"
+                        domain="[('is_sof_order', '=', True), ('operational_state', '=', 'dispatched')]"/>
+                <separator/>
+                <filter string="Por estado operativo" name="sof_groupby_state"
+                        context="{'group_by': 'operational_state'}"/>
+                <filter string="Por plan de pago" name="sof_groupby_plan"
+                        context="{'group_by': 'financing_plan_id'}"/>
+                <filter string="Por comprobante solicitado" name="sof_groupby_invoice_pref"
+                        context="{'group_by': 'sof_invoice_preference'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════
+         ACTIONS
+    ═══════════════════════════════════════════════════════ -->
+
+    <!--
+        Mis Cotizaciones: solo lectura, sin botón Nuevo.
+        Para crear nuevas cotizaciones: Sesión Activa → Nueva Cotización.
+    -->
+    <record id="action_sale_order_vendor_quotations" model="ir.actions.act_window">
+        <field name="name">Mis Cotizaciones</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_sof_order', '=', True), ('operational_state', '=', 'quotation'), ('user_id', '=', uid)]</field>
+        <field name="context">{'create': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin cotizaciones pendientes</p>
+            <p>Para crear un presupuesto: ingresá desde <strong>Sesión Activa → Nueva Cotización</strong>.</p>
+        </field>
+    </record>
+
+    <record id="action_sale_order_vendor_all" model="ir.actions.act_window">
+        <field name="name">Todos mis pedidos</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_sof_order', '=', True), ('user_id', '=', uid)]</field>
+        <field name="context">{'default_is_sof_order': True}</field>
+    </record>
+
+    <record id="action_sale_order_cashier_quotations" model="ir.actions.act_window">
+        <field name="name">Presupuestos</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_sof_order', '=', True), ('operational_state', '=', 'quotation')]</field>
+        <field name="context">{'create': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No hay presupuestos pendientes</p>
+            <p>Los presupuestos los crea el vendedor desde su Sesión Activa.</p>
+        </field>
+    </record>
+
+    <record id="action_sale_order_cashier_queue" model="ir.actions.act_window">
+        <field name="name">Pendientes de Cobro</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_sof_order', '=', True), ('operational_state', 'in', ['confirmed', 'prepared']), ('cashier_session_id.state', '=', 'open')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">La cola de caja está vacía</p>
+            <p>Los pedidos aparecen aquí cuando el vendedor los confirma en la sesión activa.</p>
+        </field>
+    </record>
+
+    <record id="action_sale_order_cashier_collected" model="ir.actions.act_window">
+        <field name="name">Cobros Realizados</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_sof_order', '=', True), ('operational_state', 'in', ['paid', 'in_delivery', 'dispatched']), ('company_id', 'in', allowed_company_ids)]</field>
+        <field name="context">{'create': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin cobros registrados</p>
+            <p>Historial de pedidos cobrados de esta sucursal. Buscá por cliente, fecha o comprobante.</p>
+        </field>
+    </record>
+
+    <!-- DESPACHO: TABLERO (kanban unificado — todos los estados activos del día) -->
+    <record id="action_sale_order_dispatch_kanban" model="ir.actions.act_window">
+        <field name="name">Tablero de Despacho</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('is_sof_order', '=', True), '|', ('operational_state', 'in', ['confirmed', 'prepared', 'paid']), '&amp;', ('operational_state', '=', 'dispatched'), ('dispatched_date', '>=', context_today().strftime('%Y-%m-%d 00:00:00'))]</field>
+        <field name="context">{'create': False}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_sale_order_kanban_dispatch')}),
+            (0, 0, {'view_mode': 'list',   'view_id': ref('view_sale_order_list_dispatch')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin pedidos activos en despacho</p>
+            <p>Aparecen aquí los pedidos por preparar, preparados, listos para entregar y las entregas del día.</p>
+        </field>
+    </record>
+
+    <!-- DESPACHO: preparación (confirmed) -->
+    <record id="action_sale_order_dispatch_prep" model="ir.actions.act_window">
+        <field name="name">En Preparación</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_sof_order', '=', True), ('operational_state', '=', 'confirmed')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin pedidos para preparar</p>
+            <p>Aparecen aquí los pedidos confirmados listos para preparar.</p>
+        </field>
+    </record>
+
+    <!-- DESPACHO: preparados (esperando cobro o cobrado, en espera de entrega) -->
+    <record id="action_sale_order_dispatch_prepared" model="ir.actions.act_window">
+        <field name="name">Preparados</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_sof_order', '=', True), ('operational_state', '=', 'prepared')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin pedidos preparados</p>
+            <p>Aparecen aquí los pedidos que Despacho marcó como preparados.</p>
+        </field>
+    </record>
+
+        <!-- DESPACHO: entrega (paid) -->
+    <record id="action_sale_order_dispatch_deliver" model="ir.actions.act_window">
+        <field name="name">Listos para Entregar</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_sof_order', '=', True), ('operational_state', '=', 'paid')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin pedidos pagados para entregar</p>
+            <p>Aparecen aquí los pedidos cuya factura fue cobrada.</p>
+        </field>
+    </record>
+
+    <!-- DESPACHO: en reparto -->
+    <record id="action_sale_order_in_delivery" model="ir.actions.act_window">
+        <field name="name">En Reparto</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_sof_order', '=', True), ('operational_state', '=', 'in_delivery')]</field>
+        <field name="context">{'search_default_delivery_today': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin pedidos en reparto</p>
+            <p>Aparecen aquí los pedidos que salieron con flete y están pendientes de confirmación de entrega.</p>
+        </field>
+    </record>
+
+    <!-- DESPACHO: entregas del día -->
+    <record id="action_sale_order_dispatched_today" model="ir.actions.act_window">
+        <field name="name">Entregas del Día</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_sof_order', '=', True), ('operational_state', '=', 'dispatched'), ('dispatched_date', '>=', (context_today()).strftime('%Y-%m-%d 00:00:00'))]</field>
+    </record>
+
+    <record id="action_sale_order_supervisor_all" model="ir.actions.act_window">
+        <field name="name">Todas las Operaciones</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_sof_order', '=', True)]</field>
+    </record>
+
+    <!-- Supervisor: todos los presupuestos en estado quotation -->
+    <record id="action_sale_order_supervisor_quotations" model="ir.actions.act_window">
+        <field name="name">Todos los Presupuestos</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_sof_order', '=', True), ('operational_state', '=', 'quotation')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin presupuestos pendientes</p>
+        </field>
+    </record>
+
+    <!-- Supervisor: todos los pedidos confirmados -->
+    <record id="action_sale_order_supervisor_confirmed" model="ir.actions.act_window">
+        <field name="name">Todos los Pedidos Confirmados</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_sof_order', '=', True), ('operational_state', '=', 'confirmed')]</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ═══════════════════════════════════════════════════════
+         MENÚ RAÍZ
+    ═══════════════════════════════════════════════════════ -->
+    <menuitem id="menu_root_sof" name="Operaciones de Venta" sequence="55"
+              web_icon="sale_op_flow,static/description/icon.png"
+              groups="sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SESIÓN ACTIVA — entrada principal del módulo
+    ═══════════════════════════════════════════════════════ -->
+    <menuitem id="menu_sof_session_entry" name="Sesión Activa" parent="menu_root_sof" sequence="5"
+              action="action_session_selector_vendor"
+              groups="sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+
+    <!-- ═══════════════════════════════════════════════════════
+         VENTAS — solo lo del VENDEDOR (sus cotizaciones/pedidos)
+    ═══════════════════════════════════════════════════════ -->
+    <menuitem id="menu_sof_sales" name="Ventas" parent="menu_root_sof" sequence="10"
+              groups="sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_sales_board" name="Tablero" parent="menu_sof_sales" sequence="5"
+              action="action_sale_vendor_board"
+              groups="sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_sales_quotations" name="Mis Cotizaciones" parent="menu_sof_sales" sequence="10"
+              action="action_sale_order_vendor_quotations"
+              groups="sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_sales_all" name="Todos mis pedidos" parent="menu_sof_sales" sequence="20"
+              action="action_sale_order_vendor_all"
+              groups="sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_supervisor"/>
+
+    <!-- ═══════════════════════════════════════════════════════
+         CAJA
+    ═══════════════════════════════════════════════════════ -->
+    <menuitem id="menu_sof_cashier" name="Caja" parent="menu_root_sof" sequence="20"
+              groups="sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_cashier_board" name="Tablero" parent="menu_sof_cashier" sequence="3"
+              action="action_sale_cashier_board"
+              groups="sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_cashier_open" name="Abrir sesión de caja" parent="menu_sof_cashier" sequence="5"
+              action="action_cashier_open_wizard"
+              groups="sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_cashier_quotations" name="Presupuestos" parent="menu_sof_cashier" sequence="8"
+              action="sale_op_flow.action_sale_order_cashier_quotations"
+              groups="sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_cashier_queue" name="Pendientes de Cobro" parent="menu_sof_cashier" sequence="10"
+              action="action_sale_order_cashier_queue"
+              groups="sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_cashier_collected" name="Cobros Realizados" parent="menu_sof_cashier" sequence="15"
+              action="action_sale_order_cashier_collected"
+              groups="sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_cashier_account_payment" name="Cuenta Corriente" parent="menu_root_sof" sequence="25"
+              action="action_cashier_account_payment"
+              groups="sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_cashier_cash_in" name="Ingreso de Efectivo" parent="menu_sof_cashier" sequence="22"
+              action="action_cashier_cash_move_in"
+              groups="sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_cashier_cash_out" name="Egreso de Efectivo" parent="menu_sof_cashier" sequence="24"
+              action="action_cashier_cash_move_out"
+              groups="sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_cashier_my_session" name="Mi Sesión" parent="menu_sof_cashier" sequence="20"
+              action="action_cashier_session_my"
+              groups="sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_cashier_history" name="Historial de Sesiones" parent="menu_sof_cashier" sequence="30"
+              action="action_cashier_session_all"
+              groups="sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+
+    <!-- ═══════════════════════════════════════════════════════
+         DESPACHO
+    ═══════════════════════════════════════════════════════ -->
+    <menuitem id="menu_sof_dispatch" name="Despacho" parent="menu_root_sof" sequence="30"
+              groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_dispatch_kanban" name="Tablero" parent="menu_sof_dispatch" sequence="5"
+              action="action_sale_dispatch_board"
+              groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_dispatch_prep" name="Por Preparar" parent="menu_sof_dispatch" sequence="10"
+              action="action_sale_order_dispatch_prep"
+              groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_dispatch_prepared" name="Preparados" parent="menu_sof_dispatch" sequence="15"
+              action="action_sale_order_dispatch_prepared"
+              groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_dispatch_deliver" name="Listos para Entregar" parent="menu_sof_dispatch" sequence="20"
+              action="action_sale_order_dispatch_deliver"
+              groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_dispatch_in_delivery" name="En Reparto" parent="menu_sof_dispatch" sequence="25"
+              action="action_sale_order_in_delivery"
+              groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_dispatch_today" name="Entregas del Día" parent="menu_sof_dispatch" sequence="30"
+              action="action_sale_order_dispatched_today"
+              groups="sale_op_flow.group_sale_dispatch,sale_op_flow.group_sale_supervisor"/>
+
+    <!-- ═══════════════════════════════════════════════════════
+         CONSULTAR STOCK — pestaña propia (vendedor / cajero / supervisor)
+    ═══════════════════════════════════════════════════════ -->
+    <menuitem id="menu_sof_branch_stock" name="Consultar Stock" parent="menu_root_sof" sequence="35"
+              action="action_sof_product_branch_stock"
+              groups="sale_op_flow.group_sale_vendor,sale_op_flow.group_sale_cashier,sale_op_flow.group_sale_supervisor"/>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SUPERVISIÓN — todas las operaciones + gestión de sesiones
+    ═══════════════════════════════════════════════════════ -->
+    <menuitem id="menu_sof_supervisor" name="Supervisión" parent="menu_root_sof" sequence="40"
+              groups="sale_op_flow.group_sale_supervisor"/>
+
+    <!-- Operaciones (movidas desde Ventas) -->
+    <menuitem id="menu_sof_sup_all_quotations" name="Todos los Presupuestos" parent="menu_sof_supervisor" sequence="10"
+              action="action_sale_order_supervisor_quotations"
+              groups="sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_sup_confirmed" name="Todos los Pedidos Confirmados" parent="menu_sof_supervisor" sequence="20"
+              action="action_sale_order_supervisor_confirmed"
+              groups="sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_supervisor_all" name="Todas las Operaciones" parent="menu_sof_supervisor" sequence="30"
+              action="action_sale_order_supervisor_all"
+              groups="sale_op_flow.group_sale_supervisor"/>
+
+    <!-- Separador visual implícito (sequence gap) -->
+
+    <!-- Gestión de sesiones -->
+    <menuitem id="menu_sof_supervisor_pending_close" name="Cierres Pendientes" parent="menu_sof_supervisor" sequence="50"
+              action="action_cashier_session_pending_validation"
+              groups="sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_supervisor_differences" name="Sesiones con Diferencias" parent="menu_sof_supervisor" sequence="60"
+              action="action_cashier_session_with_diff"
+              groups="sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_supervisor_sessions" name="Todas las Sesiones" parent="menu_sof_supervisor" sequence="70"
+              action="action_cashier_session_all"
+              groups="sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_supervisor_exchanges" name="Cambios / Devoluciones" parent="menu_sof_supervisor" sequence="80"
+              action="sale_op_flow.action_sale_exchange"
+              groups="sale_op_flow.group_sale_supervisor"/>
+
+    <!-- Reportes / Análisis (pestaña propia top-level) -->
+    <menuitem id="menu_sof_reports" name="Reportes" parent="menu_root_sof" sequence="45"
+              groups="sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_report_payments" name="Cobros" parent="menu_sof_reports" sequence="10"
+              action="action_sof_payment_report"
+              groups="sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_report_sales" name="Ventas" parent="menu_sof_reports" sequence="20"
+              action="action_sof_sale_report"
+              groups="sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_report_exchanges" name="Devoluciones / Cambios" parent="menu_sof_reports" sequence="30"
+              action="action_sof_exchange_report"
+              groups="sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_report_sessions" name="Sesiones" parent="menu_sof_reports" sequence="40"
+              action="action_sof_session_report"
+              groups="sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_report_payments_pdf" name="Cobros (PDF)" parent="menu_sof_reports" sequence="50"
+              action="action_sof_payments_period_wizard"
+              groups="sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_report_sessions_pdf" name="Sesiones (PDF)" parent="menu_sof_reports" sequence="60"
+              action="action_sof_sessions_period_wizard"
+              groups="sale_op_flow.group_sale_supervisor"/>
+
+    <!-- ═══════════════════════════════════════════════════════
+         CONFIGURACIÓN — pestaña separada (solo supervisor)
+    ═══════════════════════════════════════════════════════ -->
+    <menuitem id="menu_sof_config" name="Configuración" parent="menu_root_sof" sequence="90"
+              groups="sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_config_plans" name="Planes de pago" parent="menu_sof_config" sequence="10"
+              action="action_sale_financing_plan"
+              groups="sale_op_flow.group_sale_supervisor"/>
+    <menuitem id="menu_sof_config_settings" name="Ajustes del flujo" parent="menu_sof_config" sequence="20"
+              action="action_sale_op_flow_config"
+              groups="sale_op_flow.group_sale_supervisor"/>
+</odoo>

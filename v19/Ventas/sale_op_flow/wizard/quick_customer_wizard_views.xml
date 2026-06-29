@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_quick_customer_wizard_form" model="ir.ui.view">
+        <field name="name">sale.quick.customer.wizard.form</field>
+        <field name="model">sale.quick.customer.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Nuevo Cliente">
+                <sheet>
+                    <div class="oe_title">
+                        <h2>Nuevo Cliente</h2>
+                    </div>
+
+                    <!-- Tipo: personas vs empresa -->
+                    <group>
+                        <field name="company_type" widget="radio" options="{'horizontal': True}"/>
+                        <field name="sale_order_id" invisible="1"/>
+                        <field name="company_id" invisible="1"/>
+                    </group>
+
+                    <group>
+                        <!-- Columna izquierda: datos principales -->
+                        <group string="Datos del cliente">
+                            <field name="name"
+                                   placeholder="Nombre completo o razón social..."
+                                   required="1"/>
+                            <field name="vat"
+                                   placeholder="20-12345678-9"/>
+                            <field name="parent_id"
+                                   invisible="company_type == 'company'"
+                                   placeholder="Empresa a la que pertenece (opcional)"/>
+                        </group>
+
+                        <!-- Columna derecha: contacto -->
+                        <group string="Contacto">
+                            <field name="phone" placeholder="+54 351 000-0000"/>
+                            <field name="mobile" placeholder="+54 9 351 000-0000"/>
+                            <field name="email" placeholder="email@ejemplo.com"/>
+                        </group>
+                    </group>
+
+                    <!-- Dirección opcional, colapsada visualmente -->
+                    <group string="Dirección (opcional)">
+                        <field name="street" placeholder="Calle y número"/>
+                        <field name="city" placeholder="Ciudad o localidad"/>
+                    </group>
+
+                </sheet>
+                <footer>
+                    <button name="action_create_customer"
+                            string="Crear cliente"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancelar"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Access entry for ir.model.access.csv reference -->
+    <record id="action_quick_customer_wizard" model="ir.actions.act_window">
+        <field name="name">Nuevo Cliente</field>
+        <field name="res_model">sale.quick.customer.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

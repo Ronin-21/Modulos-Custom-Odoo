@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!--
+        Override de point_of_sale.OrderReceipt
+        Elimina el bloque <div class="pos-receipt-taxes"> que contiene
+        las líneas de Subtotal + IVA (has_tax_groups).
+
+        Este componente OWL se usa tanto para el ticket no fiscal
+        como para la precuenta (printReceipt / printBill),
+        por lo que el cambio aplica a ambos en un solo override.
+    -->
+    <t t-name="point_of_sale.OrderReceipt"
+       t-inherit="point_of_sale.OrderReceipt"
+       t-inherit-mode="extension">
+        <xpath
+            expr="//div[hasclass('pos-receipt-taxes')]"
+            position="replace">
+            <!-- Bloque Subtotal + IVA oculto por pos_hide_tax_subtotal -->
+        </xpath>
+    </t>
+
+</templates>

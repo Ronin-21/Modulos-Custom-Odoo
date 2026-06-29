@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="ir_cron_prs_process_due_money_flows" model="ir.cron">
+        <field name="name">PRS - Procesar flujos de dinero vencidos</field>
+        <field name="model_id" ref="model_prs_money_flow"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_process_due_flows()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+    </record>
+</odoo>

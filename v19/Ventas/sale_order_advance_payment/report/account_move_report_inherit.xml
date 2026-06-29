@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- =====================================================
+         HERENCIA PDF FACTURA: Agrega leyenda del pago adelantado
+         Se hereda account.report_invoice_document (Odoo 19)
+         ===================================================== -->
+
+    <template id="report_invoice_advance_payment_inherit"
+              inherit_id="account.report_invoice_document"
+              priority="15">
+
+        <!--
+            Agrega la leyenda del pago adelantado dentro del área de
+            términos/notas de la factura, antes del cierre de esa sección.
+            Xpath ancla: div#payment_term (siempre presente en el template estándar)
+        -->
+        <xpath expr="//div[@id='payment_term']" position="inside">
+            <t t-if="o.sale_advance_payment_id and o.move_type == 'out_invoice'">
+                <div class="mb-3 mt-2"
+                     style="border-left: 4px solid #28a745; padding-left: 12px;">
+                    <p class="mb-1 fw-bold" style="color: #28a745;">
+                        Pago adelantado aplicado
+                    </p>
+                    <p class="mb-1 text-muted small">
+                        Referencia:
+                        <strong t-esc="o.sale_advance_payment_id.name"/>
+                        — Orden de Venta:
+                        <strong t-esc="o.sale_advance_payment_id.sale_order_id.name"/>
+                    </p>
+                    <p class="mb-1 text-muted small">
+                        Importe del pago adelantado aplicado:
+                        <strong t-field="o.sale_advance_payment_amount"/>
+                    </p>
+                    <p class="mb-0 text-muted small">
+                        Saldo pendiente luego de aplicar pago adelantado:
+                        <strong t-field="o.amount_residual"/>
+                    </p>
+                </div>
+            </t>
+        </xpath>
+
+    </template>
+</odoo>

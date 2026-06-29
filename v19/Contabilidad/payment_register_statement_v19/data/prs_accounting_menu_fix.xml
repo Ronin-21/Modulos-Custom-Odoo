@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Ubicar Flujo de Pagos dentro de la app real de Contabilidad cuando
+         account_accountant/accountant esta instalado, sin reactivar ni renombrar
+         el menu nativo de Facturacion/Invoicing. -->
+    <function model="ir.ui.menu" name="_prs_adjust_money_flow_menu_parent" eval="[[]]"/>
+</odoo>

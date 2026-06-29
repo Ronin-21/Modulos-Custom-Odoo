@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_prs_card_accounts" model="ir.ui.view">
+        <field name="name">res.config.settings.prs.card.accounts</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="payment_register_statement.res_config_settings_view_form_prs_money_flow"/>
+        <field name="arch" type="xml">
+            <!-- Agregar bloque de cuentas predeterminadas de tarjetas justo
+                 después del bloque "Flujo de Pagos" que ya existe en PRS nativo -->
+            <block name="prs_money_flow_settings_block" position="after">
+                <block title="Cobros con Tarjeta" name="prs_card_accounts_settings_block">
+                    <setting id="prs_card_default_accounts_setting"
+                             string="Cuentas predeterminadas de comisiones"
+                             help="Se usan como fallback cuando el diario puente de tarjeta no tiene cuentas propias configuradas."
+                             invisible="not prs_money_flow_enabled">
+                        <div class="content-group">
+                            <div class="row mt16">
+                                <label for="prs_default_flow_fee_account_id" class="col-lg-4 o_light_label"/>
+                                <field name="prs_default_flow_fee_account_id" options="{'no_create': True}"/>
+                                <div class="text-muted col-lg-8 offset-lg-4">Solo cuentas de gasto.</div>
+                            </div>
+                            <div class="row mt16">
+                                <label for="prs_default_flow_fee_tax_account_id" class="col-lg-4 o_light_label"/>
+                                <field name="prs_default_flow_fee_tax_account_id" options="{'no_create': True}"/>
+                                <div class="text-muted col-lg-8 offset-lg-4">Activo corriente o gasto.</div>
+                            </div>
+                            <div class="row mt16">
+                                <label for="prs_default_flow_withholding_account_id" class="col-lg-4 o_light_label"/>
+                                <field name="prs_default_flow_withholding_account_id" options="{'no_create': True}"/>
+                                <div class="text-muted col-lg-8 offset-lg-4">Activo corriente o pasivo corriente.</div>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </block>
+        </field>
+    </record>
+
+</odoo>

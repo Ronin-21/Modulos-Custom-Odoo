@@ -1,0 +1,13 @@
+<odoo>
+    <record id="view_picking_form_sof_partial_ribbon" model="ir.ui.view">
+        <field name="name">stock.picking.form.sof.partial.ribbon</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_button_box')]" position="before">
+                <widget name="web_ribbon" title="Despacho parcial" bg_color="text-bg-warning"
+                        invisible="not backorder_id or picking_type_code != 'outgoing'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

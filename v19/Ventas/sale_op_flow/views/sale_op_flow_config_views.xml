@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_op_flow_config_wizard_form" model="ir.ui.view">
+        <field name="name">sale.op.flow.config.wizard.form</field>
+        <field name="model">sale.op.flow.config.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Ajustes de Operaciones de Venta">
+                <sheet>
+                    <group string="Cobro">
+                        <field name="auto_print_invoice"/>
+                        <field name="cash_rounding_id" options="{'no_create': True}"/>
+                    </group>
+                    <group string="Ventas">
+                        <field name="product_search_limit"/>
+                        <field name="partner_search_limit"/>
+                        <field name="allow_cashier_cash_moves"/>
+                        <field name="partner_autocomplete_enabled"/>
+                    </group>
+                    <group string="Vigencias de presupuestos">
+                        <field name="quotation_validity_days"/>
+                        <field name="expiry_warning_days"/>
+                        <field name="auto_cancel_expired"/>
+                    </group>
+                    <group string="Permisos del Cajero">
+                        <field name="allow_cashier_exchange"/>
+                        <field name="cashier_actions_require_pin"/>
+                    </group>
+                    <group string="Despacho">
+                        <field name="allow_dispatch_without_stock"/>
+                    </group>
+                    <group string="Diferencias de caja">
+                        <field name="use_payment_journal_for_differences"/>
+                        <field name="cash_difference_journal_id" string="Diario fallback" options="{'no_create': True}" invisible="use_payment_journal_for_differences" required="not use_payment_journal_for_differences"/>
+                        <field name="cash_difference_loss_account_id" string="Cuenta pérdida (faltante)" options="{'no_create': True}"/>
+                        <field name="cash_difference_gain_account_id" string="Cuenta ganancia (sobrante)" options="{'no_create': True}"/>
+                    </group>
+                    <group>
+                        <div class="text-muted" colspan="2">
+                            <p>Si <b>Permitir despacho sin stock</b> está activo, el botón <b>Confirmar despacho</b> puede validar la entrega aunque no haya stock reservado.</p>
+                            <p>Para la rendición, el criterio recomendado es usar el <b>diario del medio de pago</b>: una diferencia de Efectivo se registra en Efectivo, una diferencia de Banco se registra en Banco, etc. El diario fallback solo se usa si se desactiva ese criterio.</p>
+                        </div>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_save" string="Guardar" type="object" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sale_op_flow_config" model="ir.actions.act_window">
+        <field name="name">Ajustes del flujo</field>
+        <field name="res_model">sale.op.flow.config.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_sale_op_flow_config_wizard_form"/>
+        <field name="target">new</field>
+        <field name="context">{}</field>
+    </record>
+</odoo>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        IMPORTANTE:
+        En actualización de módulo no se tocan contactos ni sus Empresas permitidas.
+        Solo se configura la acción de Ajustes de Inventario para que muestre
+        ubicaciones internas y deje fuera tránsito/ENVIO/DECOMISO/virtuales.
+    -->
+    <function model="stock.quant" name="_mcc_configure_inventory_adjustment_actions"/>
+</odoo>

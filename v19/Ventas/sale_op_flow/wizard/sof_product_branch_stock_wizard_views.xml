@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sof_product_branch_stock_wizard_form" model="ir.ui.view">
+        <field name="name">sof.product.branch.stock.wizard.form</field>
+        <field name="model">sof.product.branch.stock.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Consultar Stock en Sucursales">
+                <group>
+                    <group>
+                        <field name="lock_product" invisible="1"/>
+                        <field name="product_id" options="{'no_create': True}"
+                               readonly="lock_product"/>
+                    </group>
+                    <group>
+                        <field name="uom_name" invisible="1"/>
+                        <field name="total_available" invisible="not product_id"/>
+                    </group>
+                </group>
+                <separator string="Disponibilidad por sucursal" invisible="not product_id"/>
+                <field name="stock_html" nolabel="1" readonly="1" invisible="not product_id"/>
+                <footer>
+                    <button string="Cerrar" special="cancel" class="btn-primary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sof_product_branch_stock" model="ir.actions.act_window">
+        <field name="name">Consultar Stock</field>
+        <field name="res_model">sof.product.branch.stock.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{}</field>
+    </record>
+</odoo>

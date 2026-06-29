@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         FORMULARIO: agregar aviso de compatibilidad + botón verificar
+         ============================================================ -->
+    <record id="view_picking_type_form_allowed_companies" model="ir.ui.view">
+        <field name="name">stock.picking.type.form.allowed.companies</field>
+        <field name="model">stock.picking.type</field>
+        <field name="inherit_id" ref="stock.view_picking_type_form"/>
+        <field name="arch" type="xml">
+
+            <!--
+                Agregamos aviso + botón de verificación justo debajo del campo
+                default_location_dest_id, que existe en todas las versiones
+                del formulario de tipo de operación.
+            -->
+            <xpath expr="//field[@name='default_location_dest_id']" position="after">
+                <field name="location_compatibility_warning"
+                       invisible="not location_compatibility_warning"
+                       readonly="1"
+                       widget="char"
+                       class="text-danger fw-bold"
+                       string="⚠ Compatibilidad de ubicaciones"/>
+                <div class="mt-2" invisible="not company_id">
+                    <button name="action_check_location_compatibility"
+                            type="object"
+                            string="Verificar compatibilidad de ubicaciones"
+                            icon="fa-check-circle"
+                            class="btn-secondary btn-sm"
+                            title="Verifica si las ubicaciones por defecto son compatibles con la empresa según allowed_company_ids."/>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

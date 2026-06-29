@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="payment_register_statement_v19.PRSInternalTransferCogMenu" owl="1">
+        <DropdownItem class="'o_prs_internal_transfer'" onSelected.bind="onSelected">
+            <i class="fa fa-exchange me-1"/>
+            <t t-esc="label"/>
+        </DropdownItem>
+    </t>
+</templates>

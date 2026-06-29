@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_bank_statement_form_prs_state" model="ir.ui.view">
+        <field name="name">account.bank.statement.form.prs.state</field>
+        <field name="model">account.bank.statement</field>
+        <field name="inherit_id" ref="account.view_account_bank_statement_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_prs_close_statement"
+                        type="object"
+                        string="Cerrar Estado de cuenta"
+                        class="btn-primary"
+                        invisible="prs_state == 'closed'"/>
+                <button name="action_prs_reopen_statement"
+                        type="object"
+                        string="Reabrir Estado de cuenta"
+                        class="btn-secondary"
+                        groups="account.group_account_manager"
+                        invisible="prs_state == 'open'"/>
+                <field name="prs_state" widget="statusbar" statusbar_visible="open,closed"/>
+            </xpath>
+
+            <!-- Bloqueo visual al cerrar -->
+            <xpath expr="//field[@name='line_ids']" position="attributes">
+                <attribute name="readonly">prs_state == 'closed'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='balance_start']" position="attributes">
+                <attribute name="readonly">prs_state == 'closed' or journal_id.prs_auto_statement_balance</attribute>
+            </xpath>
+            <xpath expr="//field[@name='balance_end_real']" position="attributes">
+                <attribute name="readonly">prs_state == 'closed' or journal_id.prs_auto_statement_balance</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

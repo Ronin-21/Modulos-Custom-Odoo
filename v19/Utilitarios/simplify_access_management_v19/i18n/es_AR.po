@@ -1,0 +1,180 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * simplify_access_management_v19
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo 19.0\n"
+"POT-Creation-Date: 2026-04-28 00:00+0000\n"
+"PO-Revision-Date: 2026-04-28 00:00+0000\n"
+"Last-Translator: OpenAI\n"
+"Language-Team: Spanish\n"
+"Language: es_AR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: simplify_access_management_v19
+msgid "Simplify Access Management v19"
+msgstr "Gestión simplificada de accesos v19"
+
+#. module: simplify_access_management_v19
+msgid "All In One Access Management App for setting the correct access rights for fields, models, menus, views for any module and for any user."
+msgstr "Aplicación integral de gestión de accesos para definir correctamente permisos sobre campos, modelos, menús y vistas para cualquier módulo y cualquier usuario."
+
+#. module: simplify_access_management_v19
+msgid "Admin user can not be set as a read-only..!"
+msgstr "¡No se puede configurar un usuario administrador como solo lectura!"
+
+#. module: simplify_access_management_v19
+msgid "The create customised domain rule where we can customise rule by selecting specific fields and records"
+msgstr "Crea una regla de dominio personalizada seleccionando campos y registros específicos."
+
+#. module: simplify_access_management_v19
+msgid "The set 'Read' access of the selected model for the specified users"
+msgstr "Define el permiso de lectura del modelo seleccionado para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The set 'Create' access of the selected model for the specified users"
+msgstr "Define el permiso de creación del modelo seleccionado para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The set 'Write' access of the selected model for the specified users"
+msgstr "Define el permiso de edición del modelo seleccionado para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The set 'Delete' access of the selected model for the specified users"
+msgstr "Define el permiso de eliminación del modelo seleccionado para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The menu or submenu added on above list will be hidden from the defined users."
+msgstr "El menú o submenú agregado en la lista anterior se ocultará para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "The Chatter will be hidden in all model from the specified users."
+msgstr "El chatter se ocultará en todos los modelos para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The Send Message button will be hidden in chatter of all model from the specified users."
+msgstr "El botón Enviar mensaje se ocultará en el chatter de todos los modelos para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The Log Notes button will be hidden in chatter of all model from the specified users."
+msgstr "El botón Registrar una nota se ocultará en el chatter de todos los modelos para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The Schedule Activity button will be hidden in chatter of all model from the specified users."
+msgstr "El botón Programar actividad se ocultará en el chatter de todos los modelos para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The Export button will be hidden in all model from the specified users."
+msgstr "El botón Exportar se ocultará en todos los modelos para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The Import button will be hidden in all model from the specified users."
+msgstr "El botón Importar se ocultará en todos los modelos para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The Users can not login if this button is chek."
+msgstr "Los usuarios no podrán iniciar sesión si esta opción está activada."
+
+#. module: simplify_access_management_v19
+msgid "Developer mode will be hidden from the defined users."
+msgstr "El modo desarrollador se ocultará para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "When 'Apply Without Company' is selected, the rules will be applied to every company."
+msgstr "Cuando 'Aplicar sin compañía' está activado, las reglas se aplicarán a todas las compañías."
+
+#. module: simplify_access_management_v19
+msgid "The Chatter will be hidden in selected model from the specified users."
+msgstr "El chatter se ocultará en el modelo seleccionado para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The Send Message button will be hidden in chatter of selected model from the specified users."
+msgstr "El botón Enviar mensaje se ocultará en el chatter del modelo seleccionado para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The Log Notes button will be hidden in chatter of selected model from the specified users."
+msgstr "El botón Registrar una nota se ocultará en el chatter del modelo seleccionado para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The Schedule Activity button will be hidden in chatter of selected model from the specified users."
+msgstr "El botón Programar actividad se ocultará en el chatter del modelo seleccionado para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "Selected Field will be hidden in selected model from the defined users."
+msgstr "El campo seleccionado se ocultará en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "Selected Field will be Read only in selected model from the defined users."
+msgstr "El campo seleccionado será de solo lectura en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "Selected Field will be set as required for selected model from the defined users."
+msgstr "El campo seleccionado será obligatorio en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "External Link will be hidden for relational fields in selected model from the defined users."
+msgstr "El enlace externo se ocultará para los campos relacionales en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "The Defalut filter are added on list will be hidden in search view of selected model from the specified users."
+msgstr "Los filtros predeterminados agregados en la lista se ocultarán en la vista de búsqueda del modelo seleccionado para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The Defalut Group are added on list will be hidden in search view of selected model from the specified users."
+msgstr "Las agrupaciones predeterminadas agregadas en la lista se ocultarán en la vista de búsqueda del modelo seleccionado para los usuarios especificados."
+
+#. module: simplify_access_management_v19
+msgid "The Buttons are added on list will be hidden in selected model from the defined users."
+msgstr "Los botones agregados en la lista se ocultarán en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "The Tabs(pages) are added on list will be hidden in selected model from the defined users."
+msgstr "Las pestañas (páginas) agregadas en la lista se ocultarán en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "The Kanban view action are added on list will be hidden in selected model from the defined users."
+msgstr "Las acciones de la vista kanban agregadas en la lista se ocultarán en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "The views are added on list will be hidden in selected model from the defined users."
+msgstr "Las vistas agregadas en la lista se ocultarán en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "The actions are added on list will be hidden in selected model from the defined users."
+msgstr "Las acciones agregadas en la lista se ocultarán en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "The Reports are added on list will be hidden in selected model from the defined users."
+msgstr "Los reportes agregados en la lista se ocultarán en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "Export Button will be hidden in selected model from the defined users."
+msgstr "El botón Exportar se ocultará en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "Import Button will be hidden in selected model from the defined users."
+msgstr "El botón Importar se ocultará en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "Create Button will be hidden in selected model from the defined users."
+msgstr "El botón Crear se ocultará en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "Edit Button will be hidden in selected model from the defined users."
+msgstr "El botón Editar se ocultará en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "Delete Button will be hidden in selected model from the defined users."
+msgstr "El botón Eliminar se ocultará en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "Archive and Unarchive action will be hidden in selected model from the defined users."
+msgstr "La acción Archivar/Desarchivar se ocultará en el modelo seleccionado para los usuarios definidos."
+
+#. module: simplify_access_management_v19
+msgid "Duplicate action will be hidden in selected model from the defined users."
+msgstr "La acción Duplicar se ocultará en el modelo seleccionado para los usuarios definidos."

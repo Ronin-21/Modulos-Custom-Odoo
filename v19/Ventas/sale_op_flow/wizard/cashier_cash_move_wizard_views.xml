@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_cashier_cash_move_wizard_form" model="ir.ui.view">
+        <field name="name">sale.cashier.cash.move.wizard.form</field>
+        <field name="model">sale.cashier.cash.move.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="session_id" readonly="1"/>
+                        <field name="move_type" readonly="1" widget="radio"/>
+                        <field name="amount"/>
+                        <field name="reason"
+                               placeholder="Ej: Pago de gastos, vuelto de billete grande, fondo extra..."/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_confirm" type="object"
+                            string="Confirmar" class="btn-primary"/>
+                    <button special="cancel" string="Cancelar"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_cashier_cash_move_in" model="ir.actions.act_window">
+        <field name="name">Ingreso de Efectivo</field>
+        <field name="res_model">sale.cashier.cash.move.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_move_type': 'in'}</field>
+    </record>
+
+    <record id="action_cashier_cash_move_out" model="ir.actions.act_window">
+        <field name="name">Egreso de Efectivo</field>
+        <field name="res_model">sale.cashier.cash.move.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_move_type': 'out'}</field>
+    </record>
+
+</odoo>

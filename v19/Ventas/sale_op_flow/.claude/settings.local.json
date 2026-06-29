@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(git *)",
+      "PowerShell(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 32227898@aldereteis-linea-blanca-testing5-32227898.dev.odoo.com \"tail -300 ~/logs/odoo.log 2>/dev/null || tail -300 /var/log/odoo/odoo.log 2>/dev/null || echo 'No se encontro el log'\" 2>&1)",
+      "PowerShell(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 32227898@aldereteis-linea-blanca-testing5-32227898.dev.odoo.com \"grep -n ' ERROR ' ~/logs/odoo.log | tail -50\" 2>&1)",
+      "PowerShell(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 32227898@aldereteis-linea-blanca-testing5-32227898.dev.odoo.com \"grep -n 'ERROR\\\\|Traceback\\\\|CRITICAL' ~/logs/odoo.log | tail -60\" 2>&1)",
+      "PowerShell(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 32227898@aldereteis-linea-blanca-testing5-32227898.dev.odoo.com \"grep -i 'sale_op_flow\\\\|cashier\\\\|report_cashier' ~/logs/odoo.log | tail -30\" 2>&1)",
+      "PowerShell(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 32269053@aldereteis-linea-blanca-testing5-32269053.dev.odoo.com \"psql -d aldereteis-linea-blanca-testing5-32269053 -c \\\\\"SELECT u.id, u.login, p.name, u.share, u.active FROM res_users u JOIN res_partner p ON p.id = u.partner_id WHERE u.active = true ORDER BY u.id;\\\\\"\" 2>&1)",
+      "PowerShell(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 32269053@aldereteis-linea-blanca-testing5-32269053.dev.odoo.com \"echo \\\\\"SELECT id, name, full_name FROM res_groups WHERE full_name ILIKE '%SOF%' ORDER BY full_name;\\\\\" | psql -d aldereteis-linea-blanca-testing5-32269053\" 2>&1)",
+      "PowerShell(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 32269053@aldereteis-linea-blanca-testing5-32269053.dev.odoo.com $cmd 2>&1)",
+      "PowerShell($cmd = 'psql -d aldereteis-linea-blanca-testing5-32269053 -c \"SELECT id, name, full_name FROM res_groups WHERE full_name ILIKE ' + \"'\" + '%SOF%' + \"'\" + ' ORDER BY full_name;\"')"
+    ]
+  }
+}

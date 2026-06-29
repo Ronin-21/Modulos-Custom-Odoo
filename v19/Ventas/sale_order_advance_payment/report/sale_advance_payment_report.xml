@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- =====================================================
+         ACCIÓN DE REPORTE: Comprobante de Pago Adelantado
+         Modelo: sale.order.advance.payment
+         ===================================================== -->
+
+    <record id="action_report_sale_advance_payment" model="ir.actions.report">
+        <field name="name">Comprobante de Pago Adelantado</field>
+        <field name="model">sale.order.advance.payment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sale_order_advance_payment.report_sale_advance_payment</field>
+        <field name="report_file">sale_order_advance_payment.report_sale_advance_payment</field>
+        <field name="binding_model_id" ref="model_sale_order_advance_payment"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+</odoo>

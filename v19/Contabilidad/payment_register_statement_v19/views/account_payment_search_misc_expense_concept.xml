@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Odoo 19: heredamos la vista de búsqueda nativa y agregamos los campos del módulo. -->
+    <record id="view_account_payment_search_prs_misc_expense_concept" model="ir.ui.view">
+        <field name="name">account.payment.search.prs.misc.expense.concept</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_search"/>
+        <field name="arch" type="xml">
+            <!-- Agregar campo de concepto de gasto junto a los campos de búsqueda existentes -->
+            <field name="journal_id" position="after">
+                <field name="prs_expense_concept_id"/>
+            </field>
+            <!-- Agregar filtro Gastos Varios antes del separador de fecha -->
+            <filter name="date" position="before">
+                <filter string="Gastos Varios" name="prs_misc_expense" domain="[('prs_is_misc_expense', '=', True)]"/>
+                <separator/>
+            </filter>
+            <!-- Agregar group-by de Concepto de Gasto junto a los existentes -->
+            <filter name="paymentmethodline" position="after">
+                <filter string="Conceptos de Gastos" name="group_prs_expense_concept" context="{'group_by': 'prs_expense_concept_id'}"/>
+            </filter>
+        </field>
+    </record>
+</odoo>

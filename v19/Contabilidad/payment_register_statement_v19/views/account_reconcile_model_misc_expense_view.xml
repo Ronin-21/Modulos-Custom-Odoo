@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Campos extra para usar modelos de conciliación como 'plantillas' de Gastos Varios -->
+    <record id="view_account_reconcile_model_form_prs_misc_expense" model="ir.ui.view">
+        <field name="name">account.reconcile.model.form.prs.misc.expense</field>
+        <field name="model">account.reconcile.model</field>
+        <field name="inherit_id" ref="account.view_account_reconcile_model_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Gastos varios (Pagos)">
+                    <field name="prs_use_for_misc_expense"/>
+                    <field name="prs_misc_expense_account_id" required="prs_use_for_misc_expense" invisible="not prs_use_for_misc_expense"/>
+                    <field name="prs_misc_journal_ids" widget="many2many_tags" invisible="not prs_use_for_misc_expense"/>
+                    <field name="prs_misc_partner_ids" widget="many2many_tags" invisible="not prs_use_for_misc_expense"/>
+                    <field name="prs_misc_memo_contains" invisible="not prs_use_for_misc_expense" placeholder="Ej: UBER / Flete / Varios"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_advance_payment" model="ir.ui.view">
+        <field name="name">res.config.settings.form.advance.payment</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='quotation_order_setting_container']" position="after">
+                <block title="Pago Adelantado" name="advance_payment_setting_container">
+                    <setting string="Diarios de Pago Aceptados"
+                             help="Diarios habilitados en el wizard de pago adelantado. Vacío = todos los de banco/efectivo.">
+                        <field name="sale_advance_payment_journal_ids"
+                               widget="many2many_tags"
+                               options="{'no_create': True}"/>
+                    </setting>
+                    <setting string="Valores por Defecto"
+                             help="Diario y modo de cobro preseleccionados al abrir el wizard.">
+                        <div class="content-group">
+                            <div class="mt8">
+                                <label for="sale_advance_payment_default_journal_id" class="o_light_label mr8"/>
+                                <field name="sale_advance_payment_default_journal_id"
+                                       options="{'no_create': True}"/>
+                            </div>
+                            <div class="mt8">
+                                <label for="sale_advance_payment_default_mode" class="o_light_label mr8"/>
+                                <field name="sale_advance_payment_default_mode"/>
+                            </div>
+                        </div>
+                    </setting>
+                    <setting string="Permitir Múltiples Anticipos"
+                             help="Permite registrar más de un pago adelantado por Orden de Venta.">
+                        <field name="sale_advance_payment_allow_multiple"/>
+                    </setting>
+                    <setting string="Requerir Referencia"
+                             help="Vuelve obligatorio el campo Referencia al registrar el pago.">
+                        <field name="sale_advance_payment_require_reference"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

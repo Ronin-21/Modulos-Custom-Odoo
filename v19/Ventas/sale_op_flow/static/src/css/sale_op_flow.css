@@ -1,0 +1,45 @@
+.o_dialog:has(.o_cashier_open_wizard) .modal-dialog {
+  max-width: 600px;
+}
+
+/* === Tablero de Despacho — cards full-width ============================= */
+
+/* El flex container real es .o_kanban_renderer, no .o_kanban_view */
+.o_sale_dispatch_board .o_kanban_renderer {
+  flex-wrap: nowrap !important;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 8px 16px;
+}
+
+/* Tarjetas reales: crecen en partes iguales */
+.o_sale_dispatch_board .o_kanban_record:not(.o_kanban_ghost) {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  width: auto !important;
+  max-width: 500px !important;
+}
+
+/* Ghost cards (relleno de flex): ocultarlas */
+.o_sale_dispatch_board .o_kanban_ghost {
+  display: none !important;
+}
+
+.sof-dispatch-count {
+  font-size: 2.8rem;
+  line-height: 1.1;
+}
+
+/* === Wizard de cobro: compactar secciones de medios de pago ============= */
+/* El .o_list_renderer tiene height: 100% en desktop — lo sobreescribimos   */
+/* para que la lista no extienda el espacio vacío hacia abajo.               */
+.o_sof_payment_wizard .o_field_one2many,
+.o_sof_payment_wizard .o_field_one2many .o_list_renderer {
+  height: auto !important;
+  min-height: 0 !important;
+}
+.o_sof_payment_wizard .o_field_one2many .o_list_renderer table {
+  height: auto !important;
+  min-height: 0 !important;
+  margin-bottom: 0 !important;
+}

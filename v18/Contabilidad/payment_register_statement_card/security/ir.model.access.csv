@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_prs_card_provider_invoice,prs.card.provider,model_prs_card_provider,account.group_account_invoice,1,1,1,1
+access_account_card_user,account.card read,model_account_card,base.group_user,1,0,0,0
+access_account_card_installment_user,account.card.installment read,model_account_card_installment,base.group_user,1,0,0,0
+access_account_card_invoice,account.card,model_account_card,account.group_account_invoice,1,1,1,1
+access_account_card_installment_invoice,account.card.installment,model_account_card_installment,account.group_account_invoice,1,1,1,1
+access_prs_payment_method_internal_config_user,prs.payment.method.internal.config.user,model_prs_payment_method_internal_config,account.group_account_user,1,1,1,1
+access_prs_payment_method_brand_plan_user,prs.payment.method.brand.plan.user,model_prs_payment_method_brand_plan,account.group_account_user,1,1,1,1
+access_prs_accreditation_confirm_wizard,prs.accreditation.confirm.wizard,model_prs_accreditation_confirm_wizard,account.group_account_user,1,1,1,1

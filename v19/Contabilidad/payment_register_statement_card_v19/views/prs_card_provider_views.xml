@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         prs.card.provider — Lista
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="prs_card_provider_list" model="ir.ui.view">
+        <field name="name">prs.card.provider.list</field>
+        <field name="model">prs.card.provider</field>
+        <field name="arch" type="xml">
+            <list string="Procesadores de Tarjetas">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" optional="show"/>
+                <field name="settlement_journal_id" string="Diario acred." optional="show"/>
+                <field name="settlement_delay_days" string="Días acred." optional="show"/>
+                <field name="card_count" string="Tarjetas"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" widget="boolean_toggle" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         prs.card.provider — Búsqueda
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="prs_card_provider_search" model="ir.ui.view">
+        <field name="name">prs.card.provider.search</field>
+        <field name="model">prs.card.provider</field>
+        <field name="arch" type="xml">
+            <search string="Procesadores de Tarjetas">
+                <field name="name"/>
+                <field name="code"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         prs.card.provider — Formulario principal
+         Muestra todas las tarjetas del proveedor con sus configuraciones.
+         Al hacer click en una tarjeta se abre el formulario completo con planes.
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="prs_card_provider_form" model="ir.ui.view">
+        <field name="name">prs.card.provider.form</field>
+        <field name="model">prs.card.provider</field>
+        <field name="arch" type="xml">
+            <form string="Procesador de Tarjetas">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_cards"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-credit-card">
+                            <field name="card_count" widget="statinfo" string="Tarjetas"/>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nombre del proveedor..."/></h1>
+                    </div>
+
+                    <group>
+                        <group string="Identificacion">
+                            <field name="partner_id" options="{'no_create': True}"/>
+                            <field name="code" placeholder="payway"/>
+                            <field name="sequence"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Acreditacion por defecto">
+                            <field name="settlement_journal_id" options="{'no_create': True}"
+                                   help="Cuenta bancaria donde este procesador deposita las liquidaciones. Las tarjetas pueden sobreescribir este valor."/>
+                            <field name="settlement_delay_days"/>
+                            <field name="settlement_day_type"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info mb-0">
+                        Los valores configurados aqui son los <strong>valores por defecto</strong> para todas las tarjetas de este procesador.
+                        Cada tarjeta puede sobreescribir cualquier valor. A su vez, cada plan de cuotas puede sobreescribir el valor de la tarjeta.
+                        <br/>Jerarquia: <strong>Plan</strong> (mayor prioridad) → <strong>Tarjeta</strong> → <strong>Procesador</strong> (menor prioridad).
+                    </div>
+                    <group string="Comisiones por defecto (heredadas por todas las tarjetas)">
+                        <group>
+                            <field name="fee_percent"/>
+                            <field name="fee_fixed_amount"/>
+                        </group>
+                        <group>
+                            <field name="fee_tax_percent"/>
+                            <field name="withholding_percent"/>
+                        </group>
+                    </group>
+
+                    <!-- Tarjetas del proveedor — configuración inline -->
+                    <notebook>
+                        <page string="Tarjetas y configuracion" name="cards">
+                            <button name="action_open_assign_wizard" type="object"
+                                    string="Asignar tarjeta existente"
+                                    icon="fa-link"
+                                    class="btn-secondary mb-2"/>
+                            <field name="card_ids" context="{'default_provider_id': id}">
+                                <list editable="bottom"
+                                      decoration-muted="not active"
+                                      string="Tarjetas">
+                                    <field name="name"/>
+                                    <field name="payment_method_id"
+                                           options="{'no_create': True}"
+                                           optional="show"/>
+                                    <field name="merchant_number" optional="show"/>
+                                    <field name="settlement_delay_days"/>
+                                    <field name="settlement_day_type" optional="hide"/>
+                                    <field name="settlement_journal_id"
+                                           options="{'no_create': True}"/>
+                                    <field name="fee_percent"/>
+                                    <field name="fee_fixed_amount" optional="hide"/>
+                                    <field name="fee_tax_percent"/>
+                                    <field name="withholding_percent" optional="show"/>
+                                    <field name="active" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         Acción y menú
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="action_prs_card_provider" model="ir.actions.act_window">
+        <field name="name">Procesadores de Tarjetas</field>
+        <field name="res_model">prs.card.provider</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea un procesador de tarjetas.
+            </p>
+            <p>
+                Configura Payway, Clover, Mercado Pago u otros procesadores.
+                Cada procesador agrupa sus tarjetas con comisiones, dias de acreditacion y planes.
+            </p>
+        </field>
+    </record>
+
+    <!-- Grupo de menú propio bajo Configuración, separado de "Pagos en línea" (sequence 35 → entre Online Payments y Analytic) -->
+    <menuitem
+        id="menu_prs_card_config_root"
+        name="Cobros con Tarjeta"
+        parent="account.menu_finance_configuration"
+        groups="account.group_account_manager"
+        sequence="35"/>
+
+    <menuitem
+        id="menu_prs_card_provider"
+        name="Procesadores de Tarjetas"
+        action="action_prs_card_provider"
+        parent="menu_prs_card_config_root"
+        sequence="10"/>
+
+</odoo>

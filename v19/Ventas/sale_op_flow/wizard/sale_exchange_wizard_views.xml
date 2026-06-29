@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Wizard Cambio / Devolución -->
+    <record id="view_sale_exchange_wizard_form" model="ir.ui.view">
+        <field name="name">sale.exchange.wizard.form</field>
+        <field name="model">sale.exchange.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cambio / Devolución">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="order_id" readonly="1"/>
+                            <field name="partner_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="session_id" readonly="1"/>
+                            <field name="reason" required="1" placeholder="Ej: cliente recibió producto equivocado"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Artículos que vuelven" name="returns">
+                            <field name="return_line_ids" nolabel="1">
+                                <list editable="bottom">
+                                    <field name="product_id" readonly="1" optional="show"/>
+                                    <field name="product_uom_id" readonly="1" optional="show"/>
+                                    <field name="quantity" string="Cant. facturada" readonly="1"/>
+                                    <field name="quantity_returned" string="Devuelve"/>
+                                    <field name="price_unit" readonly="1" optional="show"/>
+                                    <field name="tax_ids" readonly="1" optional="hide" widget="many2many_tags"/>
+                                    <field name="subtotal" readonly="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Artículos de reemplazo" name="new_items">
+                            <field name="new_line_ids" nolabel="1">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="product_uom_id" optional="show"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit"/>
+                                    <field name="tax_ids" optional="hide" widget="many2many_tags"/>
+                                    <field name="account_id" optional="hide"/>
+                                    <field name="subtotal" readonly="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Cobro de diferencia" name="payment"
+                              invisible="not has_positive_diff">
+                            <div class="alert alert-info mb-2" role="alert">
+                                El cliente debe abonar la diferencia de
+                                <field name="amount_difference" nolabel="1" readonly="1" widget="monetary"
+                                       options="{'currency_field': 'currency_id'}"/>.
+                                Registrá los medios de pago a continuación.
+                            </div>
+
+                            <separator string="EFECTIVO"/>
+                            <field name="cash_line_ids" nolabel="1"
+                                   context="{'default_amount': payment_difference, 'default_cash_received': payment_difference}">
+                                <list editable="bottom" string="Efectivo">
+                                    <field name="journal_id" string="Caja"
+                                          domain="[('type', '=', 'cash'), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"/>
+                                    <field name="amount" string="A cobrar"/>
+                                    <field name="cash_received" string="Recibido"/>
+                                    <field name="cash_change" string="Vuelto" readonly="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="company_id" column_invisible="1"/>
+                                </list>
+                            </field>
+
+                            <separator string="BANCO / TRANSFERENCIA"/>
+                            <field name="bank_line_ids" nolabel="1"
+                                   context="{'default_amount': payment_difference}">
+                                <list editable="bottom" string="Banco / Transferencia">
+                                    <field name="journal_id" string="Medio de pago"
+                                          domain="[('type', '=', 'bank'), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"/>
+                                    <field name="amount"/>
+                                    <field name="voucher_number" string="Nº Comprobante"/>
+                                    <field name="coupon_number" string="Nº Cupón" optional="hide"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="company_id" column_invisible="1"/>
+                                </list>
+                            </field>
+
+                            <group col="2" class="oe_subtotal_footer mt-2">
+                                <field name="amount_paid" readonly="1" string="Total ingresado"/>
+                                <field name="total_cash_change" readonly="1" string="Vuelto total"
+                                       invisible="total_cash_change &lt;= 0"/>
+                                <field name="payment_difference" readonly="1" string="Restante"
+                                       decoration-danger="payment_difference > 0.005"
+                                       decoration-success="payment_difference &lt;= 0.005"/>
+                            </group>
+                        </page>
+                        <page string="Reintegro al cliente" name="refund"
+                              invisible="not has_refund">
+                            <div class="alert alert-info mb-2" role="alert">
+                                Hay que reintegrar al cliente
+                                <field name="amount_to_refund" nolabel="1" readonly="1" widget="monetary"
+                                       options="{'currency_field': 'currency_id'}"/>.
+                                Elegí el/los medios (efectivo o banco). Normalmente efectivo.
+                            </div>
+                            <field name="refund_line_ids" nolabel="1"
+                                   context="{'default_amount': refund_remaining}">
+                                <list editable="bottom" string="Reintegro">
+                                    <field name="journal_id" string="Medio de reintegro"
+                                          domain="[('type', 'in', ['cash', 'bank']), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"/>
+                                    <field name="amount"/>
+                                    <field name="voucher_number" string="Nº Comprobante" optional="hide"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="company_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                            <group col="2" class="oe_subtotal_footer mt-2">
+                                <field name="amount_refunded" readonly="1" string="Reintegrado"/>
+                                <field name="refund_remaining" readonly="1" string="Falta reintegrar"
+                                       decoration-danger="refund_remaining > 0.005"
+                                       decoration-success="refund_remaining &lt;= 0.005"/>
+                            </group>
+                        </page>
+                    </notebook>
+
+                    <group col="2" class="oe_subtotal_footer">
+                        <field name="amount_return" readonly="1" string="Total devuelto"/>
+                        <field name="amount_new" readonly="1" string="Total reemplazo"/>
+                        <field name="amount_difference" readonly="1" string="Diferencia"
+                               decoration-danger="amount_difference > 0"
+                               decoration-success="amount_difference &lt;= 0"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="has_positive_diff" invisible="1"/>
+                        <field name="has_negative_diff" invisible="1"/>
+                        <field name="has_refund" invisible="1"/>
+                    </group>
+
+                    <div class="alert alert-warning" role="alert" invisible="not has_negative_diff">
+                        Diferencia a favor del cliente: se generará una <b>Nota de Crédito</b>.
+                        Lo que el cliente haya pagado se le <b>reintegra</b> (pestaña "Reintegro al cliente");
+                        si la venta fue a <b>cuenta corriente</b>, se cancela de su deuda.
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_confirm" string="Confirmar cambio" type="object" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

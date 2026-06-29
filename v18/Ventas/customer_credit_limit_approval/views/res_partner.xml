@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_res_partner_form_inherit" model="ir.ui.view">
+        <field name="name">res.partner.form.credit.limit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Smart button: reemplaza al nativo de account_followup cuando el crédito está activo -->
+            <xpath expr="//button[@name='open_customer_statement']" position="attributes">
+                <attribute name="invisible">credit_check</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='action_view_partner_invoices']" position="after">
+                <button type="object"
+                        name="action_open_credit_statement"
+                        class="oe_stat_button"
+                        icon="fa-file-text-o"
+                        invisible="not credit_check">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="amount_due" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                        </span>
+                        <span class="o_stat_text">Estado de Cuenta</span>
+                    </div>
+                </button>
+            </xpath>
+
+            <!-- pestaña Cuenta corriente -->
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Cuenta corriente">
+                    <group>
+                        <!-- ESTADO DE CUENTA -->
+                        <group string="Estado de cuenta">
+                            <!-- Valores contables estándar -->
+                            <field name="credit" string="Total por Cobrar Facturado"/>
+                            <field name="debit" string="Total por Pagar Facturado"/>
+
+                            <!-- Desglose adicional -->
+                            <field name="amount_due_accounting"
+                                   string="Deuda facturada (contable)"
+                                   readonly="1"/>
+                            <field name="amount_due_sale"
+                                   string="Ventas confirmadas sin facturar"
+                                   readonly="1"/>
+
+                            <!-- Total general (suma de los anteriores) -->
+                            <field name="amount_due"
+                                   string="Deuda Total"
+                                   readonly="1"/>
+                        </group>
+
+                        <!-- LÍMITE DE CRÉDITO -->
+                        <group string="Límite de crédito">
+                            <field name="credit_check" string="Crédito activo ?"/>
+                            <field name="credit_warning"
+                                   string="Monto de advertencia ?"
+                                   invisible="credit_check == False"/>
+                            <field name="credit_blocking"
+                                   string="Monto de bloqueo ?"
+                                   invisible="credit_check == False"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="res_company_inherit_form" model="ir.ui.view">
+        <field name="name">res.company.form.credit.limit</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vat']" position="after">
+                <field name="accountant_email"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

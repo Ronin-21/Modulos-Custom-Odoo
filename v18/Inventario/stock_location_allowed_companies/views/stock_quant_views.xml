@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         ACCIÓN: Ajuste de Inventario filtrado por empresas permitidas
+         La acción original de Odoo se deja intacta.
+         Esta nueva acción llama al método Python que construye el dominio
+         dinámico basado en allowed_company_ids de las ubicaciones.
+         ============================================================ -->
+    <record id="action_stock_inventory_allowed_companies" model="ir.actions.server">
+        <field name="name">Ajuste de Inventario (Filtrado)</field>
+        <field name="model_id" ref="stock.model_stock_quant"/>
+        <field name="binding_model_id" ref="stock.model_stock_quant"/>
+        <field name="state">code</field>
+        <field name="code">
+action = model.action_stock_inventory_allowed()
+        </field>
+    </record>
+
+    <!-- ============================================================
+         FORMULARIO de transferencias: agregar aviso de compatibilidad
+         ============================================================ -->
+    <record id="view_picking_form_allowed_companies" model="ir.ui.view">
+        <field name="name">stock.picking.form.allowed.companies</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Aviso de compatibilidad debajo del encabezado de ubicaciones -->
+            <xpath expr="//field[@name='location_id']" position="after">
+                <field name="location_compatibility_info"
+                       invisible="not location_compatibility_info"
+                       readonly="1"
+                       class="text-warning fw-bold"
+                       string="⚠ Ubicaciones"/>
+            </xpath>
+
+            <!-- Botón de verificación manual en la barra de botones -->
+            <xpath expr="//button[@name='action_confirm']" position="before">
+                <button name="action_check_location_compatibility"
+                        type="object"
+                        string="Verificar ubicaciones"
+                        icon="fa-check-circle"
+                        class="btn-secondary"
+                        invisible="state in ['done', 'cancel']"
+                        title="Verifica compatibilidad de ubicaciones con la empresa."/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- ============================================================
+         MENÚ: Ajuste de Inventario Filtrado
+         Disponible bajo Inventario > Operaciones
+         ============================================================ -->
+    <menuitem
+        id="menu_stock_inventory_allowed_companies"
+        name="Ajuste de Inventario (Filtrado)"
+        parent="stock.menu_stock_root"
+        action="action_stock_inventory_allowed_companies"
+        sequence="30"
+        groups="stock.group_stock_user"/>
+
+</odoo>

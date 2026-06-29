@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_users_form_mcc_internal_contact_permission" model="ir.ui.view">
+        <field name="name">res.users.form.mcc.internal.contact.permission</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="priority" eval="999990"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_ids'][1]" position="after">
+                <field name="mcc_allow_internal_contact_operations"
+                       groups="base.group_system"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

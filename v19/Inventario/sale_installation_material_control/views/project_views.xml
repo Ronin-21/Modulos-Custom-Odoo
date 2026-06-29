@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="edit_project_installation" model="ir.ui.view">
+        <field name="name">project.project.form.installation</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_installation_material" type="object"
+                        class="oe_stat_button" icon="fa-wrench"
+                        invisible="installation_material_count == 0"
+                        groups="sale_installation_material_control.group_installation_user">
+                    <field name="installation_material_count" widget="statinfo"
+                           string="Materiales"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_task_form2_installation" model="ir.ui.view">
+        <field name="name">project.task.form.installation</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_installation_material" type="object"
+                        class="oe_stat_button" icon="fa-wrench"
+                        invisible="installation_material_count == 0"
+                        groups="sale_installation_material_control.group_installation_user">
+                    <field name="installation_material_count" widget="statinfo"
+                           string="Materiales"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

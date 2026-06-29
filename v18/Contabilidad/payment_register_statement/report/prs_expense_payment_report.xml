@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_prs_expense_payments">
+        <t t-call="web.external_layout">
+            <t t-set="company" t-value="docs and docs[0].company_id or False"/>
+            <div class="page">
+                <h2>Reporte de Gastos / Compras</h2>
+
+                <div class="mt16 mb16">
+                    <div><strong>Empresa:</strong> <t t-if="company"><span t-esc="company.name"/></t></div>
+                    <t t-if="data and (data.get('date_from') or data.get('date_to'))">
+                        <div>
+                            <strong>Período:</strong>
+                            <t t-if="data.get('date_from')"><span t-esc="data.get('date_from')"/></t>
+                            <t t-if="data.get('date_from') and data.get('date_to')"> - </t>
+                            <t t-if="data.get('date_to')"><span t-esc="data.get('date_to')"/></t>
+                        </div>
+                    </t>
+                </div>
+
+                <style>
+                    .prs-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+                    .prs-table th, .prs-table td { border: 1px solid #d9d9d9; padding: 6px 6px; vertical-align: top; }
+                    .prs-table th { background: #f5f5f5; }
+                    .prs-right { text-align: right; }
+                    .prs-muted { color: #666; }
+                    .prs-group-title { margin-top: 14px; font-weight: 700; }
+                </style>
+
+                <t t-set="docs_sorted" t-value="docs.sorted(lambda p: (p.date or False, p.id))"/>
+                <t t-set="grand_total" t-value="0.0"/>
+
+                <t t-if="data and data.get('group_by') == 'concept_date'">
+                    <t t-set="concepts" t-value="docs_sorted.mapped('prs_expense_concept_id')"/>
+
+                    <t t-foreach="concepts" t-as="c">
+                        <t t-set="group" t-value="docs_sorted.filtered(lambda p: p.prs_expense_concept_id == c)"/>
+                        <t t-set="subtotal" t-value="0.0"/>
+
+                        <div class="prs-group-title">
+                            <span t-esc="c.display_name"/>
+                        </div>
+
+                        <table class="prs-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Diario</th>
+                                    <th>Método</th>
+                                    <th>Proveedor</th>
+                                    <th>Factura</th>
+                                    <th class="prs-muted">Estado</th>
+                                    <th class="prs-right">Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="group" t-as="p">
+                                    <tr>
+                                        <td><span t-esc="p.date"/></td>
+                                        <td><span t-esc="p.journal_id.display_name"/></td>
+                                        <td><span t-esc="p.payment_method_line_id.display_name"/></td>
+                                        <td><span t-esc="p.partner_id.display_name"/></td>
+                                        <td><span t-esc="p.prs_invoice_numbers"/></td>
+                                        <td class="prs-muted"><span t-esc="p.state"/></td>
+                                        <td class="prs-right"><span t-esc="p.amount"/></td>
+                                    </tr>
+                                    <t t-set="subtotal" t-value="subtotal + (p.amount or 0.0)"/>
+                                    <t t-set="grand_total" t-value="grand_total + (p.amount or 0.0)"/>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="6" class="prs-right"><strong>Subtotal</strong></td>
+                                    <td class="prs-right"><strong><span t-esc="subtotal"/></strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </t>
+
+                    <!-- Sin concepto -->
+                    <t t-set="group_nc" t-value="docs_sorted.filtered(lambda p: not p.prs_expense_concept_id)"/>
+                    <t t-if="group_nc">
+                        <t t-set="subtotal" t-value="0.0"/>
+                        <div class="prs-group-title">Sin concepto</div>
+                        <table class="prs-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Diario</th>
+                                    <th>Método</th>
+                                    <th>Proveedor</th>
+                                    <th>Factura</th>
+                                    <th class="prs-muted">Estado</th>
+                                    <th class="prs-right">Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="group_nc" t-as="p">
+                                    <tr>
+                                        <td><span t-esc="p.date"/></td>
+                                        <td><span t-esc="p.journal_id.display_name"/></td>
+                                        <td><span t-esc="p.payment_method_line_id.display_name"/></td>
+                                        <td><span t-esc="p.partner_id.display_name"/></td>
+                                        <td><span t-esc="p.prs_invoice_numbers"/></td>
+                                        <td class="prs-muted"><span t-esc="p.state"/></td>
+                                        <td class="prs-right"><span t-esc="p.amount"/></td>
+                                    </tr>
+                                    <t t-set="subtotal" t-value="subtotal + (p.amount or 0.0)"/>
+                                    <t t-set="grand_total" t-value="grand_total + (p.amount or 0.0)"/>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="6" class="prs-right"><strong>Subtotal</strong></td>
+                                    <td class="prs-right"><strong><span t-esc="subtotal"/></strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </t>
+
+                    <div class="mt16">
+                        <table class="prs-table">
+                            <tr>
+                                <td colspan="6" class="prs-right"><strong>Total</strong></td>
+                                <td class="prs-right"><strong><span t-esc="grand_total"/></strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+
+                <t t-else="">
+                    <table class="prs-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Diario</th>
+                                <th>Método</th>
+                                <th>Proveedor</th>
+                                <th>Concepto</th>
+                                <th>Factura</th>
+                                <th class="prs-muted">Estado</th>
+                                <th class="prs-right">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="docs_sorted" t-as="p">
+                                <tr>
+                                    <td><span t-esc="p.date"/></td>
+                                    <td><span t-esc="p.journal_id.display_name"/></td>
+                                    <td><span t-esc="p.payment_method_line_id.display_name"/></td>
+                                    <td><span t-esc="p.partner_id.display_name"/></td>
+                                    <td><span t-esc="p.prs_expense_concept_id.display_name if p.prs_expense_concept_id else 'Sin concepto'"/></td>
+                                    <td><span t-esc="p.prs_invoice_numbers"/></td>
+                                    <td class="prs-muted"><span t-esc="p.state"/></td>
+                                    <td class="prs-right"><span t-esc="p.amount"/></td>
+                                </tr>
+                                <t t-set="grand_total" t-value="grand_total + (p.amount or 0.0)"/>
+                            </t>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="7" class="prs-right"><strong>Total</strong></td>
+                                <td class="prs-right"><strong><span t-esc="grand_total"/></strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </t>
+            </div>
+        </t>
+    </template>
+</odoo>

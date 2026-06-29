@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ccl_cashier_credit_approval_form" model="ir.ui.view">
+        <field name="name">ccl.cashier.credit.approval.form</field>
+        <field name="model">ccl.cashier.credit.approval</field>
+        <field name="arch" type="xml">
+            <form string="Autorización de Cuenta Corriente">
+                <field name="currency_id" invisible="1"/>
+                <field name="payment_wizard_id" invisible="1"/>
+                <div class="alert alert-warning" role="alert">
+                    <h4>⚠️ Venta en Cuenta Corriente sobre el límite</h4>
+                    <p>
+                        El cliente <strong><field name="partner_id" readonly="1" nolabel="1" class="oe_inline"/></strong>
+                        supera su límite de crédito con esta venta en Cuenta Corriente.
+                    </p>
+                </div>
+                <group>
+                    <field name="credit_blocking"/>
+                    <field name="projected_debt"/>
+                    <field name="excess"/>
+                </group>
+                <group>
+                    <field name="supervisor_pin"
+                           password="True"
+                           placeholder="PIN / NIP del supervisor"
+                           help="El supervisor ingresa su PIN para autorizar la venta sobre el límite."/>
+                </group>
+                <p>
+                    Un <strong>supervisor</strong> debe ingresar su PIN para autorizar esta
+                    venta en Cuenta Corriente sobre el límite. Quedará registrado en el
+                    historial del pedido quién autorizó.
+                </p>
+                <footer>
+                    <button string="✅ Autorizar y cobrar"
+                            name="action_authorize"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="❌ Cancelar"
+                            name="action_cancel"
+                            type="object"
+                            class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

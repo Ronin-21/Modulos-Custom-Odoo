@@ -1,0 +1,320 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * advanced_web_domain_widget_v19
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo 19.0\n"
+"POT-Creation-Date: 2026-04-28 00:00+0000\n"
+"PO-Revision-Date: 2026-04-28 00:00+0000\n"
+"Last-Translator: OpenAI\n"
+"Language-Team: Spanish\n"
+"Language: es_AR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Advanced Web Domain Widget"
+msgstr "Widget avanzado de dominios web"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Selected records"
+msgstr "Registros seleccionados"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Domain"
+msgstr "Dominio"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Edit in dialog"
+msgstr "Editar en diálogo"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Foldable"
+msgstr "Plegable"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Display the domain using facets"
+msgstr "Mostrar el dominio usando facetas"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Model"
+msgstr "Modelo"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Invalid field chain"
+msgstr "Cadena de campos inválida"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Confirm"
+msgstr "Confirmar"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Discard"
+msgstr "Descartar"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Domain is invalid. Please correct it"
+msgstr "El dominio no es válido. Corrígelo, por favor."
+
+#. module: advanced_web_domain_widget_v19
+msgid "Select a field"
+msgstr "Selecciona un campo"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Loading..."
+msgstr "Cargando..."
+
+#. module: advanced_web_domain_widget_v19
+msgid "Start typing..."
+msgstr "Empieza a escribir..."
+
+#. module: advanced_web_domain_widget_v19
+msgid "No records"
+msgstr "Sin registros"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Environment User"
+msgstr "Usuario del entorno"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Environment Companies"
+msgstr "Compañías del entorno"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Inaccessible/missing record ID: %s"
+msgstr "ID de registro inaccesible o inexistente: %s"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Unnamed"
+msgstr "Sin nombre"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Search More..."
+msgstr "Buscar más..."
+
+#. module: advanced_web_domain_widget_v19
+msgid "(no result)"
+msgstr "(sin resultados)"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Quick search: %s"
+msgstr "Búsqueda rápida: %s"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Search: %s"
+msgstr "Buscar: %s"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Invalid record ID: %s"
+msgstr "ID de registro inválido: %s"
+
+#. module: advanced_web_domain_widget_v19
+msgid "days"
+msgstr "días"
+
+#. module: advanced_web_domain_widget_v19
+msgid "weeks"
+msgstr "semanas"
+
+#. module: advanced_web_domain_widget_v19
+msgid "months"
+msgstr "meses"
+
+#. module: advanced_web_domain_widget_v19
+msgid "years"
+msgstr "años"
+
+#. module: advanced_web_domain_widget_v19
+msgid "contains"
+msgstr "contiene"
+
+#. module: advanced_web_domain_widget_v19
+msgid "does not contain"
+msgstr "no contiene"
+
+#. module: advanced_web_domain_widget_v19
+msgid "is in"
+msgstr "está en"
+
+#. module: advanced_web_domain_widget_v19
+msgid "is not in"
+msgstr "no está en"
+
+#. module: advanced_web_domain_widget_v19
+msgid "child of"
+msgstr "hijo de"
+
+#. module: advanced_web_domain_widget_v19
+msgid "parent of"
+msgstr "padre de"
+
+#. module: advanced_web_domain_widget_v19
+msgid "date filter"
+msgstr "filtro de fecha"
+
+#. module: advanced_web_domain_widget_v19
+msgid "is"
+msgstr "es"
+
+#. module: advanced_web_domain_widget_v19
+msgid "is not"
+msgstr "no es"
+
+#. module: advanced_web_domain_widget_v19
+msgid "is set"
+msgstr "está establecido"
+
+#. module: advanced_web_domain_widget_v19
+msgid "is not set"
+msgstr "no está establecido"
+
+#. module: advanced_web_domain_widget_v19
+msgid "starts with"
+msgstr "empieza con"
+
+#. module: advanced_web_domain_widget_v19
+msgid "ends with"
+msgstr "termina con"
+
+#. module: advanced_web_domain_widget_v19
+msgid "is between"
+msgstr "está entre"
+
+#. module: advanced_web_domain_widget_v19
+msgid "is within"
+msgstr "está dentro de"
+
+#. module: advanced_web_domain_widget_v19
+msgid "matches"
+msgstr "coincide con"
+
+#. module: advanced_web_domain_widget_v19
+msgid "match"
+msgstr "coincidir con"
+
+#. module: advanced_web_domain_widget_v19
+msgid "matches none of"
+msgstr "no coincide con ninguno de"
+
+#. module: advanced_web_domain_widget_v19
+msgid "match none of"
+msgstr "no coincidir con ninguno de"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Operator not supported"
+msgstr "Operador no compatible"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Value not in selection"
+msgstr "El valor no está en la selección"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Today"
+msgstr "Hoy"
+
+#. module: advanced_web_domain_widget_v19
+msgid "This week"
+msgstr "Esta semana"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Thismonth"
+msgstr "Este mes"
+
+#. module: advanced_web_domain_widget_v19
+msgid "This quarter"
+msgstr "Este trimestre"
+
+#. module: advanced_web_domain_widget_v19
+msgid "This year"
+msgstr "Este año"
+
+#. module: advanced_web_domain_widget_v19
+msgid "last day"
+msgstr "último día"
+
+#. module: advanced_web_domain_widget_v19
+msgid "last week"
+msgstr "última semana"
+
+#. module: advanced_web_domain_widget_v19
+msgid "last month"
+msgstr "último mes"
+
+#. module: advanced_web_domain_widget_v19
+msgid "last quarter"
+msgstr "último trimestre"
+
+#. module: advanced_web_domain_widget_v19
+msgid "last year"
+msgstr "último año"
+
+#. module: advanced_web_domain_widget_v19
+msgid "last 7 days"
+msgstr "últimos 7 días"
+
+#. module: advanced_web_domain_widget_v19
+msgid "last 30 days"
+msgstr "últimos 30 días"
+
+#. module: advanced_web_domain_widget_v19
+msgid "last 90 days"
+msgstr "últimos 90 días"
+
+#. module: advanced_web_domain_widget_v19
+msgid "last 365 days"
+msgstr "últimos 365 días"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Next day"
+msgstr "Siguiente día"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Next week"
+msgstr "Siguiente semana"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Next month"
+msgstr "Siguiente mes"
+
+#. module: advanced_web_domain_widget_v19
+msgid "next quarter"
+msgstr "siguiente trimestre"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Next year"
+msgstr "Siguiente año"
+
+#. module: advanced_web_domain_widget_v19
+msgid "False"
+msgstr "Falso"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Not a valid %s"
+msgstr "No es un %s válido"
+
+#. module: advanced_web_domain_widget_v19
+msgid "set"
+msgstr "establecido"
+
+#. module: advanced_web_domain_widget_v19
+msgid "not set"
+msgstr "no establecido"
+
+#. module: advanced_web_domain_widget_v19
+msgid "True"
+msgstr "Verdadero"
+
+#. module: advanced_web_domain_widget_v19
+msgid "Value not supported"
+msgstr "Valor no compatible"
+
+#. module: advanced_web_domain_widget_v19
+msgid "and"
+msgstr "y"
+
+#. module: advanced_web_domain_widget_v19
+msgid "or"
+msgstr "o"

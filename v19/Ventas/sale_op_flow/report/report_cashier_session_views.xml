@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══ FORMATO PAPEL 80MM (comandera / impresora térmica) ══════════════ -->
+    <record id="paperformat_cashier_80mm" model="report.paperformat">
+        <field name="name">Caja 80mm Térmica</field>
+        <field name="default" eval="False"/>
+        <field name="format">custom</field>
+        <field name="page_height">400</field>
+        <field name="page_width">80</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">0</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">2</field>
+        <field name="margin_right">2</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+
+    <template id="report_cashier_close_details">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-set="o" t-value="doc['session']"/>
+                <t t-call="web.external_layout">
+                    <div class="page">
+
+                        <!-- Título -->
+                        <div class="text-center mb-3">
+                            <h4 class="text-uppercase mb-0">Cierre de Sesión de Caja</h4>
+                        </div>
+
+                        <!-- Info de cabecera -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <table class="table table-sm table-borderless mb-0">
+                                    <tr>
+                                        <td class="text-muted pe-3" style="width:110px;">Sesión</td>
+                                        <td><strong><t t-esc="doc['session'].name"/></strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Cajero</td>
+                                        <td><t t-esc="doc['session'].cashier_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Fecha</td>
+                                        <td>
+                                            <t t-esc="doc['session'].date.strftime('%d/%m/%Y') if doc['session'].date else ''"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-sm table-borderless mb-0">
+                                    <tr>
+                                        <td class="text-muted pe-3" style="width:130px;">Estado</td>
+                                        <td><t t-esc="doc['state_label']"/></td>
+                                    </tr>
+                                    <tr t-if="doc['session'].closed_date">
+                                        <td class="text-muted">Cierre</td>
+                                        <td>
+                                            <t t-esc="doc['session'].closed_date.strftime('%d/%m/%Y %H:%M') if doc['session'].closed_date else ''"/>
+                                        </td>
+                                    </tr>
+                                    <tr><td colspan="2"><hr class="my-1"/></td></tr>
+                                    <tr>
+                                        <td class="text-muted">Cobros</td>
+                                        <td class="text-end">
+                                            <t t-esc="formatLang(doc['total_amount'], currency_obj=doc['session'].currency_id)"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Fondo inicial</td>
+                                        <td class="text-end">
+                                            <t t-esc="formatLang(doc['session'].opening_balance, currency_obj=doc['session'].currency_id)"/>
+                                        </td>
+                                    </tr>
+                                    <tr class="fw-bold">
+                                        <td>Esperado rendición</td>
+                                        <td class="text-end">
+                                            <t t-esc="formatLang(doc['total_amount'] + doc['session'].opening_balance, currency_obj=doc['session'].currency_id)"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- ══ COBROS ══ -->
+                        <h6 class="text-uppercase border-bottom fw-bold pb-1 mb-2">
+                            Cobros por Medio de Pago
+                        </h6>
+
+                        <t t-if="doc['journal_lines']">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr class="table-active">
+                                        <th>Medio de Pago / Plan</th>
+                                        <th class="text-center" style="width:70px;">Trans.</th>
+                                        <th class="text-end" style="width:140px;">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc['journal_lines']" t-as="jline">
+                                        <!-- Fila del diario (negrita) -->
+                                        <tr class="fw-bold">
+                                            <td><t t-esc="jline['journal'].name"/></td>
+                                            <td class="text-center"><t t-esc="jline['count']"/></td>
+                                            <td class="text-end">
+                                                <t t-esc="formatLang(jline['total'], currency_obj=doc['session'].currency_id)"/>
+                                            </td>
+                                        </tr>
+                                        <!-- Filas de planes dentro del diario -->
+                                        <t t-foreach="jline['plan_lines']" t-as="pline">
+                                            <tr>
+                                                <td class="ps-4 text-muted">
+                                                    <small>&#8627;&#160;<t t-esc="pline['name']"/></small>
+                                                </td>
+                                                <td class="text-center text-muted">
+                                                    <small><t t-esc="pline['count']"/></small>
+                                                </td>
+                                                <td class="text-end text-muted">
+                                                    <small>
+                                                        <t t-esc="formatLang(pline['total'], currency_obj=doc['session'].currency_id)"/>
+                                                    </small>
+                                                </td>
+                                            </tr>
+                                            <!-- Cupones (si hay) -->
+                                            <tr t-if="pline['coupons']">
+                                                <td class="ps-5 fst-italic text-muted" colspan="3">
+                                                    <small>Cupones: <t t-esc="', '.join(pline['coupons'])"/></small>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-active fw-bold">
+                                        <td>TOTAL COBRADO</td>
+                                        <td class="text-center"><t t-esc="doc['total_count']"/></td>
+                                        <td class="text-end">
+                                            <t t-esc="formatLang(doc['total_amount'], currency_obj=doc['session'].currency_id)"/>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <p class="text-muted fst-italic">Sin cobros registrados.</p>
+                        </t>
+
+                        <!-- ══ RENDICIÓN ══ -->
+                        <t t-if="doc['session'].line_ids">
+                            <h6 class="text-uppercase border-bottom fw-bold pb-1 mb-2 mt-4">
+                                Rendición por Medio de Pago
+                            </h6>
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr class="table-active">
+                                        <th>Medio de Pago</th>
+                                        <th class="text-end" style="width:150px;">Esperado (sistema)</th>
+                                        <th class="text-end" style="width:130px;">Rendido (real)</th>
+                                        <th class="text-end" style="width:110px;">Diferencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc['session'].line_ids" t-as="rline">
+                                        <tr>
+                                            <td>
+                                                <t t-esc="rline.payment_journal_id.name if rline.payment_journal_id else '(sin medio)'"/>
+                                            </td>
+                                            <td class="text-end">
+                                                <t t-esc="formatLang(rline.amount_expected, currency_obj=doc['session'].currency_id)"/>
+                                            </td>
+                                            <td class="text-end">
+                                                <t t-esc="formatLang(rline.amount_real, currency_obj=doc['session'].currency_id)"/>
+                                            </td>
+                                            <td class="text-end">
+                                                <t t-esc="formatLang(rline.difference, currency_obj=doc['session'].currency_id)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-active fw-bold">
+                                        <td>TOTAL</td>
+                                        <td class="text-end">
+                                            <t t-esc="formatLang(doc['session'].total_expected_rendition, currency_obj=doc['session'].currency_id)"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <t t-esc="formatLang(doc['session'].total_real, currency_obj=doc['session'].currency_id)"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <t t-esc="formatLang(doc['session'].total_difference, currency_obj=doc['session'].currency_id)"/>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+
+                            <!-- Resumen fondo + esperado total -->
+                            <div class="row mt-2">
+                                <div class="col-5 offset-7">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tr>
+                                            <td class="text-muted">Fondo inicial</td>
+                                            <td class="text-end">
+                                                <t t-esc="formatLang(doc['session'].opening_balance, currency_obj=doc['session'].currency_id)"/>
+                                            </td>
+                                        </tr>
+                                        <tr class="fw-bold border-top">
+                                            <td>Total esperado en rendición</td>
+                                            <td class="text-end">
+                                                <t t-esc="formatLang(doc['session'].total_expected_rendition, currency_obj=doc['session'].currency_id)"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- ══ MOVIMIENTOS DE EFECTIVO ══ -->
+                        <t t-if="doc['cash_moves']">
+                            <h6 class="text-uppercase border-bottom fw-bold pb-1 mb-2 mt-4">
+                                Movimientos de Efectivo
+                            </h6>
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr class="table-active">
+                                        <th style="width:90px;">Tipo</th>
+                                        <th>Motivo</th>
+                                        <th style="width:120px;">Usuario</th>
+                                        <th class="text-end" style="width:140px;">Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc['cash_moves']" t-as="cmove">
+                                        <tr>
+                                            <td>
+                                                <t t-if="cmove.move_type == 'in'">
+                                                    <span class="badge bg-success">Ingreso</span>
+                                                </t>
+                                                <t t-else="">
+                                                    <span class="badge bg-danger">Egreso</span>
+                                                </t>
+                                            </td>
+                                            <td><t t-esc="cmove.reason"/></td>
+                                            <td><t t-esc="cmove.user_id.name"/></td>
+                                            <td class="text-end">
+                                                <t t-esc="formatLang(cmove.amount, currency_obj=doc['session'].currency_id)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr t-if="doc['total_cash_in']">
+                                        <td colspan="3" class="text-muted small">Total ingresos</td>
+                                        <td class="text-end fw-bold text-success">
+                                            <t t-esc="formatLang(doc['total_cash_in'], currency_obj=doc['session'].currency_id)"/>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="doc['total_cash_out']">
+                                        <td colspan="3" class="text-muted small">Total egresos</td>
+                                        <td class="text-end fw-bold text-danger">
+                                            <t t-esc="formatLang(doc['total_cash_out'], currency_obj=doc['session'].currency_id)"/>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </t>
+
+                        <!-- Observaciones -->
+                        <t t-if="doc['session'].notes">
+                            <div class="mt-3">
+                                <strong>Observaciones:</strong>
+                                <p class="text-muted mb-0"><t t-esc="doc['session'].notes"/></p>
+                            </div>
+                        </t>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_cashier_close_details" model="ir.actions.report">
+        <field name="name">Cierre de Caja</field>
+        <field name="model">sale.cashier.session</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sale_op_flow.report_cashier_close_details</field>
+        <field name="report_file">sale_op_flow.report_cashier_close_details</field>
+        <field name="binding_model_id" ref="model_sale_cashier_session"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- ══ TEMPLATE 80MM ═══════════════════════════════════════════════════ -->
+    <template id="report_cashier_close_80mm">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="doc">
+                <div class="page" style="width:76mm; font-family:monospace; font-size:10px; padding:0;">
+
+                    <!-- Cabecera -->
+                    <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:5px; margin-bottom:6px;">
+                        <div style="font-weight:bold; font-size:13px;">CIERRE DE CAJA</div>
+                        <div><t t-esc="doc['session'].name"/></div>
+                        <div>Cajero: <t t-esc="doc['session'].cashier_id.name"/></div>
+                        <div>Fecha: <t t-esc="doc['session'].date.strftime('%d/%m/%Y') if doc['session'].date else ''"/></div>
+                        <t t-if="doc['session'].closed_date">
+                            <div>Cierre: <t t-esc="doc['session'].closed_date.strftime('%d/%m/%Y %H:%M')"/></div>
+                        </t>
+                    </div>
+
+                    <!-- Resumen -->
+                    <div style="border-bottom:1px dashed #000; padding-bottom:5px; margin-bottom:6px;">
+                        <div>Pedidos: <t t-esc="doc['session'].total_orders"/></div>
+                        <div>Total cobrado: <t t-esc="formatLang(doc['total_amount'], currency_obj=doc['session'].currency_id)"/></div>
+                        <div>Fondo inicial: <t t-esc="formatLang(doc['session'].opening_balance, currency_obj=doc['session'].currency_id)"/></div>
+                        <div style="font-weight:bold;">
+                            Esperado: <t t-esc="formatLang(doc['total_amount'] + doc['session'].opening_balance, currency_obj=doc['session'].currency_id)"/>
+                        </div>
+                    </div>
+
+                    <!-- Cobros por medio de pago -->
+                    <div style="font-weight:bold; margin-bottom:3px;">--- COBROS ---</div>
+                    <t t-if="doc['journal_lines']">
+                        <t t-foreach="doc['journal_lines']" t-as="jline">
+                            <div style="border-bottom:1px solid #ccc; padding:2px 0; font-weight:bold;">
+                                <t t-esc="jline['journal'].name"/>
+                                (<t t-esc="jline['count']"/> trans):
+                                <t t-esc="formatLang(jline['total'], currency_obj=doc['session'].currency_id)"/>
+                            </div>
+                            <t t-foreach="jline['plan_lines']" t-as="pline">
+                                <div style="padding-left:5px; font-size:9px;">
+                                    &#8627; <t t-esc="pline['name']"/>
+                                    (<t t-esc="pline['count']"/>):
+                                    <t t-esc="formatLang(pline['total'], currency_obj=doc['session'].currency_id)"/>
+                                </div>
+                                <t t-if="pline['coupons']">
+                                    <div style="padding-left:10px; font-size:8px; color:#555;">
+                                        Cup: <t t-esc="', '.join(pline['coupons'])"/>
+                                    </div>
+                                </t>
+                            </t>
+                        </t>
+                        <div style="border-top:1px solid #000; padding-top:2px; font-weight:bold; margin-top:2px;">
+                            TOTAL: <t t-esc="doc['total_count']"/> trans —
+                            <t t-esc="formatLang(doc['total_amount'], currency_obj=doc['session'].currency_id)"/>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div style="font-size:9px; color:#999;">Sin cobros registrados.</div>
+                    </t>
+
+                    <!-- Rendición -->
+                    <t t-if="doc['session'].line_ids">
+                        <div style="border-top:1px dashed #000; margin-top:6px; padding-top:5px;">
+                            <div style="font-weight:bold; margin-bottom:3px;">--- RENDICION ---</div>
+                            <t t-foreach="doc['session'].line_ids" t-as="rline">
+                                <div style="font-size:9px; border-bottom:1px solid #eee; padding:2px 0;">
+                                    <div style="font-weight:bold;">
+                                        <t t-esc="rline.payment_journal_id.name if rline.payment_journal_id else '(sin medio)'"/>
+                                    </div>
+                                    <div>
+                                        Esp: <t t-esc="formatLang(rline.amount_expected, currency_obj=doc['session'].currency_id)"/>
+                                        Real: <t t-esc="formatLang(rline.amount_real, currency_obj=doc['session'].currency_id)"/>
+                                        Dif: <t t-esc="formatLang(rline.difference, currency_obj=doc['session'].currency_id)"/>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+
+                    <!-- Movimientos de efectivo -->
+                    <t t-if="doc['cash_moves']">
+                        <div style="border-top:1px dashed #000; margin-top:6px; padding-top:5px;">
+                            <div style="font-weight:bold; margin-bottom:3px;">--- MOV. EFECTIVO ---</div>
+                            <t t-foreach="doc['cash_moves']" t-as="cmove">
+                                <div style="font-size:9px;">
+                                    <t t-if="cmove.move_type == 'in'">+</t><t t-else="">-</t>
+                                    <t t-esc="cmove.reason or ''"/>:
+                                    <t t-esc="formatLang(cmove.amount, currency_obj=doc['session'].currency_id)"/>
+                                </div>
+                            </t>
+                            <t t-if="doc['total_cash_in']">
+                                <div style="font-size:9px;">Ingresos: <t t-esc="formatLang(doc['total_cash_in'], currency_obj=doc['session'].currency_id)"/></div>
+                            </t>
+                            <t t-if="doc['total_cash_out']">
+                                <div style="font-size:9px;">Egresos: <t t-esc="formatLang(doc['total_cash_out'], currency_obj=doc['session'].currency_id)"/></div>
+                            </t>
+                        </div>
+                    </t>
+
+                    <!-- Observaciones -->
+                    <t t-if="doc['session'].notes">
+                        <div style="border-top:1px dashed #000; margin-top:6px; padding-top:5px; font-size:9px;">
+                            Obs: <t t-esc="doc['session'].notes"/>
+                        </div>
+                    </t>
+
+                    <!-- Pie -->
+                    <div style="border-top:2px solid #000; margin-top:10px; padding-top:5px; text-align:center; font-size:8px;">
+                        Estado: <t t-esc="doc['state_label']"/>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_cashier_close_80mm" model="ir.actions.report">
+        <field name="name">Cierre de Caja 80mm</field>
+        <field name="model">sale.cashier.session</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sale_op_flow.report_cashier_close_80mm</field>
+        <field name="report_file">sale_op_flow.report_cashier_close_80mm</field>
+        <field name="paperformat_id" ref="paperformat_cashier_80mm"/>
+        <field name="binding_model_id" ref="model_sale_cashier_session"/>
+        <field name="binding_type">report</field>
+    </record>
+
+</odoo>

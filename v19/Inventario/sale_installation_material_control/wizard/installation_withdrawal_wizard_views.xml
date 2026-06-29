@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_installation_withdrawal_wizard_form" model="ir.ui.view">
+        <field name="name">installation.withdrawal.wizard.form</field>
+        <field name="model">installation.withdrawal.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Crear retiro">
+                <group>
+                    <group>
+                        <field name="installation_id" invisible="1"/>
+                        <field name="partner_id"/>
+                    </group>
+                    <group>
+                        <field name="responsible_user_id"/>
+                    </group>
+                </group>
+                <field name="line_ids">
+                    <list editable="bottom" create="false" delete="false">
+                        <field name="product_id" readonly="1"/>
+                        <field name="available_qty" readonly="1"/>
+                        <field name="qty"/>
+                        <field name="product_uom_id" readonly="1" optional="show"/>
+                    </list>
+                </field>
+                <field name="notes" placeholder="Observaciones..."/>
+                <footer>
+                    <button name="action_confirm" type="object" string="Confirmar retiro"
+                            class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

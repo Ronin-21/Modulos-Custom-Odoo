@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_order_form_installation" model="ir.ui.view">
+        <field name="name">sale.order.form.installation</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Smart button -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_installation_material" type="object"
+                        class="oe_stat_button" icon="fa-wrench"
+                        invisible="not has_installation_material_control">
+                    <field name="installation_material_count" widget="statinfo"
+                           string="Materiales"/>
+                </button>
+            </xpath>
+
+            <!-- Check 'Es instalación' (sólo en ventas nativas, no en SOF) -->
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+                <field name="installation_available" invisible="1"/>
+                <field name="is_installation_order" invisible="not installation_available"/>
+                <field name="has_installation_material_control" invisible="1"/>
+                <field name="installation_material_state" invisible="1"/>
+            </xpath>
+
+            <!-- Pestaña resumen de instalación -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Instalación" name="installation"
+                      invisible="not has_installation_material_control">
+                    <group>
+                        <group string="Resumen de materiales">
+                            <field name="installation_material_state"/>
+                            <field name="installation_original_total"/>
+                            <field name="installation_withdrawn_total"/>
+                            <field name="installation_returned_total"/>
+                            <field name="installation_used_total"/>
+                            <field name="installation_pending_total"/>
+                        </group>
+                    </group>
+                    <field name="installation_material_ids" readonly="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="warehouse_id"/>
+                            <field name="responsible_user_id"/>
+                            <field name="original_qty_total"/>
+                            <field name="used_qty_total"/>
+                            <field name="pending_qty_total"/>
+                            <field name="state" widget="badge"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

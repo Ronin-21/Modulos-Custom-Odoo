@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <!--
+            Odoo 18 define account.action_bank_statement_tree con view_mode="list"
+            únicamente. Esto impide abrir el formulario al hacer click en una fila
+            de Cajas Registradoras.
+
+            Este registro sobreescribe SOLO el campo view_mode para agregar "form",
+            dejando todos los demás campos intactos (dominio, contexto, nombre, etc.).
+        -->
+        <record id="account.action_bank_statement_tree" model="ir.actions.act_window">
+            <field name="view_mode">list,form</field>
+        </record>
+    </data>
+</odoo>

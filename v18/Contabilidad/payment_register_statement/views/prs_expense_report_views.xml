@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ============================================================
+         REPORTE DE GASTOS (LISTADO DE PAGOS + BUSCADOR NATIVO)
+         Contabilidad > Reportes > Reporte de gastos
+         ============================================================ -->
+
+    <record id="view_account_payment_tree_prs_expense_report" model="ir.ui.view">
+        <field name="name">account.payment.tree.prs.expense.report</field>
+        <field name="model">account.payment</field>
+        <field name="arch" type="xml">
+            <list string="Reporte de gastos" default_order="date desc, id desc">
+                <field name="date"/>
+                <field name="journal_id"/>
+                <field name="payment_method_line_id" optional="show"/>
+                <field name="partner_id"/>
+                <field name="prs_partner_ref" string="Cód. Proveedor" optional="show"/>
+                <field name="prs_expense_concept_id" optional="show"/>
+                <field name="prs_is_misc_expense" string="Gastos Varios" optional="show"/>
+                <field name="reconciled_invoice_ids" widget="many2many_tags" optional="show"/>
+                <field name="memo" string="Detalle/Memo" optional="show"/>
+                <field name="amount" sum="Total"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="state" optional="hide"/>
+                <field name="payment_type" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_prs_expense_report_payments" model="ir.actions.act_window">
+        <field name="name">Reporte de gastos</field>
+        <field name="res_model">account.payment</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="domain">[('payment_type','=','outbound')]</field>
+        <field name="context">{'search_default_posted': 1}</field>
+        <field name="views" eval="[(ref('payment_register_statement.view_account_payment_tree_prs_expense_report'),'list'), (False,'form')]"/>
+        <field name="search_view_id" ref="account.view_account_payment_search"/>
+    </record>
+
+    <menuitem id="menu_prs_expense_report"
+              name="Reporte de gastos"
+              parent="account.menu_finance_reports"
+              action="action_prs_expense_report_payments"
+              sequence="95"/>
+
+    <!-- Wizard modal -->
+    <record id="action_prs_expense_report_wizard" model="ir.actions.act_window">
+        <field name="name">Imprimir Gastos / Compras</field>
+        <field name="res_model">prs.expense.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- Acción desde el listado (Acción -> Imprimir PDF) -->
+    <record id="server_action_prs_expense_report_print" model="ir.actions.server">
+        <field name="name">Imprimir Gastos / Compras (PDF)</field>
+        <field name="model_id" ref="account.model_account_payment"/>
+        <field name="binding_model_id" ref="account.model_account_payment"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+action = env.ref('payment_register_statement.action_prs_expense_report_wizard').read()[0]
+action['context'] = dict(env.context)
+        </field>
+    </record>
+
+</odoo>

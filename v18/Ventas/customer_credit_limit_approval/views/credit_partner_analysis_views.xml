@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LISTA
+    ═══════════════════════════════════════════════════════════ -->
+    <record id="view_credit_partner_analysis_list" model="ir.ui.view">
+        <field name="name">credit.partner.analysis.list</field>
+        <field name="model">credit.partner.analysis</field>
+        <field name="arch" type="xml">
+            <list string="Análisis de Crédito"
+                  decoration-success="credit_status == 'ok'"
+                  decoration-warning="credit_status == 'over_warning'"
+                  decoration-danger="credit_status == 'over_limit'"
+                  default_order="amount_due desc">
+                <field name="partner_id" string="Cliente" widget="many2one" readonly="1"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="amount_due_accounting" string="Deuda contable" sum="Total contable"/>
+                <field name="amount_due_sale" string="Ventas sin facturar" sum="Total ventas"/>
+                <field name="amount_due" string="Deuda total" sum="Total deuda"/>
+                <field name="credit_warning" string="Límite advertencia" optional="show"/>
+                <field name="credit_blocking" string="Límite bloqueo"/>
+                <field name="utilization_pct" string="Utilización %"/>
+                <field name="credit_status" widget="badge"
+                       decoration-success="credit_status == 'ok'"
+                       decoration-warning="credit_status == 'over_warning'"
+                       decoration-danger="credit_status == 'over_limit'"
+                       string="Estado"/>
+                <button name="action_open_invoices" type="object"
+                        string="Facturas pendientes"
+                        icon="fa-file-text-o"
+                        title="Ver facturas impagas de este cliente"/>
+                <button name="action_open_orders" type="object"
+                        string="Órdenes sin facturar"
+                        icon="fa-shopping-cart"
+                        title="Ver órdenes de venta pendientes de facturar"
+                        invisible="not amount_due_sale"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PIVOT
+    ═══════════════════════════════════════════════════════════ -->
+    <record id="view_credit_partner_analysis_pivot" model="ir.ui.view">
+        <field name="name">credit.partner.analysis.pivot</field>
+        <field name="model">credit.partner.analysis</field>
+        <field name="arch" type="xml">
+            <pivot string="Análisis de Crédito" sample="1">
+                <field name="credit_status" type="col"/>
+                <field name="partner_id" type="row"/>
+                <field name="amount_due" type="measure"/>
+                <field name="amount_due_accounting" type="measure"/>
+                <field name="amount_due_sale" type="measure"/>
+                <field name="credit_blocking" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         GRÁFICO
+    ═══════════════════════════════════════════════════════════ -->
+    <record id="view_credit_partner_analysis_graph" model="ir.ui.view">
+        <field name="name">credit.partner.analysis.graph</field>
+        <field name="model">credit.partner.analysis</field>
+        <field name="arch" type="xml">
+            <graph string="Análisis de Crédito" type="bar" sample="1">
+                <field name="partner_id" type="row"/>
+                <field name="amount_due" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BÚSQUEDA
+    ═══════════════════════════════════════════════════════════ -->
+    <record id="view_credit_partner_analysis_search" model="ir.ui.view">
+        <field name="name">credit.partner.analysis.search</field>
+        <field name="model">credit.partner.analysis</field>
+        <field name="arch" type="xml">
+            <search string="Buscar análisis de crédito">
+                <field name="partner_id" string="Cliente"/>
+                <separator/>
+                <filter string="Sobre el límite"
+                        name="over_limit"
+                        domain="[('credit_status', '=', 'over_limit')]"/>
+                <filter string="Cerca del límite"
+                        name="over_warning"
+                        domain="[('credit_status', '=', 'over_warning')]"/>
+                <filter string="Sin problemas"
+                        name="ok"
+                        domain="[('credit_status', '=', 'ok')]"/>
+                <separator/>
+                <filter string="Con deuda contable"
+                        name="has_accounting"
+                        domain="[('amount_due_accounting', '>', 0)]"/>
+                <filter string="Con ventas sin facturar"
+                        name="has_sale"
+                        domain="[('amount_due_sale', '>', 0)]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Estado"
+                            name="group_status"
+                            context="{'group_by': 'credit_status'}"/>
+                    <filter string="Compañía"
+                            name="group_company"
+                            context="{'group_by': 'company_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         ACCIÓN
+    ═══════════════════════════════════════════════════════════ -->
+    <record id="action_credit_partner_analysis" model="ir.actions.act_window">
+        <field name="name">Análisis de Crédito</field>
+        <field name="res_model">credit.partner.analysis</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="search_view_id" ref="view_credit_partner_analysis_search"/>
+        <field name="context">{'search_default_over_limit': 0}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay clientes con crédito activo configurado.
+            </p>
+            <p>
+                Activá el control de crédito en la ficha del cliente y configurá
+                los montos de advertencia y bloqueo para que aparezcan aquí.
+            </p>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MENÚ
+    ═══════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_credit_partner_analysis"
+              name="Análisis de Crédito"
+              parent="menu_sale_credit_management"
+              action="action_credit_partner_analysis"
+              sequence="20"/>
+
+</odoo>
